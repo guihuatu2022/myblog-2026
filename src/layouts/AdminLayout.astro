@@ -11,17 +11,17 @@ const pathname = Astro.url.pathname;
 
 // 菜单项
 const menuItems = [
-  { id: 'dashboard', label: '仪表盘', icon: 'ph-chart-pie', href: '/admin' },
-  { id: 'log', label: '日志管理', icon: 'ph-article', href: '/admin/log', sub: [
+  { id: 'dashboard', label: '仪表盘', icon: '📊', href: '/admin' },
+  { id: 'log', label: '日志管理', icon: '📝', href: '/admin/log', sub: [
     { id: 'log-list', label: '文章列表', href: '/admin/log' },
     { id: 'log-new', label: '写文章', href: '/admin/log/new' },
   ]},
-  { id: 'album', label: '相册管理', icon: 'ph-images', href: '/admin/album' },
-  { id: 'drive', label: '网盘管理', icon: 'ph-folder-simple', href: '/admin/drive' },
-  { id: 'nav', label: '导航管理', icon: 'ph-compass', href: '/admin/nav' },
-  { id: 'message', label: '留言管理', icon: 'ph-chat-circle-dots', href: '/admin/message' },
-  { id: 'todo', label: '待办清单', icon: 'ph-check-square', href: '/admin/todo' },
-  { id: 'settings', label: '系统设置', icon: 'ph-gear', href: '/admin/settings' },
+  { id: 'album', label: '相册管理', icon: '📷', href: '/admin/album' },
+  { id: 'drive', label: '网盘管理', icon: '💾', href: '/admin/drive' },
+  { id: 'nav', label: '导航管理', icon: '🔗', href: '/admin/nav' },
+  { id: 'message', label: '留言管理', icon: '💬', href: '/admin/message' },
+  { id: 'todo', label: '待办清单', icon: '☑️', href: '/admin/todo' },
+  { id: 'settings', label: '系统设置', icon: '⚙️', href: '/admin/settings' },
 ];
 
 // 判断当前菜单是否激活
@@ -43,7 +43,6 @@ function isActive(item: typeof menuItems[0]): boolean {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css" />
   <link rel="stylesheet" href="/styles/admin.css" />
 </head>
 <body class="admin-body">
@@ -52,7 +51,7 @@ function isActive(item: typeof menuItems[0]): boolean {
     <aside class="admin-sidebar">
       <div class="sidebar-header">
         <a href="/" class="flex items-center gap-2 text-white">
-          <i class="ph ph-house-simple text-xl"></i>
+          <i class="nav-icon">🏠</i>
           <span class="font-serif font-bold">博客管理</span>
         </a>
       </div>
@@ -64,7 +63,7 @@ function isActive(item: typeof menuItems[0]): boolean {
               href={item.href}
               class={`nav-item ${isActive(item) ? 'active' : ''}`}
             >
-              <i class={`${item.icon}`}></i>
+              <span class="nav-icon">{item.icon}</span>
               <span>{item.label}</span>
             </a>
             
@@ -75,7 +74,7 @@ function isActive(item: typeof menuItems[0]): boolean {
                     href={subItem.href}
                     class={`nav-sub-item ${pathname === subItem.href ? 'active' : ''}`}
                   >
-                    <i class="ph ph-caret-right"></i>
+                    <span class="nav-caret">›</span>
                     {subItem.label}
                   </a>
                 ))}
