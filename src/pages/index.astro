@@ -1,77 +1,61 @@
 ---
 import BookLayout from '../layouts/BookLayout.astro';
-import Sidebar from '../components/Sidebar.astro';
 
-const currentPath = '/';
-
-// 模拟数据
+// 模拟数据 - 后续从数据库获取
 const recentPosts = [
   {
-    id: 1,
     title: '三十岁的第一个清晨',
-    category: '岁月日志',
     date: '2024.05.20',
-    excerpt: '今天阳光很好，透过窗帘照在书桌上。我想是时候整理一下过去十年的照片了...',
-    cover: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=600&q=80'
+    category: '岁月日志',
+    excerpt: '今天阳光很好，透过窗帘照在书桌上。我想是时候整理一下过去十年的照片了...'
   },
   {
-    id: 2,
     title: '胶片里的老街',
-    category: '影像回忆',
     date: '2024.05.18',
-    excerpt: '那个角落的咖啡店已经拆了，幸好我留下了这张照片。城市的变迁总是让人猝不及防...',
-    cover: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=80'
-  },
-  {
-    id: 3,
-    title: 'Astro 框架搭建博客',
-    category: '技术笔记',
-    date: '2024.05.15',
-    excerpt: '折腾了一周，终于把博客搭好了。选择 Astro 是因为它的 Islands 架构...',
-    cover: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80'
+    category: '影像回忆',
+    excerpt: '那个角落的咖啡店已经拆了，幸好我留下了这张照片。城市的变迁总是让人猝不及防...'
   }
 ];
-
-// 获取当前农历日期
-const lunarDate = '农历 甲辰年 十月廿三';
 ---
 
-<BookLayout title="二零二四年" subtitle={lunarDate} sealChar="阅" sealRotate={12}>
-  <Fragment slot="sidebar">
-    <Sidebar currentPath={currentPath} />
-  </Fragment>
-
-  <!-- 欢迎语 -->
-  <div class="mb-12">
-    <p class="leading-loose text-[#333] text-lg font-serif indent-8">
-      欢迎来到我的数字庭院。
-    </p>
-    <p class="leading-loose text-[#333] text-lg font-serif indent-8 mt-4">
-      这里没有算法推荐，没有红点通知，只有我三十岁以后的生活琐碎。我把这里当作一本泛黄的旧书，希望当你偶然翻开时，能闻到一点时间的味道。
-    </p>
-    <p class="leading-loose text-[#333] text-lg font-serif indent-8 mt-4">
-      <span class="text-[#8b3a3a] text-sm block mt-2 text-right opacity-80">—— 题记</span>
-    </p>
-  </div>
-
-  <!-- 最新动态 -->
-  <h3 class="text-lg font-bold border-l-4 border-[#8b3a3a] pl-3 mb-6 text-[#2c2c2c] tracking-widest font-serif">
-    最近翻阅
-  </h3>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    {recentPosts.map(post => (
-      <a href={`/log/${post.id}`} class="group border border-[#dcd3b2] p-6 bg-white/40 hover:bg-[#fdfbf6] transition-all duration-500 cursor-pointer shadow-sm hover:shadow-md block">
-        <div class="text-xs text-[#8b3a3a] mb-2 font-bold tracking-wider opacity-70 font-serif">
-          {post.date} · {post.category}
+<BookLayout title="博客首页 - 三十而立" currentPage="home">
+    <!-- 顶部日期/天气栏 -->
+    <header class="content-header">
+        <div>
+            <h2>二零二四年</h2>
+            <p class="subtitle">农历 甲辰年 十月廿三</p>
         </div>
-        <h4 class="text-xl font-bold mb-3 text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors font-serif">
-          {post.title}
-        </h4>
-        <p class="text-sm text-gray-600 leading-relaxed line-clamp-3">
-          {post.excerpt}
-        </p>
-      </a>
-    ))}
-  </div>
+        <div class="seal-decoration">
+            <span class="page-label">Home</span>
+            <div class="seal">阅</div>
+        </div>
+    </header>
+
+    <!-- 首页内容 -->
+    <article>
+        <div class="welcome-text">
+            <p>
+                欢迎来到我的数字庭院。
+            </p>
+            <p>
+                这里没有算法推荐，没有红点通知，只有我三十岁以后的生活琐碎。我把这里当作一本泛黄的旧书，希望当你偶然翻开时，能闻到一点时间的味道。
+            </p>
+            <p class="epigraph">—— 题记</p>
+        </div>
+
+        <!-- 最新动态 -->
+        <h3 class="section-title">最近翻阅</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {recentPosts.map((post) => (
+                <a href={`/log/${post.title}`} class="article-card">
+                    <div class="article-meta">
+                        {post.date} · {post.category}
+                    </div>
+                    <h4>{post.title}</h4>
+                    <p>{post.excerpt}</p>
+                </a>
+            ))}
+        </div>
+    </article>
 </BookLayout>
