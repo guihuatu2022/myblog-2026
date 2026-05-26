@@ -111,6 +111,505 @@ body {
 }
 
 /* ========================
+   分类索引
+   ======================== */
+.index-link {
+  position: relative;
+  text-decoration: none;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+  color: #5d5d5d;
+}
+
+.index-link:hover {
+  color: #8b3a3a;
+  background-color: rgba(139, 58, 58, 0.05);
+}
+
+.index-link.active {
+  color: #8b3a3a;
+  font-weight: bold;
+  background-image: linear-gradient(to top, rgba(139, 58, 58, 0.1) 0%, rgba(139, 58, 58, 0.1) 40%, transparent 40%);
+}
+
+/* ========================
+   搜索框
+   ======================== */
+.vintage-search {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #dcd3b2;
+  padding: 4px 0;
+  color: #2c2c2c;
+  font-family: 'Noto Serif SC', serif;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.vintage-search:focus {
+  border-bottom-color: #8b3a3a;
+}
+
+.vintage-search::placeholder {
+  color: #a8a8a8;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+}
+
+/* ========================
+   主人寄语
+   ======================== */
+.host-message {
+  background: linear-gradient(135deg, #f7f1e3 0%, #efe9db 100%);
+  border: 1px solid #dcd3b2;
+  border-radius: 4px;
+  padding: 24px 32px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.host-message::before {
+  content: '"';
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-size: 48px;
+  color: #dcd3b2;
+  font-family: 'Noto Serif SC', serif;
+  line-height: 1;
+}
+
+.host-content {
+  font-family: 'Noto Serif SC', serif;
+  color: #5d5d5d;
+  line-height: 1.8;
+  padding-left: 24px;
+}
+
+.host-signature {
+  text-align: right;
+  margin-top: 12px;
+  color: #8b3a3a;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+}
+
+/* ========================
+   留言输入
+   ======================== */
+.input-area {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #dcd3b2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-admin {
+  background: #8b3a3a;
+  color: white;
+}
+
+.letter-paper {
+  background: linear-gradient(#f7f1e3 28px, #87CEEB 0);
+  background-size: 100% 30px;
+  border: 1px solid #dcd3b2;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: 'Noto Serif SC', serif;
+  color: #2c2c2c;
+  line-height: 30px;
+  resize: vertical;
+  outline: none;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+  color: #5d5d5d;
+  font-size: 14px;
+}
+
+.checkbox-wrapper input {
+  accent-color: #8b3a3a;
+}
+
+.btn-post {
+  background: #8b3a3a;
+  color: white;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Noto Serif SC', serif;
+  transition: all 0.3s ease;
+}
+
+.btn-post:hover {
+  background: #a04545;
+}
+
+/* ========================
+   留言卡片
+   ======================== */
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.message-card {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(247, 241, 227, 0.5);
+  border-radius: 8px;
+  border: 1px solid #dcd3b2;
+}
+
+.message-body {
+  flex: 1;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.sender-name {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 600;
+  color: #2c2c2c;
+}
+
+.message-time {
+  font-size: 12px;
+  color: #999;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+}
+
+.floor-tag {
+  font-size: 12px;
+  color: #8b3a3a;
+  background: rgba(139, 58, 58, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+}
+
+.message-content {
+  color: #5d5d5d;
+  line-height: 1.8;
+  font-family: 'Noto Serif SC', serif;
+}
+
+.message-secret {
+  color: #999;
+  font-style: italic;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+  padding: 16px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-reply {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(139, 58, 58, 0.05);
+  border-left: 3px solid #8b3a3a;
+  border-radius: 0 4px 4px 0;
+}
+
+.reply-label {
+  display: block;
+  font-size: 12px;
+  color: #8b3a3a;
+  margin-bottom: 4px;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+}
+
+.reply-text {
+  color: #5d5d5d;
+  font-family: 'Noto Serif SC', serif;
+}
+
+/* ========================
+   相册样式
+   ======================== */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.photo-card {
+  background: #f7f1e3;
+  padding: 12px;
+  box-shadow: 2px 4px 12px rgba(0,0,0,0.1);
+  transform: rotate(-1deg);
+  transition: all 0.3s ease;
+}
+
+.photo-card:nth-child(2n) {
+  transform: rotate(1deg);
+}
+
+.photo-card:nth-child(3n) {
+  transform: rotate(-0.5deg);
+}
+
+.photo-card:hover {
+  transform: rotate(0deg) scale(1.02);
+  box-shadow: 4px 8px 20px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.photo-tape {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 20px;
+  background: rgba(255, 235, 155, 0.7);
+}
+
+.photo-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-wrapper img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  filter: sepia(0.2);
+  transition: all 0.5s ease;
+}
+
+.photo-card:hover .photo-wrapper img {
+  filter: sepia(0);
+}
+
+.photo-caption {
+  text-align: center;
+  padding: 8px 0;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+  color: #5d5d5d;
+}
+
+/* ========================
+   网盘样式
+   ======================== */
+.file-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(247, 241, 227, 0.5);
+  border: 1px solid #dcd3b2;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.file-item:hover {
+  background: #f7f1e3;
+  border-color: #8b3a3a;
+}
+
+.file-icon {
+  width: 40px;
+  height: 40px;
+  background: #dcd3b2;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b3a3a;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-name {
+  font-family: 'Noto Serif SC', serif;
+  color: #2c2c2c;
+  font-weight: 500;
+}
+
+.file-meta {
+  font-size: 12px;
+  color: #999;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+}
+
+.file-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.file-action-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #dcd3b2;
+  border-radius: 4px;
+  color: #5d5d5d;
+  cursor: pointer;
+  font-family: 'LXGW WenKai Screen', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.file-action-btn:hover {
+  background: #8b3a3a;
+  border-color: #8b3a3a;
+  color: white;
+}
+
+/* ========================
+   导航样式
+   ======================== */
+.link-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.link-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(247, 241, 227, 0.5);
+  border: 1px solid #dcd3b2;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.link-card:hover {
+  background: #f7f1e3;
+  border-color: #8b3a3a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.link-icon {
+  width: 40px;
+  height: 40px;
+  background: #dcd3b2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.link-title {
+  font-family: 'Noto Serif SC', serif;
+  color: #2c2c2c;
+}
+
+/* ========================
+   归档样式
+   ======================== */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #dcd3b2;
+}
+
+.timeline-year {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.timeline-year::before {
+  content: '';
+  position: absolute;
+  left: -28px;
+  top: 8px;
+  width: 12px;
+  height: 12px;
+  background: #8b3a3a;
+  border-radius: 50%;
+  border: 2px solid #f7f1e3;
+}
+
+.timeline-title {
+  font-family: 'Ma Shan Zheng', cursive;
+  font-size: 24px;
+  color: #8b3a3a;
+  margin-bottom: 16px;
+}
+
+.timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: rgba(247, 241, 227, 0.5);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.timeline-item:hover {
+  background: #f7f1e3;
+}
+
+.timeline-date {
+  font-family: 'LXGW WenKai Screen', sans-serif;
+  color: #8b3a3a;
+  font-size: 14px;
+  min-width: 60px;
+}
+
+.timeline-content {
+  flex: 1;
+  font-family: 'Noto Serif SC', serif;
+  color: #2c2c2c;
+}
+
+/* ========================
    移动端适配
    ======================== */
 @media (max-width: 768px) {
