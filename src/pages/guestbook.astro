@@ -1,326 +1,215 @@
 ---
 import BookLayout from '../layouts/BookLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
 
+// 模拟数据
 const hostMessage = {
-  content: '感谢每一位访客，愿你的生活也如这本小册子般，记录着美好与温暖。',
-  signature: '—— 三十而立的主人',
+  content: '欢迎来到我的留言板，这里是访客与主人交流的空间。如果你有任何想说的话，无论是赞美、建议还是闲聊，都可以在这里留下你的足迹。',
+  signature: '主人敬上'
 };
 
 const messages = [
   {
-    id: '1',
-    user: '路过的旅人',
-    content: '偶然发现这个博客，设计很独特，内容也很温暖。祝好！',
-    date: '2024.05.18',
+    id: 1,
+    userName: '路过的旅人',
+    content: '偶然发现这个博客，设计很有味道，像翻开一本旧书。',
+    time: '2024-05-20 14:32',
+    floor: 12,
     isPrivate: false,
+    isAdmin: false,
+    reply: null
   },
   {
-    id: '2',
-    user: '小明',
-    content: '三十岁，正是好时候。加油！',
-    date: '2024.05.15',
+    id: 2,
+    userName: '主人',
+    content: '感谢来访，愿你也能找到属于自己的数字庭院。',
+    time: '2024-05-20 15:18',
+    floor: 13,
     isPrivate: false,
-  },
-  {
-    id: '3',
-    user: '匿名',
-    content: '悄悄话...',
-    date: '2024.05.10',
-    isPrivate: true,
-  },
+    isAdmin: true,
+    reply: null
+  }
 ];
+
+const currentPath = '/guestbook';
 ---
 
-<BookLayout title="访客留言" currentPage="guestbook">
-  <!-- 页眉 -->
-  <header class="page-header">
-    <div class="header-left">
-      <h2 class="page-title">留言板</h2>
-      <p class="page-subtitle">留下你的足迹</p>
-    </div>
-    <div class="header-right">
-      <span class="page-header-bg">Guestbook</span>
-      <div class="seal-stamp">留</div>
-    </div>
-  </header>
+<BookLayout title="鸿雁传书" subtitle="Guestbook" sealChar="书" sealRotate={8}>
+  <Fragment slot="sidebar">
+    <Sidebar currentPath={currentPath} />
+  </Fragment>
 
   <!-- 主人寄语 -->
-  <section class="host-section">
-    <div class="host-card">
-      <p class="host-label">主人寄语</p>
-      <p class="host-content">"{hostMessage.content}"</p>
-      <p class="host-signature">{hostMessage.signature}</p>
+  <div class="host-message">
+    <div class="host-content">
+      {hostMessage.content}
     </div>
-  </section>
+    <div class="host-signature">
+      —— {hostMessage.signature}
+    </div>
+  </div>
 
-  <!-- 留言表单 -->
-  <section class="form-section">
-    <h3 class="section-title">写留言</h3>
-    <form class="message-form">
-      <div class="form-row">
-        <input type="text" placeholder="您的称呼" class="input-paper" required />
-        <input type="email" placeholder="邮箱（选填）" class="input-paper" />
-      </div>
-      <textarea placeholder="写下您的留言..." class="input-paper textarea" required></textarea>
-      <div class="form-footer">
-        <label class="private-checkbox">
-          <input type="checkbox" />
-          <span>悄悄话（仅主人可见）</span>
-        </label>
-        <button type="submit" class="btn-paper">提交留言</button>
-      </div>
-    </form>
-  </section>
+  <!-- 留言输入 -->
+  <div class="input-area">
+    <div class="flex gap-4 mb-4">
+      <input 
+        type="text" 
+        id="guest-name"
+        placeholder="你的名字"
+        class="flex-1 bg-transparent border-b border-[#dcd3b2] font-hand text-[#2c2c2c] placeholder-[#a8a8a8] focus:outline-none focus:border-[#8b3a3a] py-2 transition-colors"
+      />
+    </div>
+    <textarea 
+      id="guest-message"
+      placeholder="写下你想说的话..."
+      rows="4"
+      class="letter-paper w-full mb-4"
+    ></textarea>
+    <div class="flex items-center justify-between">
+      <label class="checkbox-wrapper">
+        <input type="checkbox" id="is-private" />
+        <span>悄悄话（仅主人可见）</span>
+      </label>
+      <button 
+        id="submit-btn"
+        class="btn-post"
+        onclick="submitMessage()"
+      ></button>
+    </div>
+  </div>
 
   <!-- 留言列表 -->
-  <section class="messages-section">
-    <h3 class="section-title">访客留言 <span class="count">({messages.filter(m => !m.isPrivate).length})</span></h3>
-    <div class="messages-list">
-      {messages.filter(m => !m.isPrivate).map(msg => (
-        <div class="message-item">
-          <div class="message-header">
-            <span class="message-user">{msg.user}</span>
-            <span class="message-date">{msg.date}</span>
-          </div>
-          <p class="message-content">{msg.content}</p>
+  <div class="message-list">
+    {messages.map(msg => (
+      <div class="message-card" data-id={msg.id}>
+        <!-- 头像 -->
+        <div class={`avatar ${msg.isAdmin ? 'avatar-admin' : ''}`}>
+          {msg.userName.charAt(0)}
         </div>
-      ))}
+
+        <!-- 内容 -->
+        <div class="message-body">
+          <div class="message-header">
+            <span class="sender-name">{msg.userName}</span>
+            <div>
+              <span class="message-time">{msg.time}</span>
+              <span class="floor-tag">#{msg.floor}</span>
+            </div>
+          </div>
+
+          <div class={`message-content ${msg.isPrivate ? 'message-secret' : ''}`}>
+            {msg.isPrivate ? (
+              <>
+                <i class="ph ph-eye-slash"></i>
+                <span class="secret-mask">这条是悄悄话，只有主人可见</span>
+                <span class="secret-content">{msg.content}</span>
+              </>
+            ) : msg.content}
+          </div>
+
+          {msg.reply && (
+            <div class="admin-reply">
+              <span class="reply-label">掌柜回复</span>
+              <span class="reply-text">{msg.reply}</span>
+            </div>
+          )}
+
+          {/* 管理员操作 */}
+          <div class="admin-action">
+            <span class="btn-reply-action" onclick="showReplyInput(this)">回复</span>
+          </div>
+
+          {/* 回复框 */}
+          <div class="reply-input-box hidden mt-3">
+            <textarea 
+              placeholder="写下回复..."
+              rows="2"
+              class="letter-paper w-full mb-2"
+            ></textarea>
+            <button 
+              class="px-3 py-1 bg-[#8b3a3a] text-white text-sm font-hand hover:bg-[#722f2f] transition-colors"
+              onclick="submitReply(this)"
+            >
+              发送回复
+            </button>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- 分页 -->
+  <div class="mt-8 pt-6 border-t border-[#dcd3b2] flex items-center justify-center">
+    <div class="flex items-center gap-4 font-serif text-sm text-[#5d5d5d]">
+      <span class="opacity-50">上一页</span>
+      <a href="#" class="pagination-link active">【 壹 】</a>
+      <span class="opacity-50">下一页</span>
     </div>
-  </section>
+  </div>
 </BookLayout>
 
-<style>
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid var(--line-color);
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
-    position: relative;
-  }
+<!-- Toast 提示 -->
+<div id="toast-notification">
+  <i class="ph ph-paper-plane-tilt toast-icon"></i>
+  <span id="toast-message">操作成功</span>
+</div>
 
-  .header-left {
-    z-index: 1;
-  }
-
-  .page-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0 0 0.25rem 0;
-    font-family: var(--font-serif);
-  }
-
-  .page-subtitle {
-    color: var(--text-light);
-    font-size: 0.875rem;
-    font-family: var(--font-serif);
-  }
-
-  .header-right {
-    position: relative;
-    z-index: 1;
-  }
-
-  .page-header-bg {
-    font-size: 3rem;
-    font-weight: 300;
-    color: #cfcfcf;
-    position: absolute;
-    top: -1rem;
-    right: 3.5rem;
-    opacity: 0.3;
-    user-select: none;
-    font-family: var(--font-serif);
-  }
-
-  .seal-stamp {
-    width: 48px;
-    height: 48px;
-    border: 2px solid var(--accent-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent-color);
-    font-size: 14px;
-    font-weight: bold;
-    transform: rotate(12deg);
-    opacity: 0.7;
-    font-family: var(--font-serif);
-  }
-
-  .host-section {
-    margin-bottom: 2rem;
-  }
-
-  .host-card {
-    padding: 1.5rem;
-    background: linear-gradient(135deg, rgba(139, 58, 58, 0.05) 0%, rgba(139, 58, 58, 0.02) 100%);
-    border: 1px solid var(--line-color);
-    border-left: 4px solid var(--accent-color);
-  }
-
-  .host-label {
-    font-size: 0.75rem;
-    color: var(--accent-color);
-    letter-spacing: 0.2em;
-    margin: 0 0 0.75rem 0;
-    font-family: var(--font-serif);
-  }
-
-  .host-content {
-    font-size: 1rem;
-    line-height: 1.8;
-    margin: 0 0 1rem 0;
-    color: var(--text-main);
-    font-family: var(--font-serif);
-  }
-
-  .host-signature {
-    font-size: 0.875rem;
-    color: var(--text-light);
-    text-align: right;
-    margin: 0;
-    font-family: var(--font-serif);
-  }
-
-  .section-title {
-    font-size: 1rem;
-    font-weight: 700;
-    border-left: 4px solid var(--accent-color);
-    padding-left: 0.75rem;
-    margin-bottom: 1rem;
-    color: var(--text-main);
-    letter-spacing: 0.1em;
-    font-family: var(--font-serif);
-  }
-
-  .form-section {
-    margin-bottom: 2rem;
-  }
-
-  .message-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
-  @media (max-width: 768px) {
-    .form-row {
-      grid-template-columns: 1fr;
+<script is:inline>
+  // 显示 Toast
+  function showToast(message) {
+    const toast = document.getElementById('toast-notification');
+    const msgEl = document.getElementById('toast-message');
+    if (toast && msgEl) {
+      msgEl.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
   }
 
-  .input-paper {
-    width: 100%;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid var(--line-color);
-    background-color: rgba(255,255,255,0.5);
-    font-family: var(--font-serif);
-    font-size: 0.875rem;
+  // 提交留言
+  function submitMessage() {
+    const name = document.getElementById('guest-name')?.value;
+    const content = document.getElementById('guest-message')?.value;
+    const isPrivate = document.getElementById('is-private')?.checked;
+
+    if (!name || !content) {
+      showToast('请填写昵称和留言内容');
+      return;
+    }
+
+    // TODO: 调用 API
+    console.log({ name, content, isPrivate });
+    showToast('留言已投递');
+    
+    // 清空表单
+    if (document.getElementById('guest-name')) document.getElementById('guest-name').value = '';
+    if (document.getElementById('guest-message')) document.getElementById('guest-message').value = '';
+    if (document.getElementById('is-private')) document.getElementById('is-private').checked = false;
   }
 
-  .input-paper:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    background-color: white;
+  // 显示回复框
+  function showReplyInput(btn) {
+    const box = btn.parentElement.nextElementSibling;
+    if (box && box.classList.contains('reply-input-box')) {
+      box.classList.toggle('hidden');
+    }
   }
 
-  .textarea {
-    min-height: 120px;
-    resize: vertical;
-  }
+  // 提交回复
+  function submitReply(btn) {
+    const box = btn.parentElement;
+    const textarea = box.querySelector('textarea');
+    const content = textarea?.value;
+    
+    if (!content) {
+      showToast('请填写回复内容');
+      return;
+    }
 
-  .form-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    // TODO: 调用 API
+    console.log({ content });
+    showToast('回复已发送');
+    box.classList.add('hidden');
+    textarea.value = '';
   }
-
-  .private-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8125rem;
-    color: var(--text-light);
-    cursor: pointer;
-    font-family: var(--font-serif);
-  }
-
-  .private-checkbox input {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--accent-color);
-  }
-
-  .btn-paper {
-    background-color: var(--accent-color);
-    color: white;
-    padding: 0.5rem 1.25rem;
-    border: none;
-    font-family: var(--font-serif);
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-paper:hover {
-    background-color: #6b2a2a;
-  }
-
-  .messages-section {
-    margin-top: 2rem;
-  }
-
-  .count {
-    font-weight: 400;
-    color: var(--text-light);
-    font-size: 0.875rem;
-  }
-
-  .messages-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .message-item {
-    padding: 1rem;
-    border: 1px solid var(--line-color);
-    background: rgba(255,255,255,0.4);
-  }
-
-  .message-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-  }
-
-  .message-user {
-    font-weight: 600;
-    color: var(--accent-color);
-    font-size: 0.875rem;
-    font-family: var(--font-serif);
-  }
-
-  .message-date {
-    font-size: 0.75rem;
-    color: var(--text-light);
-    font-family: var(--font-serif);
-  }
-
-  .message-content {
-    font-size: 0.875rem;
-    line-height: 1.6;
-    margin: 0;
-    color: var(--text-main);
-    font-family: var(--font-serif);
-  }
-</style>
+</script>

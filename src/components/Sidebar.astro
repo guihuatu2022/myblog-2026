@@ -1,357 +1,143 @@
 ---
 interface Props {
-  currentPage?: string;
+  currentPath?: string;
 }
 
-const { currentPage = 'home' } = Astro.props;
+const { currentPath = '/' } = Astro.props;
 
-const menuItems = [
-  { id: 'home', icon: 'house', label: '博客首页', href: '/' },
-  { id: 'log', icon: 'pen-nib', label: '岁月日志', href: '/log' },
-  { id: 'album', icon: 'image', label: '生活相册', href: '/album' },
-  { id: 'drive', icon: 'hard-drives', label: '个人网盘', href: '/drive' },
-  { id: 'nav', icon: 'compass', label: '常用导航', href: '/nav' },
-  { id: 'archive', icon: 'archive', label: '文章归档', href: '/archive' },
-  { id: 'guestbook', icon: 'envelope-simple', label: '访客留言', href: '/guestbook' },
+// 判断当前激活菜单
+const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
+
+const navItems = [
+  { path: '/', icon: 'ph-house', label: '博客首页', key: 'home' },
+  { path: '/log', icon: 'ph-pen-nib', label: '岁月日志', key: 'log' },
+  { path: '/album', icon: 'ph-image', label: '生活相册', key: 'album' },
+  { path: '/drive', icon: 'ph-hard-drives', label: '个人网盘', key: 'drive' },
+  { path: '/nav', icon: 'ph-compass', label: '常用导航', key: 'nav' },
+  { path: '/archive', icon: 'ph-archive', label: '文章归档', key: 'archive' },
+  { path: '/guestbook', icon: 'ph-envelope-simple', label: '访客留言', key: 'guestbook' },
 ];
 
-const adminItems = [
-  { id: 'todo', icon: 'check-square-offset', label: '我的待办', href: '/todo', highlight: true },
-  { id: 'admin', icon: 'gear', label: '后台管理', href: '/admin', highlight: true },
-];
+const isCurrentPage = (key: string) => {
+  if (key === 'home') return currentPath === '/';
+  if (key === 'log') return currentPath.startsWith('/log');
+  if (key === 'album') return currentPath.startsWith('/album');
+  if (key === 'drive') return currentPath.startsWith('/drive');
+  if (key === 'nav') return currentPath === '/nav';
+  if (key === 'archive') return currentPath === '/archive';
+  if (key === 'guestbook') return currentPath === '/guestbook';
+  return false;
+};
 ---
 
-<aside class="sidebar spine-texture">
+<aside class="sidebar w-[240px] spine-texture text-[#d0d0d0] flex flex-col shrink-0">
   <!-- 上部：精神角落 -->
-  <div class="sidebar-top">
-    <div class="header-row">
-      <h1 class="site-title">三十而立</h1>
-      <button class="seal-btn" title="点击盖印" onclick="toggleAdminMenu()">
-        <span>主</span>
+  <div class="sidebar-top px-6 py-8 border-b border-gray-700/30 flex flex-col items-center justify-center shrink-0">
+    <div class="flex items-center justify-between w-full mb-3">
+      <!-- 标题书法字 -->
+      <h1 class="font-calligraphy text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest">
+        三十而立
+      </h1>
+
+      <!-- 登录私印按钮 -->
+      <button 
+        id="seal-btn"
+        title="点击盖印" 
+        class="group focus:outline-none transition-transform active:scale-95 ml-2"
+        onclick="toggleLogin()"
+      >
+        <div 
+          class="w-8 h-8 border-2 border-[#a93226] bg-[#a93226]/10 text-[#a93226] flex items-center justify-center text-xs font-bold rounded-sm shadow-sm group-hover:bg-[#a93226] group-hover:text-white transition-colors cursor-pointer select-none"
+        >
+          主
+        </div>
       </button>
     </div>
 
-    <p class="slogan">记录 · 沉淀 · 回忆</p>
+    <!-- Slogan 小字 -->
+    <div class="w-full text-center mb-1">
+      <p class="text-xs text-[#a8a8a8] tracking-[0.4em] font-hand opacity-90">
+        记录 · 沉淀 · 回忆
+      </p>
+    </div>
 
-    <p class="slogan-en">The Chronicle</p>
+    <!-- 英文副标题 -->
+    <p class="mt-3 text-[10px] text-gray-500 tracking-[0.3em] uppercase font-serif opacity-50 w-full text-center border-t border-gray-600/30 pt-2">
+      The Chronicle
+    </p>
   </div>
 
   <!-- 中部：导航菜单 -->
-  <nav class="sidebar-nav">
-    <ul class="menu-list">
-      {menuItems.map(item => (
-        <li class={currentPage === item.id ? 'menu-active' : ''}>
-          <a href={item.href} class="menu-link">
-            <i class={`ph ph-${item.icon}`}></i>
-            <span class="menu-item-text">{item.label}</span>
+  <nav class="flex-1 py-6 px-5 overflow-y-auto">
+    <ul class="space-y-4">
+      {navItems.map(item => (
+        <li class={isCurrentPage(item.key) ? 'menu-active' : ''}>
+          <a 
+            href={item.path}
+            class={`flex items-center gap-3 px-3 py-2.5 rounded transition-all group ${
+              isCurrentPage(item.key) 
+                ? 'bg-[#201e1e]/50 border-l-2 border-[#8b3a3a] shadow-md' 
+                : 'hover:bg-white/5'
+            }`}
+          >
+            <i class={`${item.icon} text-lg ${
+              isCurrentPage(item.key) 
+                ? 'text-[#dcd3b2]' 
+                : 'text-gray-500 group-hover:text-[#dcd3b2] transition-colors'
+            }`}></i>
+            <span class="menu-item-text text-sm">{item.label}</span>
           </a>
         </li>
       ))}
 
       <!-- 分割线 -->
-      <li class="admin-divider" id="admin-divider">
-        <div class="divider-line"></div>
-      </li>
+      <li id="admin-divider" class="admin-menu border-t border-gray-700/50 my-2 pt-2"></li>
 
-      <!-- 管理员菜单 -->
-      {adminItems.map(item => (
-        <li id={`menu-${item.id}`} class="admin-menu">
-          <a href={item.href} class="menu-link admin-link">
-            <i class={`ph ph-${item.icon}`}></i>
-            <span class="menu-item-text admin-text">{item.label}</span>
-          </a>
-        </li>
-      ))}
+      <!-- 需要登录才显示的菜单 -->
+      <li id="menu-todo" class="admin-menu">
+        <a href="/todo" class="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded transition-all group">
+          <i class="ph-check-square-offset text-lg text-[#a93226]"></i>
+          <span class="menu-item-text text-sm text-[#a93226] group-hover:text-[#c4493c]">我的待办</span>
+        </a>
+      </li>
+      <li id="menu-admin" class="admin-menu">
+        <a href="/admin" class="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded transition-all group">
+          <i class="ph-gear text-lg text-[#a93226]"></i>
+          <span class="menu-item-text text-sm text-[#a93226] group-hover:text-[#c4493c]">后台管理</span>
+        </a>
+      </li>
     </ul>
   </nav>
 
   <!-- 底部：版权 -->
-  <div class="sidebar-footer">
+  <div class="p-5 text-[10px] text-gray-600 text-center border-t border-gray-700/20 shrink-0">
     <p>&copy; 2024 - 2064</p>
-    <p class="footer-slogan">朝花夕拾 · 岁月静好</p>
+    <p class="mt-1 font-serif opacity-70">朝花夕拾 · 岁月静好</p>
   </div>
 </aside>
 
-<!-- 移动端菜单按钮 -->
-<button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-  <i class="ph ph-list"></i>
-</button>
-
-<style>
-  .sidebar {
-    width: 240px;
-    display: flex;
-    flex-direction: column;
-    color: #d0d0d0;
-    flex-shrink: 0;
-  }
-
-  .sidebar-top {
-    padding: 2rem 1.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 0.75rem;
-  }
-
-  .site-title {
-    font-family: var(--font-calli);
-    font-size: 1.875rem;
-    color: #e8e8e8;
-    opacity: 0.9;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    letter-spacing: 0.2em;
-  }
-
-  .seal-btn {
-    width: 32px;
-    height: 32px;
-    border: 2px solid #a93226;
-    background-color: rgba(169, 50, 38, 0.1);
-    color: #a93226;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border-radius: 2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font-serif);
-  }
-
-  .seal-btn:hover {
-    background-color: #a93226;
-    color: white;
-  }
-
-  .seal-btn.active {
-    background-color: #a93226;
-    color: white;
-  }
-
-  .slogan {
-    font-size: 0.75rem;
-    color: #a8a8a8;
-    letter-spacing: 0.4em;
-    opacity: 0.9;
-    margin-bottom: 0.25rem;
-    font-family: var(--font-hand);
-  }
-
-  .slogan-en {
-    margin-top: 0.75rem;
-    font-size: 10px;
-    color: #666;
-    letter-spacing: 0.3em;
-    opacity: 0.5;
-    font-family: var(--font-serif);
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 0.5rem;
-    width: 100%;
-    text-align: center;
-  }
-
-  .sidebar-nav {
-    flex: 1;
-    padding: 1.5rem 1.25rem;
-    overflow-y: auto;
-  }
-
-  .menu-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .menu-link {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.625rem 0.75rem;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    text-decoration: none;
-  }
-
-  .menu-link i {
-    font-size: 1.125rem;
-    color: #888;
-    transition: color 0.3s ease;
-  }
-
-  .menu-link:hover i {
-    color: #dcd3b2;
-  }
-
-  .menu-link:hover {
-    background-color: rgba(255,255,255,0.05);
-  }
-
-  .menu-active .menu-link {
-    background-color: rgba(32, 30, 30, 0.5);
-    border-left: 2px solid #8b3a3a;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-
-  .menu-item-text {
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: 0.875rem;
-    letter-spacing: 0.15em;
-    color: #a89f91;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
-  }
-
-  .menu-link:hover .menu-item-text {
-    color: #dcd3b2;
-    text-shadow: 0 0 8px rgba(220, 211, 178, 0.3);
-  }
-
-  .menu-active .menu-item-text {
-    color: #e0d8c8;
-    text-shadow: 0 0 5px rgba(224, 216, 200, 0.4);
-  }
-
-  .admin-divider {
-    margin: 0.5rem 0;
-    padding: 0 0.75rem;
-  }
-
-  .divider-line {
-    height: 1px;
-    background: rgba(255,255,255,0.2);
-  }
-
-  .admin-menu {
-    display: none;
-  }
-
-  .admin-menu.show {
-    display: block;
-  }
-
-  .admin-link i {
-    color: #a93226;
-  }
-
-  .admin-text {
-    color: #a93226 !important;
-  }
-
-  .admin-link:hover .admin-text {
-    color: #c4493c !important;
-  }
-
-  .sidebar-footer {
-    padding: 1.25rem;
-    text-align: center;
-    font-size: 10px;
-    color: #666;
-    border-top: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .sidebar-footer p {
-    margin: 0;
-  }
-
-  .footer-slogan {
-    margin-top: 0.25rem !important;
-    opacity: 0.7;
-    font-family: var(--font-serif);
-  }
-
-  /* 移动端 */
-  .mobile-menu-btn {
-    display: none;
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    width: 48px;
-    height: 48px;
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    cursor: pointer;
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  }
-
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 100%;
-      min-height: auto;
-      padding: 1rem;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .sidebar-top {
-      border-bottom: none !important;
-      padding: 0 !important;
-      flex-direction: row;
-      gap: 1rem;
-    }
-
-    .sidebar-top p,
-    .slogan-en {
-      display: none;
-    }
-
-    .sidebar-nav {
-      display: none;
-    }
-
-    .sidebar-footer {
-      display: none;
-    }
-
-    .mobile-menu-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-</style>
-
-<script>
-  // 印章点击切换管理员菜单
-  function toggleAdminMenu() {
+<script is:inline>
+  // 侧边栏登录逻辑
+  function toggleLogin() {
     const adminMenus = document.querySelectorAll('.admin-menu');
-    const btn = document.querySelector('.seal-btn');
-
+    const btn = document.querySelector('#seal-btn div');
+    const body = document.body;
+    
+    // 切换 is-admin 类
+    body.classList.toggle('is-admin');
+    
+    // 切换菜单显示状态
     adminMenus.forEach(menu => {
       menu.classList.toggle('show');
     });
 
-    btn?.classList.toggle('active');
-  }
-
-  // 移动端菜单
-  function toggleMobileMenu() {
-    const nav = document.querySelector('.sidebar-nav');
-    if (nav) {
-      nav.style.display = nav.style.display === 'block' ? 'none' : 'block';
+    // 切换印章状态
+    if (btn.classList.contains('bg-[#a93226]')) {
+      btn.classList.remove('bg-[#a93226]', 'text-white');
+      btn.classList.add('bg-[#a93226]/10', 'text-[#a93226]');
+    } else {
+      btn.classList.remove('bg-[#a93226]/10', 'text-[#a93226]');
+      btn.classList.add('bg-[#a93226]', 'text-white');
     }
   }
-
-  // 导出给全局使用
-  (window as any).toggleAdminMenu = toggleAdminMenu;
-  (window as any).toggleMobileMenu = toggleMobileMenu;
 </script>

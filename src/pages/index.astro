@@ -1,252 +1,88 @@
 ---
 import BookLayout from '../layouts/BookLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
 
-const currentYear = new Date().getFullYear();
-const lunarYear = '甲辰年';
-
-// 模拟数据 - 后续从数据库获取
+// 模拟数据
 const recentPosts = [
   {
-    id: '1',
     title: '三十岁的第一个清晨',
     category: '岁月日志',
     date: '2024.05.20',
     excerpt: '今天阳光很好，透过窗帘照在书桌上。我想是时候整理一下过去十年的照片了...',
-    href: '/log/1'
+    url: '/log/1'
   },
   {
-    id: '2',
     title: '胶片里的老街',
     category: '影像回忆',
     date: '2024.05.18',
     excerpt: '那个角落的咖啡店已经拆了，幸好我留下了这张照片。城市的变迁总是让人猝不及防...',
-    href: '/log/2'
-  },
-  {
-    id: '3',
-    title: '搭建博客的一些心得',
-    category: '技术笔记',
-    date: '2024.05.15',
-    excerpt: '用了将近一周的时间，终于把这个博客搭建完成了。从设计到实现，每一步都花费了不少心思...',
-    href: '/log/3'
-  },
+    url: '/log/2'
+  }
 ];
+
+const currentPath = '/';
 ---
 
-<BookLayout title="首页" currentPage="home">
-  <!-- 顶部日期/天气栏 -->
-  <header class="page-header">
-    <div class="header-left">
-      <h2 class="year-title">{currentYear} 年</h2>
-      <p class="lunar-info">农历 {lunarYear}</p>
-    </div>
-    <div class="header-right">
-      <span class="page-header-bg">Home</span>
-      <div class="seal-stamp">阅</div>
-    </div>
-  </header>
+<BookLayout title="二零二四年" subtitle="农历 甲辰年 十月廿三">
+  <Fragment slot="sidebar">
+    <Sidebar currentPath={currentPath} />
+  </Fragment>
 
   <!-- 首页内容 -->
-  <article class="prose-paper">
-    <div class="intro-section">
-      <p class="text-indent">
+  <article class="prose-vintage max-w-none text-lg">
+    <div class="mb-12">
+      <p class="leading-loose text-[#333] indent-8">
         欢迎来到我的数字庭院。
       </p>
-      <p class="text-indent mt-4">
+      <p class="leading-loose text-[#333] indent-8 mt-4">
         这里没有算法推荐，没有红点通知，只有我三十岁以后的生活琐碎。我把这里当作一本泛黄的旧书，希望当你偶然翻开时，能闻到一点时间的味道。
       </p>
-      <span class="text-accent text-sm block mt-4 text-right opacity-80">—— 题记</span>
+      <p class="leading-loose text-[#333] indent-8 mt-4">
+        <span class="text-[#8b3a3a] text-sm block mt-2 text-right opacity-80 font-hand">—— 题记</span>
+      </p>
     </div>
 
     <!-- 最新动态 -->
-    <section class="recent-section">
-      <h3 class="section-title">最近翻阅</h3>
+    <h3 class="text-lg font-bold border-l-4 border-[#8b3a3a] pl-3 mb-6 text-[#2c2c2c] tracking-widest font-serif">
+      最近翻阅
+    </h3>
 
-      <div class="posts-grid">
-        {recentPosts.map(post => (
-          <a href={post.href} class="paper-card">
-            <div class="card-meta">{post.date} · {post.category}</div>
-            <h4 class="card-title">{post.title}</h4>
-            <p class="card-excerpt">{post.excerpt}</p>
-          </a>
-        ))}
-      </div>
-    </section>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {recentPosts.map(post => (
+        <a 
+          href={post.url}
+          class="article-card group hover:shadow-md"
+        >
+          <div class="text-xs text-[#8b3a3a] mb-2 font-bold tracking-wider opacity-70 font-serif">
+            {post.date} · {post.category}
+          </div>
+          <h4 class="text-xl font-bold mb-3 text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors font-serif">
+            {post.title}
+          </h4>
+          <p class="text-sm text-gray-600 leading-relaxed line-clamp-3">
+            {post.excerpt}
+          </p>
+        </a>
+      ))}
+    </div>
+
+    <!-- 快捷入口 -->
+    <h3 class="text-lg font-bold border-l-4 border-[#8b3a3a] pl-3 mb-6 mt-12 text-[#2c2c2c] tracking-widest font-serif">
+      快速翻阅
+    </h3>
+    <div class="flex flex-wrap gap-4">
+      <a href="/log" class="px-4 py-2 border border-[#dcd3b2] bg-white/40 hover:bg-[#fdfbf6] transition-all font-hand text-[#5d5d5d] hover:text-[#8b3a3a]">
+        📝 岁月日志
+      </a>
+      <a href="/album" class="px-4 py-2 border border-[#dcd3b2] bg-white/40 hover:bg-[#fdfbf6] transition-all font-hand text-[#5d5d5d] hover:text-[#8b3a3a]">
+        📷 生活相册
+      </a>
+      <a href="/drive" class="px-4 py-2 border border-[#dcd3b2] bg-white/40 hover:bg-[#fdfbf6] transition-all font-hand text-[#5d5d5d] hover:text-[#8b3a3a]">
+        💾 个人网盘
+      </a>
+      <a href="/nav" class="px-4 py-2 border border-[#dcd3b2] bg-white/40 hover:bg-[#fdfbf6] transition-all font-hand text-[#5d5d5d] hover:text-[#8b3a3a]">
+        🔗 常用导航
+      </a>
+    </div>
   </article>
 </BookLayout>
-
-<style>
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid var(--line-color);
-    padding-bottom: 1rem;
-    margin-bottom: 2.5rem;
-    position: relative;
-  }
-
-  .header-left {
-    z-index: 1;
-  }
-
-  .year-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0 0 0.25rem 0;
-    font-family: var(--font-serif);
-  }
-
-  .lunar-info {
-    color: var(--accent-color);
-    font-size: 0.875rem;
-    letter-spacing: 0.1em;
-    font-family: var(--font-serif);
-  }
-
-  .header-right {
-    text-align: right;
-    position: relative;
-    z-index: 1;
-  }
-
-  .page-header-bg {
-    font-size: 4rem;
-    font-weight: 300;
-    color: #cfcfcf;
-    position: absolute;
-    top: -1.5rem;
-    right: 3.5rem;
-    opacity: 0.3;
-    user-select: none;
-    font-family: var(--font-serif);
-  }
-
-  .seal-stamp {
-    width: 48px;
-    height: 48px;
-    border: 2px solid var(--accent-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent-color);
-    font-size: 14px;
-    font-weight: bold;
-    transform: rotate(12deg);
-    opacity: 0.7;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    font-family: var(--font-serif);
-  }
-
-  .prose-paper {
-    font-size: 1rem;
-    line-height: 1.8;
-  }
-
-  .intro-section {
-    margin-bottom: 3rem;
-  }
-
-  .text-indent {
-    text-indent: 2em;
-    margin-bottom: 0;
-    color: var(--text-main);
-  }
-
-  .mt-4 {
-    margin-top: 1rem;
-  }
-
-  .text-right {
-    text-align: right;
-  }
-
-  .text-sm {
-    font-size: 0.875rem;
-  }
-
-  .text-accent {
-    color: var(--accent-color);
-  }
-
-  .block {
-    display: block;
-  }
-
-  .opacity-80 {
-    opacity: 0.8;
-  }
-
-  .section-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    border-left: 4px solid var(--accent-color);
-    padding-left: 0.75rem;
-    margin-bottom: 1.5rem;
-    color: var(--text-main);
-    letter-spacing: 0.1em;
-    font-family: var(--font-serif);
-  }
-
-  .posts-grid {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 768px) {
-    .posts-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  .paper-card {
-    display: block;
-    border: 1px solid var(--line-color);
-    padding: 1.5rem;
-    background-color: rgba(255,255,255,0.4);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    transition: all 0.5s ease;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .paper-card:hover {
-    background-color: #fdfbf6;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-
-  .paper-card:hover .card-title {
-    color: var(--accent-color);
-  }
-
-  .card-meta {
-    font-size: 0.75rem;
-    color: var(--accent-color);
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    opacity: 0.8;
-    margin-bottom: 0.5rem;
-    font-family: var(--font-serif);
-  }
-
-  .card-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0.5rem 0;
-    transition: color 0.3s ease;
-    font-family: var(--font-serif);
-  }
-
-  .card-excerpt {
-    font-size: 0.875rem;
-    color: var(--text-light);
-    line-height: 1.6;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin: 0;
-  }
-</style>

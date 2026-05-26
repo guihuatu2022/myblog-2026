@@ -1,271 +1,162 @@
 ---
 import BookLayout from '../../layouts/BookLayout.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import Pagination from '../../components/Pagination.astro';
 
-const categories = [
-  { id: 'all', name: '全部' },
-  { id: 'life', name: '生活' },
-  { id: 'travel', name: '旅行' },
-  { id: 'food', name: '美食' },
-];
-
+// 模拟数据
+const categories = ['全部', '旅行足迹', '生活随拍', '光影风景'];
 const albums = [
   {
-    id: '1',
-    title: '杭州的春天',
-    description: '西湖边的垂柳，断桥上的残雪，还有龙井茶山的清晨',
-    cover: 'https://picsum.photos/seed/album1/400/300',
-    photoCount: 24,
-    date: '2024.03',
-  },
-  {
-    id: '2',
-    title: '老街时光',
-    description: '那些即将消失的街道，用镜头留下最后的记忆',
-    cover: 'https://picsum.photos/seed/album2/400/300',
-    photoCount: 18,
+    id: 1,
+    title: '晨光熹微',
+    category: 'scenery',
+    categoryName: '光影风景',
     date: '2024.01',
+    count: 24,
+    cover: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=600',
+    permission: 'public',
+    rotation: 2,
+    tapeColor: 'tape-blue'
   },
   {
-    id: '3',
-    title: '深夜食堂',
-    description: '城市的夜晚，总有一些温暖的角落',
-    cover: 'https://picsum.photos/seed/album3/400/300',
-    photoCount: 12,
-    date: '2023.12',
+    id: 2,
+    title: '五渔村的夏天',
+    category: 'travel',
+    categoryName: '旅行足迹',
+    date: '2023.08',
+    count: 36,
+    cover: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600',
+    permission: 'public',
+    rotation: -1.5,
+    tapeColor: 'tape-red'
   },
   {
-    id: '4',
+    id: 3,
     title: '日常碎片',
-    description: '平凡日子里的闪光时刻',
-    cover: 'https://picsum.photos/seed/album4/400/300',
-    photoCount: 36,
-    date: '2023.11',
-  },
+    category: 'life',
+    categoryName: '生活随拍',
+    date: '2023.06',
+    count: 18,
+    cover: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=600',
+    permission: 'public',
+    rotation: 1,
+    tapeColor: 'tape-blue'
+  }
 ];
+
+const currentPage = 1;
+const totalPages = 1;
+const currentPath = '/album';
 ---
 
-<BookLayout title="生活相册" currentPage="album">
-  <!-- 页眉 -->
-  <header class="page-header">
-    <div class="header-left">
-      <h2 class="page-title">影像记忆</h2>
-      <p class="page-subtitle">用镜头记录生活</p>
-    </div>
-    <div class="header-right">
-      <span class="page-header-bg">Album</span>
-      <div class="seal-stamp">影</div>
-    </div>
-  </header>
+<BookLayout title="光影流年" subtitle="Captured Memories" sealChar="影" sealRotate={3}>
+  <Fragment slot="sidebar">
+    <Sidebar currentPath={currentPath} />
+  </Fragment>
 
-  <!-- 分类筛选 -->
-  <div class="filter-bar">
-    {categories.map((cat, i) => (
-      <button class={i === 0 ? 'filter-btn active' : 'filter-btn'}>{cat.name}</button>
-    ))}
+  <!-- 分类索引 & 搜索 -->
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-10 pb-6 border-b border-dashed border-[#dcd3b2] text-sm text-[#5d5d5d] tracking-wider shrink-0" id="album-filters">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-bold text-[#2c2c2c] mr-2 font-serif">相册分类：</span>
+      {categories.map((cat, idx) => (
+        <>
+          <span 
+            class={`index-link ${idx === 0 ? 'active' : ''}`}
+            data-filter={idx === 0 ? 'all' : cat}
+          >
+            {cat}
+          </span>
+          {idx < categories.length - 1 && <span class="text-[#dcd3b2] select-none">/</span>}
+        </>
+      ))}
+    </div>
+    <div class="relative group">
+      <i class="ph ph-magnifying-glass absolute left-0 top-1/2 -translate-y-1/2 text-[#a8a8a8] group-focus-within:text-[#8b3a3a] transition-colors"></i>
+      <input 
+        type="text" 
+        placeholder="检索回忆..." 
+        class="vintage-search pl-6"
+        id="search-input"
+      />
+    </div>
   </div>
 
-  <!-- 相册网格 -->
-  <div class="albums-grid">
-    {albums.map(album => (
-      <a href={`/album/${album.id}`} class="album-card">
-        <div class="album-cover">
-          <img src={album.cover} alt={album.title} loading="lazy" />
-          <div class="album-overlay">
-            <span class="view-count">{album.photoCount} 张</span>
-          </div>
+  <!-- 瀑布流相册 -->
+  <div id="album-volumes" class="flex-1">
+    <details open class="mb-8 group year-section">
+      <summary class="year-header flex items-center gap-3 text-xl font-bold text-[#2c2c2c] mb-6 select-none outline-none">
+        <i class="ph ph-caret-right icon-arrow text-[#8b3a3a]"></i>
+        <span>卷三 · 二零二四年</span>
+        <span class="text-sm font-normal text-gray-500 mt-1">甲辰年</span>
+      </summary>
+
+      <div class="pl-4 border-l border-[#dcd3b2] ml-2 mt-4">
+        <div class="masonry-grid">
+          {albums.map(album => (
+            <div 
+              class={`album-card ${album.permission === 'private' ? 'album-private negative-film' : ''}`}
+              style={`transform: rotate(${album.rotation}deg);`}
+              data-category={album.category}
+            >
+              <div class={`tape ${album.tapeColor}`}></div>
+              <a href={`/album/${album.id}`}>
+                <div class="overflow-hidden aspect-square bg-gray-100 mb-2">
+                  <img 
+                    src={album.cover}
+                    alt={album.title}
+                    class="w-full h-full object-cover sepia hover:sepia-0 transition-all duration-700"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="album-info">
+                  <h3 class="album-title">{album.title}</h3>
+                  <div class="album-meta">
+                    <span>{album.date}</span>
+                    <span>·</span>
+                    <span>共 {album.count} 张</span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          ))}
         </div>
-        <div class="album-info">
-          <h3 class="album-title">{album.title}</h3>
-          <p class="album-desc">{album.description}</p>
-          <span class="album-date">{album.date}</span>
-        </div>
-      </a>
-    ))}
+      </div>
+    </details>
   </div>
+
+  <!-- 分页 -->
+  <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl="/album" />
 </BookLayout>
 
-<style>
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid var(--line-color);
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
-    position: relative;
-  }
+<script is:inline>
+  // 分类筛选
+  document.querySelectorAll('#album-filters .index-link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('#album-filters .index-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      
+      const filter = link.dataset.filter;
+      
+      document.querySelectorAll('.album-card').forEach(card => {
+        if (filter === 'all' || card.dataset.category === filter) {
+          card.classList.remove('filtered-out');
+        } else {
+          card.classList.add('filtered-out');
+        }
+      });
+    });
+  });
 
-  .header-left {
-    z-index: 1;
-  }
-
-  .page-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0 0 0.25rem 0;
-    font-family: var(--font-serif);
-  }
-
-  .page-subtitle {
-    color: var(--text-light);
-    font-size: 0.875rem;
-    font-family: var(--font-serif);
-  }
-
-  .header-right {
-    position: relative;
-    z-index: 1;
-  }
-
-  .page-header-bg {
-    font-size: 4rem;
-    font-weight: 300;
-    color: #cfcfcf;
-    position: absolute;
-    top: -1.5rem;
-    right: 3.5rem;
-    opacity: 0.3;
-    user-select: none;
-    font-family: var(--font-serif);
-  }
-
-  .seal-stamp {
-    width: 48px;
-    height: 48px;
-    border: 2px solid var(--accent-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent-color);
-    font-size: 14px;
-    font-weight: bold;
-    transform: rotate(12deg);
-    opacity: 0.7;
-    font-family: var(--font-serif);
-  }
-
-  .filter-bar {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    padding: 0.375rem 0.875rem;
-    border: 1px solid var(--line-color);
-    background: white;
-    color: var(--text-main);
-    font-family: var(--font-serif);
-    font-size: 0.8125rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .filter-btn:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-  }
-
-  .filter-btn.active {
-    background: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-  }
-
-  .albums-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-  }
-
-  @media (max-width: 768px) {
-    .albums-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .album-card {
-    display: block;
-    border: 1px solid var(--line-color);
-    background: white;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.3s ease;
-    overflow: hidden;
-  }
-
-  .album-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
-  }
-
-  .album-card:hover .album-cover img {
-    transform: scale(1.05);
-  }
-
-  .album-cover {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 4/3;
-  }
-
-  .album-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .album-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.5));
-    padding: 1rem 0.75rem 0.75rem;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .album-card:hover .album-overlay {
-    opacity: 1;
-  }
-
-  .view-count {
-    color: white;
-    font-size: 0.75rem;
-    font-family: var(--font-serif);
-  }
-
-  .album-info {
-    padding: 1rem;
-  }
-
-  .album-title {
-    font-size: 1rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
-    color: var(--text-main);
-    font-family: var(--font-serif);
-  }
-
-  .album-desc {
-    font-size: 0.8125rem;
-    color: var(--text-light);
-    margin: 0 0 0.5rem 0;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    font-family: var(--font-serif);
-  }
-
-  .album-date {
-    font-size: 0.75rem;
-    color: var(--accent-color);
-    font-family: var(--font-serif);
-  }
-</style>
+  // 搜索
+  document.getElementById('search-input')?.addEventListener('input', (e) => {
+    const keyword = e.target.value.toLowerCase();
+    document.querySelectorAll('.album-card').forEach(card => {
+      const title = card.querySelector('.album-title')?.textContent?.toLowerCase() || '';
+      if (keyword === '' || title.includes(keyword)) {
+        card.classList.remove('filtered-out');
+      } else {
+        card.classList.add('filtered-out');
+      }
+    });
+  });
+</script>
