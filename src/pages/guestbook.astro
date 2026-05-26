@@ -1,40 +1,47 @@
 ---
 import BookLayout from '../layouts/BookLayout.astro';
 import Sidebar from '../components/Sidebar.astro';
+import Pagination from '../components/Pagination.astro';
 
-// 模拟数据
-const hostMessage = {
-  content: '欢迎来到我的留言板，这里是访客与主人交流的空间。如果你有任何想说的话，无论是赞美、建议还是闲聊，都可以在这里留下你的足迹。',
-  signature: '主人敬上'
-};
+const currentPage = 1;
+const totalPages = 1;
+const currentPath = '/guestbook';
 
 const messages = [
   {
     id: 1,
-    userName: '路过的旅人',
-    content: '偶然发现这个博客，设计很有味道，像翻开一本旧书。',
-    time: '2024-05-20 14:32',
-    floor: 12,
-    isPrivate: false,
-    isAdmin: false,
+    user_name: '清风徐来',
+    content: '偶然发现这个博客，文笔真好，像是在读一本泛黄的旧书。希望能一直写下去。',
+    created_at: '2024-05-20 14:32',
+    is_admin: false,
+    is_private: false,
     reply: null
   },
   {
     id: 2,
-    userName: '主人',
-    content: '感谢来访，愿你也能找到属于自己的数字庭院。',
-    time: '2024-05-20 15:18',
-    floor: 13,
-    isPrivate: false,
-    isAdmin: true,
+    user_name: '云中漫步',
+    content: '博主的生活态度很让人羡慕，记录生活的习惯也很棒。加油！',
+    created_at: '2024-05-19 09:15',
+    is_admin: true,
+    is_private: false,
+    reply: '谢谢云中漫步的鼓励，有空常来坐坐。'
+  },
+  {
+    id: 3,
+    user_name: '静水流深',
+    content: '悄悄话：博主真是个有趣的人，希望能成为朋友。',
+    created_at: '2024-05-18 22:45',
+    is_admin: false,
+    is_private: true,
     reply: null
   }
 ];
 
-const currentPath = '/guestbook';
+const hostMessage = '欢迎来到我的留言板。这里是一个安静的角落，你可以留下只属于我们的悄悄话。每一条留言我都会认真阅读，期待与你的相遇。';
+const hostSignature = '—— 主人敬上';
 ---
 
-<BookLayout title="鸿雁传书" subtitle="Guestbook" sealChar="书" sealRotate={8}>
+<BookLayout title="访客留言" subtitle="Guestbook" sealChar="访" sealRotate={6}>
   <Fragment slot="sidebar">
     <Sidebar currentPath={currentPath} />
   </Fragment>
@@ -42,174 +49,134 @@ const currentPath = '/guestbook';
   <!-- 主人寄语 -->
   <div class="host-message">
     <div class="host-content">
-      {hostMessage.content}
+      {hostMessage}
     </div>
     <div class="host-signature">
-      —— {hostMessage.signature}
+      {hostSignature}
     </div>
   </div>
 
   <!-- 留言输入 -->
-  <div class="input-area">
-    <div class="flex gap-4 mb-4">
-      <input 
-        type="text" 
-        id="guest-name"
-        placeholder="你的名字"
-        class="flex-1 bg-transparent border-b border-[#dcd3b2] font-hand text-[#2c2c2c] placeholder-[#a8a8a8] focus:outline-none focus:border-[#8b3a3a] py-2 transition-colors"
-      />
-    </div>
-    <textarea 
-      id="guest-message"
-      placeholder="写下你想说的话..."
-      rows="4"
-      class="letter-paper w-full mb-4"
-    ></textarea>
-    <div class="flex items-center justify-between">
-      <label class="checkbox-wrapper">
-        <input type="checkbox" id="is-private" />
-        <span>悄悄话（仅主人可见）</span>
-      </label>
-      <button 
-        id="submit-btn"
-        class="btn-post"
-        onclick="submitMessage()"
-      ></button>
+  <div class="input-area mb-12">
+    <div class="flex gap-4 items-start">
+      <div class="avatar">
+        <i class="ph ph-user text-xl text-gray-400"></i>
+      </div>
+      <div class="flex-1">
+        <div class="flex gap-4 mb-4">
+          <input 
+            type="text" 
+            placeholder="你的名字" 
+            class="vintage-search flex-1 max-w-[200px]"
+            id="guest-name"
+          />
+          <input 
+            type="email" 
+            placeholder="邮箱（选填）" 
+            class="vintage-search flex-1 max-w-[200px]"
+            id="guest-email"
+          />
+        </div>
+        <textarea 
+          class="letter-paper w-full h-32 mb-4"
+          placeholder="写下你想说的话..."
+          id="message-content"
+        ></textarea>
+        <div class="flex justify-between items-center">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="is-private" />
+            <span>悄悄话（仅博主可见）</span>
+          </label>
+          <button class="btn-post" onclick="submitMessage()"></button>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- 留言列表 -->
   <div class="message-list">
-    {messages.map(msg => (
-      <div class="message-card" data-id={msg.id}>
-        <!-- 头像 -->
-        <div class={`avatar ${msg.isAdmin ? 'avatar-admin' : ''}`}>
-          {msg.userName.charAt(0)}
+    {messages.map((msg, idx) => (
+      <div class="message-card" data-floor={messages.length - idx}>
+        <div class={`avatar ${msg.is_admin ? 'avatar-admin' : ''}`}>
+          {msg.user_name.charAt(0)}
         </div>
-
-        <!-- 内容 -->
         <div class="message-body">
           <div class="message-header">
-            <span class="sender-name">{msg.userName}</span>
-            <div>
-              <span class="message-time">{msg.time}</span>
-              <span class="floor-tag">#{msg.floor}</span>
+            <div class="flex items-baseline gap-2">
+              <span class="sender-name">{msg.user_name}</span>
+              {msg.is_admin && (
+                <span class="text-xs text-[#8b3a3a] font-hand bg-[#8b3a3a]/10 px-2 py-0.5 rounded">博主</span>
+              )}
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="message-time">{msg.created_at}</span>
+              <span class="floor-tag">#{messages.length - idx}楼</span>
             </div>
           </div>
-
-          <div class={`message-content ${msg.isPrivate ? 'message-secret' : ''}`}>
-            {msg.isPrivate ? (
-              <>
-                <i class="ph ph-eye-slash"></i>
-                <span class="secret-mask">这条是悄悄话，只有主人可见</span>
-                <span class="secret-content">{msg.content}</span>
-              </>
-            ) : msg.content}
-          </div>
-
+          
+          {msg.is_private && !document?.body?.classList?.contains('is-admin') ? (
+            <div class="message-secret">
+              <i class="ph ph-eye-slash"></i>
+              <span>这是一条悄悄话，只有博主能看到哦~</span>
+            </div>
+          ) : (
+            <div class="message-content">{msg.content}</div>
+          )}
+          
           {msg.reply && (
             <div class="admin-reply">
-              <span class="reply-label">掌柜回复</span>
+              <span class="reply-label">博主回复</span>
               <span class="reply-text">{msg.reply}</span>
             </div>
           )}
-
-          {/* 管理员操作 */}
-          <div class="admin-action">
-            <span class="btn-reply-action" onclick="showReplyInput(this)">回复</span>
-          </div>
-
-          {/* 回复框 */}
-          <div class="reply-input-box hidden mt-3">
-            <textarea 
-              placeholder="写下回复..."
-              rows="2"
-              class="letter-paper w-full mb-2"
-            ></textarea>
-            <button 
-              class="px-3 py-1 bg-[#8b3a3a] text-white text-sm font-hand hover:bg-[#722f2f] transition-colors"
-              onclick="submitReply(this)"
-            >
-              发送回复
-            </button>
-          </div>
         </div>
       </div>
     ))}
   </div>
 
   <!-- 分页 -->
-  <div class="mt-8 pt-6 border-t border-[#dcd3b2] flex items-center justify-center">
-    <div class="flex items-center gap-4 font-serif text-sm text-[#5d5d5d]">
-      <span class="opacity-50">上一页</span>
-      <a href="#" class="pagination-link active">【 壹 】</a>
-      <span class="opacity-50">下一页</span>
-    </div>
-  </div>
+  <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl="/guestbook" />
 </BookLayout>
 
-<!-- Toast 提示 -->
-<div id="toast-notification">
-  <i class="ph ph-paper-plane-tilt toast-icon"></i>
-  <span id="toast-message">操作成功</span>
-</div>
-
 <script is:inline>
-  // 显示 Toast
-  function showToast(message) {
-    const toast = document.getElementById('toast-notification');
-    const msgEl = document.getElementById('toast-message');
-    if (toast && msgEl) {
-      msgEl.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-  }
-
-  // 提交留言
   function submitMessage() {
-    const name = document.getElementById('guest-name')?.value;
-    const content = document.getElementById('guest-message')?.value;
-    const isPrivate = document.getElementById('is-private')?.checked;
-
+    const name = document.getElementById('guest-name').value;
+    const content = document.getElementById('message-content').value;
+    const isPrivate = document.getElementById('is-private').checked;
+    
     if (!name || !content) {
-      showToast('请填写昵称和留言内容');
+      alert('请填写姓名和留言内容');
       return;
     }
-
-    // TODO: 调用 API
-    console.log({ name, content, isPrivate });
-    showToast('留言已投递');
     
-    // 清空表单
-    if (document.getElementById('guest-name')) document.getElementById('guest-name').value = '';
-    if (document.getElementById('guest-message')) document.getElementById('guest-message').value = '';
-    if (document.getElementById('is-private')) document.getElementById('is-private').checked = false;
-  }
-
-  // 显示回复框
-  function showReplyInput(btn) {
-    const box = btn.parentElement.nextElementSibling;
-    if (box && box.classList.contains('reply-input-box')) {
-      box.classList.toggle('hidden');
-    }
-  }
-
-  // 提交回复
-  function submitReply(btn) {
-    const box = btn.parentElement;
-    const textarea = box.querySelector('textarea');
-    const content = textarea?.value;
-    
-    if (!content) {
-      showToast('请填写回复内容');
-      return;
-    }
-
-    // TODO: 调用 API
-    console.log({ content });
-    showToast('回复已发送');
-    box.classList.add('hidden');
-    textarea.value = '';
+    // TODO: 提交留言
+    alert('留言已提交，感谢你的来访！');
+    document.getElementById('guest-name').value = '';
+    document.getElementById('message-content').value = '';
+    document.getElementById('is-private').checked = false;
   }
 </script>
+
+<style>
+  .vintage-search {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed #dcd3b2;
+    font-family: var(--font-hand);
+    color: #2c2c2c;
+    padding: 4px 0;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+  
+  .vintage-search:focus {
+    border-bottom: 1px solid #8b3a3a;
+  }
+  
+  .vintage-search::placeholder {
+    color: #a8a8a8;
+    font-family: var(--font-serif);
+    font-style: italic;
+  }
+</style>

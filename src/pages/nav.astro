@@ -1,208 +1,132 @@
 ---
 import BookLayout from '../layouts/BookLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+
+const currentPath = '/nav';
 
 const categories = [
   {
-    name: '技术学习',
+    name: '技术',
+    icon: 'ph-code',
     sites: [
-      { name: 'MDN Web Docs', url: 'https://developer.mozilla.org', desc: '前端开发文档' },
-      { name: 'GitHub', url: 'https://github.com', desc: '代码托管平台' },
-      { name: 'Stack Overflow', url: 'https://stackoverflow.com', desc: '技术问答社区' },
+      { name: 'GitHub', url: 'https://github.com', desc: '代码仓库' },
+      { name: 'Stack Overflow', url: 'https://stackoverflow.com', desc: '技术问答' },
+      { name: 'MDN', url: 'https://developer.mozilla.org', desc: '前端文档' },
     ]
   },
   {
-    name: '设计资源',
+    name: '设计',
+    icon: 'ph-palette',
     sites: [
-      { name: 'Unsplash', url: 'https://unsplash.com', desc: '免费高清图片' },
-      { name: 'Iconfont', url: 'https://iconfont.cn', desc: '阿里巴巴矢量图标库' },
-      { name: 'Figma', url: 'https://figma.com', desc: '在线设计工具' },
+      { name: 'Dribbble', url: 'https://dribbble.com', desc: '设计作品' },
+      { name: 'Behance', url: 'https://behance.net', desc: '创意设计' },
     ]
   },
   {
-    name: '效率工具',
+    name: '生活',
+    icon: 'ph-coffee',
     sites: [
-      { name: 'Notion', url: 'https://notion.so', desc: '笔记与协作工具' },
-      { name: 'Obsidian', url: 'https://obsidian.md', desc: '本地笔记软件' },
+      { name: '豆瓣', url: 'https://douban.com', desc: '读书电影' },
+      { name: '即刻', url: 'https://jike.city', desc: '兴趣社区' },
     ]
-  },
+  }
 ];
 ---
 
-<BookLayout title="常用导航" currentPage="nav">
-  <!-- 页眉 -->
-  <header class="page-header">
-    <div class="header-left">
-      <h2 class="page-title">收藏夹</h2>
-      <p class="page-subtitle">日常使用的网站导航</p>
-    </div>
-    <div class="header-right">
-      <span class="page-header-bg">Nav</span>
-      <div class="seal-stamp">链</div>
-    </div>
-  </header>
+<BookLayout title="常用导航" subtitle="Bookmarks" sealChar="链" sealRotate={8}>
+  <Fragment slot="sidebar">
+    <Sidebar currentPath={currentPath} />
+  </Fragment>
 
-  <!-- 导航分类 -->
-  <div class="nav-categories">
-    {categories.map(cat => (
-      <section class="nav-category">
-        <h3 class="category-title">{cat.name}</h3>
-        <div class="sites-grid">
+  <!-- 分类导航 -->
+  <div class="nav-categories flex-1">
+    {categories.map((cat) => (
+      <div class="nav-category mb-12">
+        <div class="category-header flex items-center gap-3 mb-6">
+          <i class={`ph ${cat.icon} text-xl text-[#8b3a3a]`}></i>
+          <h2 class="category-title text-xl font-bold text-[#2c2c2c] font-serif">{cat.name}</h2>
+          <div class="flex-1 h-px bg-gradient-to-r from-[#dcd3b2] to-transparent"></div>
+        </div>
+        
+        <div class="site-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {cat.sites.map(site => (
-            <a href={site.url} target="_blank" rel="noopener" class="site-card">
-              <div class="site-icon">🔗</div>
+            <a 
+              href={site.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="site-card"
+            >
+              <div class="site-icon">
+                <i class="ph ph-globe text-2xl text-[#8b3a3a]"></i>
+              </div>
               <div class="site-info">
-                <span class="site-name">{site.name}</span>
-                <span class="site-desc">{site.desc}</span>
+                <h3 class="site-name">{site.name}</h3>
+                <p class="site-desc">{site.desc}</p>
+              </div>
+              <div class="site-arrow">
+                <i class="ph ph-arrow-up-right text-gray-400"></i>
               </div>
             </a>
           ))}
         </div>
-      </section>
+      </div>
     ))}
   </div>
 </BookLayout>
 
 <style>
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid var(--line-color);
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
-    position: relative;
-  }
-
-  .header-left {
-    z-index: 1;
-  }
-
-  .page-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0 0 0.25rem 0;
-    font-family: var(--font-serif);
-  }
-
-  .page-subtitle {
-    color: var(--text-light);
-    font-size: 0.875rem;
-    font-family: var(--font-serif);
-  }
-
-  .header-right {
-    position: relative;
-    z-index: 1;
-  }
-
-  .page-header-bg {
-    font-size: 4rem;
-    font-weight: 300;
-    color: #cfcfcf;
-    position: absolute;
-    top: -1.5rem;
-    right: 3.5rem;
-    opacity: 0.3;
-    user-select: none;
-    font-family: var(--font-serif);
-  }
-
-  .seal-stamp {
-    width: 48px;
-    height: 48px;
-    border: 2px solid var(--accent-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent-color);
-    font-size: 14px;
-    font-weight: bold;
-    transform: rotate(12deg);
-    opacity: 0.7;
-    font-family: var(--font-serif);
-  }
-
-  .nav-category {
-    margin-bottom: 2rem;
-  }
-
-  .category-title {
-    font-size: 1rem;
-    font-weight: 700;
-    border-left: 4px solid var(--accent-color);
-    padding-left: 0.75rem;
-    margin-bottom: 1rem;
-    color: var(--text-main);
-    letter-spacing: 0.1em;
-    font-family: var(--font-serif);
-  }
-
-  .sites-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-  }
-
-  @media (max-width: 768px) {
-    .sites-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 480px) {
-    .sites-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
   .site-card {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1rem;
-    border: 1px solid var(--line-color);
-    background: rgba(255,255,255,0.4);
-    text-decoration: none;
-    color: inherit;
+    gap: 12px;
+    padding: 16px;
+    background: var(--paper-white);
+    border: 1px solid #dcd3b2;
+    border-radius: 4px;
     transition: all 0.3s ease;
+    text-decoration: none;
   }
-
+  
   .site-card:hover {
-    background: white;
-    border-color: var(--accent-color);
+    border-color: #8b3a3a;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(139, 58, 58, 0.1);
   }
-
+  
   .site-icon {
-    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 58, 58, 0.1);
+    border-radius: 50%;
     flex-shrink: 0;
   }
-
+  
   .site-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    flex: 1;
     min-width: 0;
   }
-
+  
   .site-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-main);
     font-family: var(--font-serif);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 1rem;
+    color: #2c2c2c;
+    margin-bottom: 2px;
   }
-
+  
   .site-desc {
-    font-size: 0.75rem;
-    color: var(--text-light);
-    font-family: var(--font-serif);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 0.8rem;
+    color: #888;
+  }
+  
+  .site-arrow {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .site-card:hover .site-arrow {
+    opacity: 1;
   }
 </style>

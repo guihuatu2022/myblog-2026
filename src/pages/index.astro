@@ -2,87 +2,220 @@
 import BookLayout from '../layouts/BookLayout.astro';
 import Sidebar from '../components/Sidebar.astro';
 
-// 模拟数据
+const currentPath = '/';
+
 const recentPosts = [
   {
+    id: 1,
     title: '三十岁的第一个清晨',
-    category: '岁月日志',
-    date: '2024.05.20',
-    excerpt: '今天阳光很好，透过窗帘照在书桌上。我想是时候整理一下过去十年的照片了...',
-    url: '/log/1'
+    category: '生活随笔',
+    date: '2024-05-20',
+    excerpt: '今天阳光很好，透过窗帘照在书桌上，尘埃在光线里漂浮。三十岁，人生的又一个新的起点...',
+    cover: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=600'
   },
   {
+    id: 2,
     title: '胶片里的老街',
-    category: '影像回忆',
-    date: '2024.05.18',
-    excerpt: '那个角落的咖啡店已经拆了，幸好我留下了这张照片。城市的变迁总是让人猝不及防...',
-    url: '/log/2'
+    category: '影像记忆',
+    date: '2024-05-18',
+    excerpt: '那家咖啡店已经拆了，只剩下模糊的轮廓在照片里。那个角落，曾经承载过多少人的故事...',
+    cover: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=600'
+  },
+  {
+    id: 3,
+    title: 'Astro 框架搭建博客',
+    category: '技术笔记',
+    date: '2024-05-15',
+    excerpt: '折腾了一周，终于把博客搭好了。选择 Astro 是因为它的 Islands 架构，静态页面+少量交互...',
+    cover: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=600'
   }
 ];
 
-const currentPath = '/';
+const stats = {
+  articles: 42,
+  albums: 8,
+  files: 128
+};
 ---
 
-<BookLayout title="二零二四年" subtitle="农历 甲辰年 十月廿三">
+<BookLayout title="浮生六记" subtitle="My Digital Garden" sealChar="浮" sealRotate={4}>
   <Fragment slot="sidebar">
     <Sidebar currentPath={currentPath} />
   </Fragment>
 
-  <!-- 首页内容 -->
-  <article class="prose-vintage max-w-none text-lg">
-    <div class="mb-12">
-      <p class="leading-loose text-[#333] indent-8">
-        欢迎来到我的数字庭院。
-      </p>
-      <p class="leading-loose text-[#333] indent-8 mt-4">
-        这里没有算法推荐，没有红点通知，只有我三十岁以后的生活琐碎。我把这里当作一本泛黄的旧书，希望当你偶然翻开时，能闻到一点时间的味道。
-      </p>
-      <p class="leading-loose text-[#333] indent-8 mt-4">
-        <span class="text-[#8b3a3a] text-sm block mt-2 text-right opacity-80 font-hand">—— 题记</span>
+  <!-- 欢迎语卡片 -->
+  <div class="welcome-card mb-12">
+    <div class="welcome-content">
+      <h1 class="welcome-title font-display mb-2">欢迎来到我的数字庭院</h1>
+      <p class="welcome-subtitle font-hand">
+        这里没有算法推荐，没有信息茧房。<br/>
+        只有一些随想、随拍、随记，和慢慢流逝的时光。
       </p>
     </div>
+    <div class="seal-welcome">
+      <span class="seal-text">私</span>
+      <span class="seal-label">私人领地</span>
+    </div>
+  </div>
 
-    <!-- 最新动态 -->
-    <h3 class="text-lg font-bold border-l-4 border-[#8b3a3a] pl-3 mb-6 text-[#2c2c2c] tracking-widest font-serif">
-      最近翻阅
-    </h3>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- 最近翻阅 -->
+  <section class="mb-12">
+    <div class="section-header flex items-center gap-3 mb-8">
+      <i class="ph ph-book-open text-xl text-[#8b3a3a]"></i>
+      <h2 class="section-title text-xl font-bold text-[#2c2c2c] font-serif">最近翻阅</h2>
+      <div class="flex-1 h-px bg-gradient-to-r from-[#dcd3b2] to-transparent"></div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {recentPosts.map(post => (
-        <a 
-          href={post.url}
-          class="article-card group hover:shadow-md"
-        >
-          <div class="text-xs text-[#8b3a3a] mb-2 font-bold tracking-wider opacity-70 font-serif">
-            {post.date} · {post.category}
+        <a href={`/log/${post.id}`} class="post-card group">
+          <div class="card-cover overflow-hidden mb-4">
+            <img 
+              src={post.cover}
+              alt={post.title}
+              class="w-full aspect-[4/3] object-cover sepia-[0.3] group-hover:sepia-0 group-hover:scale-105 transition-all duration-700"
+              loading="lazy"
+            />
           </div>
-          <h4 class="text-xl font-bold mb-3 text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors font-serif">
-            {post.title}
-          </h4>
-          <p class="text-sm text-gray-600 leading-relaxed line-clamp-3">
-            {post.excerpt}
-          </p>
+          <div class="card-content">
+            <span class="card-category text-xs text-[#8b3a3a] font-hand mb-1 block">{post.category}</span>
+            <h3 class="card-title text-lg font-serif text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors mb-2">
+              {post.title}
+            </h3>
+            <p class="card-excerpt text-sm text-[#888] line-clamp-2 mb-3">
+              {post.excerpt}
+            </p>
+            <span class="card-date text-xs text-[#aaa] font-hand">{post.date}</span>
+          </div>
         </a>
       ))}
     </div>
+  </section>
 
-    <!-- 快捷入口 -->
-    <h3 class="text-lg font-bold border-l-4 border-[#8b3a3a] pl-3 mb-6 mt-12 text-[#2c2c2c] tracking-widest font-serif">
-      快速翻阅
-    </h3>
-    <div class="flex flex-wrap gap-4">
-      <a href="/log" class="px-4 py-2 border border-[#dcd3b2] bg-white/40 hover:bg-[#fdfbf6] transition-all font-hand text-[#5d5d5d] hover:text-[#8b3a3a]">
-        📝 岁月日志
+  <!-- 快捷入口 -->
+  <section>
+    <div class="section-header flex items-center gap-3 mb-8">
+      <i class="ph ph-compass text-xl text-[#8b3a3a]"></i>
+      <h2 class="section-title text-xl font-bold text-[#2c2c2c] font-serif">快捷入口</h2>
+      <div class="flex-1 h-px bg-gradient-to-r from-[#dcd3b2] to-transparent"></div>
+    </div>
+    
+    <div class="quick-links grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <a href="/log" class="quick-link">
+        <i class="ph ph-bookmarks text-2xl text-[#8b3a3a] mb-2"></i>
+        <span>岁月日志</span>
       </a>
-      <a href="/album" class="px-4 py-2 border border-[#dcd3b2] bg-white/40 hover:bg-[#fdfbf6] transition-all font-hand text-[#5d5d5d] hover:text-[#8b3a3a]">
-        📷 生活相册
+      <a href="/album" class="quick-link">
+        <i class="ph ph-images text-2xl text-[#8b3a3a] mb-2"></i>
+        <span>生活相册</span>
       </a>
-      <a href="/drive" class="px-4 py-2 border border-[#dcd3b2] bg-white/40 hover:bg-[#fdfbf6] transition-all font-hand text-[#5d5d5d] hover:text-[#8b3a3a]">
-        💾 个人网盘
+      <a href="/drive" class="quick-link">
+        <i class="ph ph-folder-open text-2xl text-[#8b3a3a] mb-2"></i>
+        <span>个人网盘</span>
       </a>
-      <a href="/nav" class="px-4 py-2 border border-[#dcd3b2] bg-white/40 hover:bg-[#fdfbf6] transition-all font-hand text-[#5d5d5d] hover:text-[#8b3a3a]">
-        🔗 常用导航
+      <a href="/nav" class="quick-link">
+        <i class="ph ph-link text-2xl text-[#8b3a3a] mb-2"></i>
+        <span>常用导航</span>
       </a>
     </div>
-  </article>
+  </section>
 </BookLayout>
+
+<style>
+  .welcome-card {
+    background: var(--paper-white);
+    border: 1px solid #dcd3b2;
+    padding: 2rem;
+    position: relative;
+    box-shadow: 
+      inset 0 0 30px rgba(139, 58, 58, 0.03),
+      3px 3px 0 rgba(139, 58, 58, 0.1);
+  }
+  
+  .welcome-content {
+    max-width: calc(100% - 80px);
+  }
+  
+  .welcome-title {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: #2c2c2c;
+    letter-spacing: 0.1em;
+  }
+  
+  .welcome-subtitle {
+    color: #5d5d5d;
+    line-height: 1.8;
+    font-size: 1rem;
+  }
+  
+  .seal-welcome {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(8deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.85;
+  }
+  
+  .seal-text {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: #8b3a3a;
+    border: 2px solid #8b3a3a;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+  }
+  
+  .seal-label {
+    font-family: var(--font-hand);
+    font-size: 0.65rem;
+    color: #8b3a3a;
+    margin-top: 4px;
+  }
+  
+  .post-card {
+    background: var(--paper-white);
+    border: 1px solid #dcd3b2;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    display: block;
+  }
+  
+  .post-card:hover {
+    border-color: #8b3a3a;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(139, 58, 58, 0.1);
+  }
+  
+  .card-category {
+    letter-spacing: 0.1em;
+  }
+  
+  .quick-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--paper-white);
+    border: 1px solid #dcd3b2;
+    color: #5d5d5d;
+    text-decoration: none;
+    font-family: var(--font-hand);
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+  
+  .quick-link:hover {
+    background: rgba(139, 58, 58, 0.05);
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+</style>

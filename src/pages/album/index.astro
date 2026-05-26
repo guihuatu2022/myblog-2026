@@ -3,18 +3,20 @@ import BookLayout from '../../layouts/BookLayout.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import Pagination from '../../components/Pagination.astro';
 
-// 模拟数据
+const currentPage = 1;
+const totalPages = 1;
+const currentPath = '/album';
+
 const categories = ['全部', '旅行足迹', '生活随拍', '光影风景'];
+
 const albums = [
   {
     id: 1,
     title: '晨光熹微',
     category: 'scenery',
-    categoryName: '光影风景',
     date: '2024.01',
     count: 24,
     cover: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=600',
-    permission: 'public',
     rotation: 2,
     tapeColor: 'tape-blue'
   },
@@ -22,11 +24,9 @@ const albums = [
     id: 2,
     title: '五渔村的夏天',
     category: 'travel',
-    categoryName: '旅行足迹',
     date: '2023.08',
     count: 36,
     cover: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600',
-    permission: 'public',
     rotation: -1.5,
     tapeColor: 'tape-red'
   },
@@ -34,19 +34,13 @@ const albums = [
     id: 3,
     title: '日常碎片',
     category: 'life',
-    categoryName: '生活随拍',
     date: '2023.06',
     count: 18,
     cover: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=600',
-    permission: 'public',
     rotation: 1,
     tapeColor: 'tape-blue'
   }
 ];
-
-const currentPage = 1;
-const totalPages = 1;
-const currentPath = '/album';
 ---
 
 <BookLayout title="光影流年" subtitle="Captured Memories" sealChar="影" sealRotate={3}>
@@ -83,6 +77,8 @@ const currentPath = '/album';
 
   <!-- 瀑布流相册 -->
   <div id="album-volumes" class="flex-1">
+    
+    <!-- 卷三：2024 -->
     <details open class="mb-8 group year-section">
       <summary class="year-header flex items-center gap-3 text-xl font-bold text-[#2c2c2c] mb-6 select-none outline-none">
         <i class="ph ph-caret-right icon-arrow text-[#8b3a3a]"></i>
@@ -93,35 +89,35 @@ const currentPath = '/album';
       <div class="pl-4 border-l border-[#dcd3b2] ml-2 mt-4">
         <div class="masonry-grid">
           {albums.map(album => (
-            <div 
-              class={`album-card ${album.permission === 'private' ? 'album-private negative-film' : ''}`}
+            <a 
+              href={`/album/${album.id}`}
+              class="album-card"
               style={`transform: rotate(${album.rotation}deg);`}
               data-category={album.category}
             >
               <div class={`tape ${album.tapeColor}`}></div>
-              <a href={`/album/${album.id}`}>
-                <div class="overflow-hidden aspect-square bg-gray-100 mb-2">
-                  <img 
-                    src={album.cover}
-                    alt={album.title}
-                    class="w-full h-full object-cover sepia hover:sepia-0 transition-all duration-700"
-                    loading="lazy"
-                  />
+              <div class="overflow-hidden aspect-square bg-gray-100 mb-2">
+                <img 
+                  src={album.cover}
+                  alt={album.title}
+                  class="w-full h-full object-cover sepia hover:sepia-0 transition-all duration-700"
+                  loading="lazy"
+                />
+              </div>
+              <div class="album-info">
+                <h3 class="album-title">{album.title}</h3>
+                <div class="album-meta">
+                  <span>{album.date}</span>
+                  <span>·</span>
+                  <span>共 {album.count} 张</span>
                 </div>
-                <div class="album-info">
-                  <h3 class="album-title">{album.title}</h3>
-                  <div class="album-meta">
-                    <span>{album.date}</span>
-                    <span>·</span>
-                    <span>共 {album.count} 张</span>
-                  </div>
-                </div>
-              </a>
-            </div>
+              </div>
+            </a>
           ))}
         </div>
       </div>
     </details>
+
   </div>
 
   <!-- 分页 -->
@@ -147,12 +143,12 @@ const currentPath = '/album';
     });
   });
 
-  // 搜索
+  // 搜索功能
   document.getElementById('search-input')?.addEventListener('input', (e) => {
-    const keyword = e.target.value.toLowerCase();
+    const query = e.target.value.toLowerCase();
     document.querySelectorAll('.album-card').forEach(card => {
-      const title = card.querySelector('.album-title')?.textContent?.toLowerCase() || '';
-      if (keyword === '' || title.includes(keyword)) {
+      const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
+      if (title.includes(query)) {
         card.classList.remove('filtered-out');
       } else {
         card.classList.add('filtered-out');
@@ -160,3 +156,9 @@ const currentPath = '/album';
     });
   });
 </script>
+
+<style>
+  .album-card.filtered-out {
+    display: none;
+  }
+</style>

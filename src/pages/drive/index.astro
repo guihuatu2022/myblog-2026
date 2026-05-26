@@ -1,255 +1,169 @@
 ---
 import BookLayout from '../../layouts/BookLayout.astro';
+import Sidebar from '../../components/Sidebar.astro';
+
+const currentPath = '/drive';
 
 const categories = [
-  { id: 'all', name: '全部' },
-  { id: 'doc', name: '文档' },
-  { id: 'code', name: '代码' },
-  { id: 'design', name: '设计' },
-  { id: 'other', name: '其他' },
+  { id: 'all', name: '全部文件' },
+  { id: 'docs', name: '文档资料' },
+  { id: 'code', name: '代码项目' },
+  { id: 'design', name: '设计素材' },
+  { id: 'other', name: '其他' }
 ];
 
 const files = [
-  { id: '1', name: '项目需求文档.pdf', size: '2.3 MB', type: 'PDF', category: '文档', date: '2024-05-15' },
-  { id: '2', name: '设计稿源文件.sketch', size: '15.6 MB', type: '设计', category: '设计', date: '2024-05-10' },
-  { id: '3', name: '博客源码.zip', size: '1.2 MB', type: '代码', category: '代码', date: '2024-05-08' },
-  { id: '4', name: '读书笔记.epub', size: '856 KB', type: '电子书', category: '文档', date: '2024-05-01' },
-  { id: '5', name: '会议纪要.docx', size: '124 KB', type: '文档', category: '文档', date: '2024-04-28' },
-  { id: '6', name: '图标素材包.zip', size: '8.9 MB', type: '设计', category: '设计', date: '2024-04-20' },
+  {
+    id: 1,
+    name: '2024年度计划.pdf',
+    size: '2.3MB',
+    type: 'docs',
+    date: '2024-01-05',
+    download: 128
+  },
+  {
+    id: 2,
+    name: '博客源码.zip',
+    size: '15.8MB',
+    type: 'code',
+    date: '2024-05-20',
+    download: 256
+  },
+  {
+    id: 3,
+    name: '旅行照片集.zip',
+    size: '128.5MB',
+    type: 'design',
+    date: '2024-04-15',
+    download: 89
+  },
+  {
+    id: 4,
+    name: '阅读书单.md',
+    size: '12KB',
+    type: 'docs',
+    date: '2024-03-20',
+    download: 64
+  }
 ];
-
-const getFileIcon = (type) => {
-  const icons: Record<string, string> = {
-    'PDF': '📄',
-    '文档': '📝',
-    '代码': '💻',
-    '设计': '🎨',
-    '电子书': '📚',
-    'ZIP': '📦',
-  };
-  return icons[type] || '📁';
-};
 ---
 
-<BookLayout title="个人网盘" currentPage="drive">
-  <!-- 页眉 -->
-  <header class="page-header">
-    <div class="header-left">
-      <h2 class="page-title">资料库</h2>
-      <p class="page-subtitle">收集整理的学习资料</p>
-    </div>
-    <div class="header-right">
-      <span class="page-header-bg">Drive</span>
-      <div class="seal-stamp">存</div>
-    </div>
-  </header>
+<BookLayout title="个人网盘" subtitle="My Drive" sealChar="盘" sealRotate={-3}>
+  <Fragment slot="sidebar">
+    <Sidebar currentPath={currentPath} />
+  </Fragment>
 
   <!-- 分类筛选 -->
-  <div class="filter-bar">
-    {categories.map((cat, i) => (
-      <button class={i === 0 ? 'filter-btn active' : 'filter-btn'}>{cat.name}</button>
-    ))}
-  </div>
-
-  <!-- 文件列表 -->
-  <div class="files-table">
-    <div class="table-header">
-      <span class="col-icon"></span>
-      <span class="col-name">文件名</span>
-      <span class="col-size">大小</span>
-      <span class="col-date">日期</span>
-      <span class="col-action">操作</span>
-    </div>
-    <div class="table-body">
-      {files.map(file => (
-        <div class="table-row">
-          <span class="col-icon">{getFileIcon(file.type)}</span>
-          <span class="col-name">{file.name}</span>
-          <span class="col-size">{file.size}</span>
-          <span class="col-date">{file.date}</span>
-          <span class="col-action">
-            <button class="action-btn download-btn">下载</button>
-          </span>
-        </div>
+  <div class="flex items-center gap-4 mb-8 pb-6 border-b border-dashed border-[#dcd3b2] shrink-0">
+    <span class="font-bold text-[#2c2c2c] font-serif">文件分类：</span>
+    <div class="flex flex-wrap gap-2">
+      {categories.map((cat, idx) => (
+        <button 
+          class={`category-btn ${idx === 0 ? 'active' : ''}`}
+          data-filter={cat.id}
+        >
+          {cat.name}
+        </button>
       ))}
     </div>
   </div>
+
+  <!-- 文件列表 -->
+  <div class="file-list flex-1">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-[#dcd3b2]">
+          <th class="text-left py-3 px-4 text-sm font-medium text-[#5d5d5d]">文件名</th>
+          <th class="text-left py-3 px-4 text-sm font-medium text-[#5d5d5d] w-24">大小</th>
+          <th class="text-left py-3 px-4 text-sm font-medium text-[#5d5d5d] w-28">日期</th>
+          <th class="text-left py-3 px-4 text-sm font-medium text-[#5d5d5d] w-20">下载</th>
+        </tr>
+      </thead>
+      <tbody>
+        {files.map(file => (
+          <tr 
+            class="file-row border-b border-dashed border-[#dcd3b2] hover:bg-[#f7f1e3]/50 transition-colors"
+            data-type={file.type}
+          >
+            <td class="py-3 px-4">
+              <a href="#" class="flex items-center gap-3 group">
+                <i class={`${getFileIcon(file.type)} text-xl text-[#8b3a3a]`}></i>
+                <span class="text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors">
+                  {file.name}
+                </span>
+              </a>
+            </td>
+            <td class="py-3 px-4 text-sm text-[#888]">{file.size}</td>
+            <td class="py-3 px-4 text-sm text-[#888]">{file.date}</td>
+            <td class="py-3 px-4">
+              <span class="text-sm text-[#8b3a3a]">{file.download}</span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 </BookLayout>
 
+<script is:inline>
+  // 分类筛选
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      const filter = btn.dataset.filter;
+      
+      document.querySelectorAll('.file-row').forEach(row => {
+        if (filter === 'all' || row.dataset.type === filter) {
+          row.classList.remove('filtered-out');
+        } else {
+          row.classList.add('filtered-out');
+        }
+      });
+    });
+  });
+</script>
+
 <style>
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid var(--line-color);
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
-    position: relative;
+  .file-row.filtered-out {
+    display: none;
   }
-
-  .header-left {
-    z-index: 1;
-  }
-
-  .page-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0 0 0.25rem 0;
-    font-family: var(--font-serif);
-  }
-
-  .page-subtitle {
-    color: var(--text-light);
-    font-size: 0.875rem;
-    font-family: var(--font-serif);
-  }
-
-  .header-right {
-    position: relative;
-    z-index: 1;
-  }
-
-  .page-header-bg {
-    font-size: 4rem;
-    font-weight: 300;
-    color: #cfcfcf;
-    position: absolute;
-    top: -1.5rem;
-    right: 3.5rem;
-    opacity: 0.3;
-    user-select: none;
-    font-family: var(--font-serif);
-  }
-
-  .seal-stamp {
-    width: 48px;
-    height: 48px;
-    border: 2px solid var(--accent-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent-color);
-    font-size: 14px;
-    font-weight: bold;
-    transform: rotate(12deg);
-    opacity: 0.7;
-    font-family: var(--font-serif);
-  }
-
-  .filter-bar {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    padding: 0.375rem 0.875rem;
-    border: 1px solid var(--line-color);
-    background: white;
-    color: var(--text-main);
-    font-family: var(--font-serif);
-    font-size: 0.8125rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .filter-btn:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-  }
-
-  .filter-btn.active {
-    background: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-  }
-
-  .files-table {
-    border: 1px solid var(--line-color);
-    background: white;
-  }
-
-  .table-header {
-    display: flex;
-    padding: 0.75rem 1rem;
-    background: rgba(139, 58, 58, 0.05);
-    border-bottom: 1px solid var(--line-color);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-light);
-    font-family: var(--font-serif);
-  }
-
-  .table-row {
-    display: flex;
-    padding: 0.875rem 1rem;
-    border-bottom: 1px dashed var(--line-color);
-    align-items: center;
-    transition: background 0.2s ease;
-  }
-
-  .table-row:last-child {
-    border-bottom: none;
-  }
-
-  .table-row:hover {
-    background: rgba(139, 58, 58, 0.02);
-  }
-
-  .col-icon {
-    width: 40px;
-    font-size: 1.25rem;
-  }
-
-  .col-name {
-    flex: 1;
-    font-size: 0.875rem;
-    font-family: var(--font-serif);
-  }
-
-  .col-size {
-    width: 80px;
-    text-align: right;
-    font-size: 0.8125rem;
-    color: var(--text-light);
-    font-family: var(--font-serif);
-  }
-
-  .col-date {
-    width: 100px;
-    text-align: right;
-    font-size: 0.8125rem;
-    color: var(--text-light);
-    font-family: var(--font-serif);
-  }
-
-  .col-action {
-    width: 80px;
-    text-align: right;
-  }
-
-  .action-btn {
-    padding: 0.25rem 0.75rem;
-    border: 1px solid var(--accent-color);
+  
+  .category-btn {
+    font-family: var(--font-hand);
+    padding: 4px 12px;
+    border: 1px solid #dcd3b2;
+    border-radius: 2px;
+    font-size: 0.9rem;
+    color: #5d5d5d;
     background: transparent;
-    color: var(--accent-color);
-    font-size: 0.75rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font-serif);
+    transition: all 0.3s;
   }
-
-  .action-btn:hover {
-    background: var(--accent-color);
-    color: white;
+  
+  .category-btn:hover {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
   }
-
-  @media (max-width: 768px) {
-    .col-size,
-    .col-date {
-      display: none;
-    }
+  
+  .category-btn.active {
+    background: #8b3a3a;
+    border-color: #8b3a3a;
+    color: #fff;
   }
 </style>
+
+<Fragment set:html={`
+<script is:inline>
+  function getFileIcon(type) {
+    const icons = {
+      'docs': 'ph ph-file-text',
+      'code': 'ph ph-file-code',
+      'design': 'ph ph-image',
+      'other': 'ph ph-file'
+    };
+    return icons[type] || 'ph ph-file';
+  }
+</script>
+`}>

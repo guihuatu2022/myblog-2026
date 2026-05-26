@@ -3,50 +3,6 @@ import BookLayout from '../../layouts/BookLayout.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import Pagination from '../../components/Pagination.astro';
 
-// 模拟数据
-const categories = ['全部', '生活随笔', '技术笔记', '影像记忆'];
-const years = [
-  {
-    year: '2024',
-    lunar: '甲辰年',
-    count: 42,
-    months: [
-      {
-        name: '五月 · 孟夏',
-        entries: [
-          { id: 1, title: '三十岁的第一个清晨', category: '随笔', date: '五月廿十', permission: 'public', categorySlug: '生活随笔' },
-          { id: 2, title: '胶片里的秘密', category: '摄影', date: '五月十八', permission: 'encrypted', categorySlug: '影像记忆' },
-        ]
-      },
-      {
-        name: '四月 · 孟夏',
-        entries: [
-          { id: 3, title: '服务器私钥备份', category: '技术', date: '四月初五', permission: 'private', categorySlug: '技术笔记' },
-        ]
-      }
-    ]
-  },
-  {
-    year: '2023',
-    lunar: '癸卯年',
-    count: 186,
-    months: [
-      {
-        name: '腊月 · 岁末',
-        entries: [
-          { id: 4, title: '再见，二十九岁', category: '随笔', date: '腊月三十', permission: 'public', categorySlug: '生活随笔' },
-        ]
-      }
-    ]
-  },
-  {
-    year: '2022',
-    lunar: '壬寅年',
-    count: 152,
-    months: []
-  }
-];
-
 const currentPage = 1;
 const totalPages = 3;
 const currentPath = '/log';
@@ -61,17 +17,13 @@ const currentPath = '/log';
   <div class="flex flex-wrap items-center justify-between gap-4 mb-10 pb-6 border-b border-dashed border-[#dcd3b2] text-sm text-[#5d5d5d] tracking-wider shrink-0" id="category-filters">
     <div class="flex flex-wrap items-center gap-2">
       <span class="font-bold text-[#2c2c2c] mr-2 font-serif">分类索引：</span>
-      {categories.map((cat, idx) => (
-        <>
-          <span 
-            class={`index-link ${idx === 0 ? 'active' : ''}`} 
-            data-filter={idx === 0 ? 'all' : cat}
-          >
-            {cat}
-          </span>
-          {idx < categories.length - 1 && <span class="text-[#dcd3b2] select-none">/</span>}
-        </>
-      ))}
+      <span class="index-link active" data-filter="all">全部</span>
+      <span class="text-[#dcd3b2] select-none">/</span>
+      <span class="index-link" data-filter="随笔">生活随笔</span>
+      <span class="text-[#dcd3b2] select-none">/</span>
+      <span class="index-link" data-filter="技术">技术笔记</span>
+      <span class="text-[#dcd3b2] select-none">/</span>
+      <span class="index-link" data-filter="摄影">影像记忆</span>
     </div>
     <div class="relative group">
       <i class="ph ph-magnifying-glass absolute left-0 top-1/2 -translate-y-1/2 text-[#a8a8a8] group-focus-within:text-[#8b3a3a] transition-colors"></i>
@@ -85,137 +37,149 @@ const currentPath = '/log';
   </div>
 
   <!-- 文章列表 -->
-  <div class="prose max-w-none flex-grow" id="journal-entries">
-    {years.map((yearData, yearIdx) => (
-      <details 
-        class="mb-6 group year-section"
-        open={yearIdx === 0}
-      >
-        <summary class="year-header flex items-center gap-3 text-xl font-bold text-[#2c2c2c] mb-6 select-none outline-none">
-          <i class="ph ph-caret-right icon-arrow text-[#8b3a3a]"></i>
-          <span>卷{years.length - yearIdx} · {yearData.year}年</span>
-          <span class="text-sm font-normal text-gray-500 mt-1">{yearData.lunar}</span>
-          <span class="text-sm font-normal text-[#8b3a3a] opacity-70 mt-1 font-hand count-display">
-            (共 {yearData.count} 篇)
-          </span>
-        </summary>
+  <div id="journal-entries" class="flex-1">
+    
+    <!-- 卷三：2024 -->
+    <details open class="mb-6 group year-section">
+      <summary class="year-header flex items-center gap-3 text-xl font-bold text-[#2c2c2c] mb-6 select-none outline-none">
+        <i class="ph ph-caret-right icon-arrow text-[#8b3a3a]"></i>
+        <span>卷三 · 二零二四年</span>
+        <span class="text-sm font-normal text-gray-500 mt-1">甲辰年</span>
+        <span class="text-sm font-normal text-[#8b3a3a] opacity-70 mt-1 font-hand">(共 42 篇)</span>
+      </summary>
 
-        <div class="pl-8 border-l border-[#dcd3b2] ml-2">
-          {yearData.months.length > 0 ? yearData.months.map(month => (
-            <div class="mb-8 entry-group">
-              <h4 class="text-sm font-bold text-[#8b3a3a] mb-4 tracking-widest font-serif opacity-80">
-                {month.name}
-              </h4>
-              <ul class="space-y-4">
-                {month.entries.map(entry => (
-                  <li 
-                    class={`group/item cursor-pointer journal-entry ${entry.permission === 'private' ? 'entry-private' : ''}`}
-                    data-category={entry.categorySlug}
-                  >
-                    <a 
-                      href={`/log/${entry.id}`}
-                      class="flex items-end justify-between w-full hover:text-[#8b3a3a] transition-colors"
-                    >
-                      <div class="relative z-10 bg-[#f7f1e3] pr-3 shrink-0 flex items-center">
-                        <span class="category-tag">【{entry.category}】</span>
-                        <span class="text-lg font-bold text-[#2c2c2c] group-hover/item:text-[#8b3a3a] entry-title">
-                          {entry.title}
-                        </span>
-                        {entry.permission === 'encrypted' && (
-                          <i class="ph ph-lock-key status-icon status-lock" title="加密内容"></i>
-                        )}
-                        {entry.permission === 'private' && (
-                          <i class="ph ph-eye-slash status-icon status-private" title="仅自己可见"></i>
-                        )}
-                      </div>
-                      <span class="toc-leader"></span>
-                      <span class="text-sm font-serif text-[#8b3a3a] font-bold relative z-10 bg-[#f7f1e3] pl-3 shrink-0">
-                        {entry.date}
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )) : (
-            <p class="text-sm text-gray-400 py-4 italic">点击展开回忆...</p>
-          )}
-        </div>
-      </details>
-    ))}
+      <div class="pl-4 border-l border-[#dcd3b2] ml-2 mt-4 space-y-4">
+        
+        <!-- 文章条目 -->
+        <article class="entry-item border-b border-dashed border-[#dcd3b2] pb-4 last:border-b-0">
+          <div class="flex items-baseline justify-between gap-4">
+            <a href="/log/1" class="entry-title flex items-baseline gap-2 flex-1 group">
+              <span class="text-[#8b3a3a] font-hand text-sm shrink-0">05-20</span>
+              <h3 class="text-lg text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors font-serif">
+                三十岁的第一个清晨
+              </h3>
+            </a>
+            <span class="category-tag">生活随笔</span>
+          </div>
+          <p class="text-sm text-gray-500 mt-2 ml-16 line-clamp-1">
+            今天阳光很好，透过窗帘照在书桌上...
+          </p>
+        </article>
+
+        <article class="entry-item border-b border-dashed border-[#dcd3b2] pb-4 last:border-b-0">
+          <div class="flex items-baseline justify-between gap-4">
+            <a href="/log/2" class="entry-title flex items-baseline gap-2 flex-1 group">
+              <span class="text-[#8b3a3a] font-hand text-sm shrink-0">05-18</span>
+              <h3 class="text-lg text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors font-serif">
+                胶片里的老街
+              </h3>
+            </a>
+            <span class="category-tag">影像记忆</span>
+          </div>
+          <p class="text-sm text-gray-500 mt-2 ml-16 line-clamp-1">
+            那个角落的咖啡店已经拆了...
+          </p>
+        </article>
+
+        <article class="entry-item border-b border-dashed border-[#dcd3b2] pb-4 last:border-b-0">
+          <div class="flex items-baseline justify-between gap-4">
+            <a href="/log/3" class="entry-title flex items-baseline gap-2 flex-1 group">
+              <span class="text-[#8b3a3a] font-hand text-sm shrink-0">05-15</span>
+              <h3 class="text-lg text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors font-serif">
+                Astro 框架搭建博客心得
+              </h3>
+            </a>
+            <span class="category-tag">技术笔记</span>
+          </div>
+          <p class="text-sm text-gray-500 mt-2 ml-16 line-clamp-1">
+            用了整整一周时间，终于把博客搭好了...
+          </p>
+        </article>
+
+        <article class="entry-item entry-private border-b border-dashed border-[#dcd3b2] pb-4 last:border-b-0">
+          <div class="flex items-baseline justify-between gap-4">
+            <a href="/log/4" class="entry-title flex items-baseline gap-2 flex-1 group">
+              <span class="text-[#8b3a3a] font-hand text-sm shrink-0">05-10</span>
+              <h3 class="text-lg text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors font-serif">
+                私密日记
+              </h3>
+            </a>
+            <span class="category-tag">私人</span>
+            <span class="text-gray-400 text-xs flex items-center gap-1">
+              <i class="ph ph-lock-simple"></i>
+              <span class="font-hand">私有</span>
+            </span>
+          </div>
+          <p class="text-sm text-gray-500 mt-2 ml-16 line-clamp-1">
+            这是一篇只有自己能看到的日记...
+          </p>
+        </article>
+
+      </div>
+    </details>
+
+    <!-- 卷二：2023 -->
+    <details class="mb-6 group year-section">
+      <summary class="year-header flex items-center gap-3 text-xl font-bold text-[#2c2c2c] mb-6 select-none outline-none">
+        <i class="ph ph-caret-right icon-arrow text-[#8b3a3a]"></i>
+        <span>卷二 · 二零二三年</span>
+        <span class="text-sm font-normal text-gray-500 mt-1">癸卯年</span>
+        <span class="text-sm font-normal text-[#8b3a3a] opacity-70 mt-1 font-hand">(共 38 篇)</span>
+      </summary>
+      <div class="pl-4 border-l border-[#dcd3b2] ml-2 mt-4 space-y-4">
+        <!-- 更多文章... -->
+      </div>
+    </details>
+
   </div>
 
   <!-- 分页 -->
   <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl="/log" />
 </BookLayout>
 
-<!-- 密码弹窗 -->
-<div id="password-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden">
-  <div class="modal-paper-bg relative w-[90%] max-w-[360px] p-8 rounded-sm shadow-2xl flex flex-col items-center">
-    <!-- 装饰角纹 -->
-    <div class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-[#8b3a3a] opacity-50"></div>
-    <div class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-[#8b3a3a] opacity-50"></div>
-    <div class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-[#8b3a3a] opacity-50"></div>
-    <div class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-[#8b3a3a] opacity-50"></div>
-
-    <h3 class="font-calligraphy text-3xl text-[#2c2c2c] mb-6 tracking-widest">密卷启封</h3>
-    <p id="modal-title" class="text-sm text-[#5d5d5d] mb-6 font-serif text-center">文章标题</p>
-
-    <input 
-      type="password" 
-      id="entry-password" 
-      placeholder="请输入口令..." 
-      class="w-full bg-transparent border-b-2 border-[#dcd3b2] text-center font-serif text-[#2c2c2c] placeholder-[#a8a8a8] focus:outline-none focus:border-[#8b3a3a] py-2 mb-8 transition-colors"
-    />
-
-    <button 
-      id="unlock-btn"
-      class="w-16 h-16 rounded-full border-4 border-[#8b3a3a] text-[#8b3a3a] hover:bg-[#8b3a3a] hover:text-white transition-all duration-300 flex items-center justify-center font-calligraphy text-xl shadow-lg active:scale-95 group"
-    >
-      <span class="group-hover:hidden">启封</span>
-      <span class="hidden group-hover:inline">阅</span>
-    </button>
-
-    <button 
-      onclick="closePasswordModal()" 
-      class="absolute top-4 right-4 text-[#a8a8a8] hover:text-[#8b3a3a] transition-colors"
-    >
-      <i class="ph ph-x text-lg"></i>
-    </button>
-  </div>
-</div>
-
 <script is:inline>
   // 分类筛选
   document.querySelectorAll('#category-filters .index-link').forEach(link => {
     link.addEventListener('click', () => {
-      // 更新激活状态
       document.querySelectorAll('#category-filters .index-link').forEach(l => l.classList.remove('active'));
       link.classList.add('active');
       
       const filter = link.dataset.filter;
-      
-      // 筛选条目
-      document.querySelectorAll('.journal-entry').forEach(entry => {
-        if (filter === 'all' || entry.dataset.category === filter) {
-          entry.classList.remove('filtered-out');
+      document.querySelectorAll('.entry-item').forEach(item => {
+        if (filter === 'all' || item.dataset.category === filter) {
+          item.classList.remove('filtered-out');
         } else {
-          entry.classList.add('filtered-out');
+          item.classList.add('filtered-out');
         }
       });
     });
   });
 
-  // 搜索
+  // 搜索功能
   document.getElementById('search-input')?.addEventListener('input', (e) => {
-    const keyword = e.target.value.toLowerCase();
-    document.querySelectorAll('.journal-entry').forEach(entry => {
-      const title = entry.querySelector('.entry-title')?.textContent?.toLowerCase() || '';
-      if (keyword === '' || title.includes(keyword)) {
-        entry.classList.remove('filtered-out');
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('.entry-item').forEach(item => {
+      const title = item.querySelector('h3')?.textContent.toLowerCase() || '';
+      const content = item.querySelector('p')?.textContent.toLowerCase() || '';
+      if (title.includes(query) || content.includes(query)) {
+        item.classList.remove('filtered-out');
       } else {
-        entry.classList.add('filtered-out');
+        item.classList.add('filtered-out');
       }
     });
   });
 </script>
+
+<style>
+  .entry-item {
+    transition: opacity 0.3s;
+  }
+  
+  .entry-item.filtered-out {
+    display: none;
+  }
+  
+  .entry-title h3 {
+    font-weight: 400;
+  }
+</style>
