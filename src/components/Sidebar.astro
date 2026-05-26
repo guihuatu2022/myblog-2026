@@ -5,9 +5,6 @@ interface Props {
 
 const { currentPath = '/' } = Astro.props;
 
-// 判断当前激活菜单
-const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
-
 const navItems = [
   { path: '/', icon: 'ph-house', label: '博客首页', key: 'home' },
   { path: '/log', icon: 'ph-pen-nib', label: '岁月日志', key: 'log' },
@@ -30,12 +27,12 @@ const isCurrentPage = (key: string) => {
 };
 ---
 
-<aside class="sidebar w-[240px] spine-texture text-[#d0d0d0] flex flex-col shrink-0">
+<aside class="sidebar w-[240px] shrink-0 flex flex-col text-[#d0d0d0] min-h-[90vh]" style="background-color: #2c2a29;">
   <!-- 上部：精神角落 -->
-  <div class="sidebar-top px-6 py-8 border-b border-gray-700/30 flex flex-col items-center justify-center shrink-0">
+  <div class="px-6 py-8 border-b border-gray-700/30 flex flex-col items-center justify-center shrink-0">
     <div class="flex items-center justify-between w-full mb-3">
       <!-- 标题书法字 -->
-      <h1 class="font-calligraphy text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest">
+      <h1 class="text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest" style="font-family: 'Ma Shan Zheng', cursive;">
         三十而立
       </h1>
 
@@ -43,11 +40,11 @@ const isCurrentPage = (key: string) => {
       <button 
         id="seal-btn"
         title="点击盖印" 
-        class="group focus:outline-none transition-transform active:scale-95 ml-2"
+        class="focus:outline-none transition-transform active:scale-95 ml-2"
         onclick="toggleLogin()"
       >
         <div 
-          class="w-8 h-8 border-2 border-[#a93226] bg-[#a93226]/10 text-[#a93226] flex items-center justify-center text-xs font-bold rounded-sm shadow-sm group-hover:bg-[#a93226] group-hover:text-white transition-colors cursor-pointer select-none"
+          class="w-8 h-8 border-2 border-[#a93226] bg-[#a93226]/10 text-[#a93226] flex items-center justify-center text-xs font-bold rounded-sm shadow-sm hover:bg-[#a93226] hover:text-white transition-colors cursor-pointer select-none"
         >
           主
         </div>
@@ -56,13 +53,13 @@ const isCurrentPage = (key: string) => {
 
     <!-- Slogan 小字 -->
     <div class="w-full text-center mb-1">
-      <p class="text-xs text-[#a8a8a8] tracking-[0.4em] font-hand opacity-90">
+      <p class="text-xs text-[#a8a8a8] tracking-[0.4em] opacity-90" style="font-family: 'LXGW WenKai Screen', sans-serif;">
         记录 · 沉淀 · 回忆
       </p>
     </div>
 
     <!-- 英文副标题 -->
-    <p class="mt-3 text-[10px] text-gray-500 tracking-[0.3em] uppercase font-serif opacity-50 w-full text-center border-t border-gray-600/30 pt-2">
+    <p class="mt-3 text-[10px] text-gray-500 tracking-[0.3em] uppercase opacity-50 w-full text-center border-t border-gray-600/30 pt-2" style="font-family: 'Noto Serif SC', serif;">
       The Chronicle
     </p>
   </div>
@@ -74,7 +71,7 @@ const isCurrentPage = (key: string) => {
         <li class={isCurrentPage(item.key) ? 'menu-active' : ''}>
           <a 
             href={item.path}
-            class={`flex items-center gap-3 px-3 py-2.5 rounded transition-all group ${
+            class={`flex items-center gap-3 px-3 py-2.5 rounded transition-all ${
               isCurrentPage(item.key) 
                 ? 'bg-[#201e1e]/50 border-l-2 border-[#8b3a3a] shadow-md' 
                 : 'hover:bg-white/5'
@@ -83,9 +80,18 @@ const isCurrentPage = (key: string) => {
             <i class={`${item.icon} text-lg ${
               isCurrentPage(item.key) 
                 ? 'text-[#dcd3b2]' 
-                : 'text-gray-500 group-hover:text-[#dcd3b2] transition-colors'
+                : 'text-gray-500 hover:text-[#dcd3b2] transition-colors'
             }`}></i>
-            <span class="menu-item-text text-sm">{item.label}</span>
+            <span 
+              class="text-sm transition-all"
+              style={
+                isCurrentPage(item.key)
+                  ? `color: #e0d8c8; font-family: 'Noto Serif SC', serif; font-weight: 700; letter-spacing: 0.15em; text-shadow: 0 0 5px rgba(224, 216, 200, 0.4);`
+                  : `color: #a89f91; font-family: 'Noto Serif SC', serif; font-weight: 700; letter-spacing: 0.15em; text-shadow: 0 1px 2px rgba(0,0,0,0.7);`
+              }
+            >
+              {item.label}
+            </span>
           </a>
         </li>
       ))}
@@ -95,15 +101,15 @@ const isCurrentPage = (key: string) => {
 
       <!-- 需要登录才显示的菜单 -->
       <li id="menu-todo" class="admin-menu">
-        <a href="/todo" class="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded transition-all group">
-          <i class="ph-check-square-offset text-lg text-[#a93226]"></i>
-          <span class="menu-item-text text-sm text-[#a93226] group-hover:text-[#c4493c]">我的待办</span>
+        <a href="/todo" class="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded transition-all">
+          <i class="ph-check-square-offset text-lg" style="color: #a93226;"></i>
+          <span class="text-sm" style="color: #a93226; font-family: 'Noto Serif SC', serif; font-weight: 700; letter-spacing: 0.15em;">我的待办</span>
         </a>
       </li>
       <li id="menu-admin" class="admin-menu">
-        <a href="/admin" class="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded transition-all group">
-          <i class="ph-gear text-lg text-[#a93226]"></i>
-          <span class="menu-item-text text-sm text-[#a93226] group-hover:text-[#c4493c]">后台管理</span>
+        <a href="/admin" class="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded transition-all">
+          <i class="ph-gear text-lg" style="color: #a93226;"></i>
+          <span class="text-sm" style="color: #a93226; font-family: 'Noto Serif SC', serif; font-weight: 700; letter-spacing: 0.15em;">后台管理</span>
         </a>
       </li>
     </ul>
@@ -112,32 +118,22 @@ const isCurrentPage = (key: string) => {
   <!-- 底部：版权 -->
   <div class="p-5 text-[10px] text-gray-600 text-center border-t border-gray-700/20 shrink-0">
     <p>&copy; 2024 - 2064</p>
-    <p class="mt-1 font-serif opacity-70">朝花夕拾 · 岁月静好</p>
+    <p class="mt-1 opacity-70" style="font-family: 'Noto Serif SC', serif;">朝花夕拾 · 岁月静好</p>
   </div>
 </aside>
 
-<script is:inline>
-  // 侧边栏登录逻辑
-  function toggleLogin() {
-    const adminMenus = document.querySelectorAll('.admin-menu');
-    const btn = document.querySelector('#seal-btn div');
-    const body = document.body;
-    
-    // 切换 is-admin 类
-    body.classList.toggle('is-admin');
-    
-    // 切换菜单显示状态
-    adminMenus.forEach(menu => {
-      menu.classList.toggle('show');
-    });
-
-    // 切换印章状态
-    if (btn.classList.contains('bg-[#a93226]')) {
-      btn.classList.remove('bg-[#a93226]', 'text-white');
-      btn.classList.add('bg-[#a93226]/10', 'text-[#a93226]');
-    } else {
-      btn.classList.remove('bg-[#a93226]/10', 'text-[#a93226]');
-      btn.classList.add('bg-[#a93226]', 'text-white');
+<style>
+  /* 移动端适配 */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100% !important;
+      min-height: auto;
+      flex-direction: row;
+    }
+    .sidebar-top {
+      flex-direction: row;
+      border-bottom: none !important;
+      padding: 1rem !important;
     }
   }
-</script>
+</style>
