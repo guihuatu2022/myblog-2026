@@ -1,244 +1,326 @@
 ---
 import BookLayout from '../layouts/BookLayout.astro';
-import Pagination from '../components/Pagination.astro';
 
-// 主人寄语
 const hostMessage = {
-  content: '来者皆是客，不必拘礼。\n留下一言半语，便是缘分。',
-  signature: '—— 主人敬上',
+  content: '感谢每一位访客，愿你的生活也如这本小册子般，记录着美好与温暖。',
+  signature: '—— 三十而立的主人',
 };
 
-// 模拟留言数据
 const messages = [
   {
     id: '1',
-    userName: '海边旅人',
-    content: '偶然路过，被这个复古的博客风格吸引。写得真好，文章读起来很有年代感，却不失温度。祝博主创作愉快！',
-    date: '2024-05-21 14:32',
+    user: '路过的旅人',
+    content: '偶然发现这个博客，设计很独特，内容也很温暖。祝好！',
+    date: '2024.05.18',
     isPrivate: false,
-    isReplied: true,
-    reply: '感谢来访。安静是这个时代最奢侈的东西，希望这里能给你片刻的宁静。',
   },
   {
     id: '2',
-    userName: '云中漫步',
-    content: '三十岁的文章看完了，深有同感。',
-    date: '2024-05-22 09:15',
+    user: '小明',
+    content: '三十岁，正是好时候。加油！',
+    date: '2024.05.15',
     isPrivate: false,
-    isReplied: false,
-    reply: '',
   },
   {
     id: '3',
-    userName: '故园东望',
-    content: '博主用的是 Astro 框架吗？看起来加载很快。',
-    date: '2024-05-20 20:45',
-    isPrivate: false,
-    isReplied: true,
-    reply: '是的，Astro 配合 Cloudflare Pages，速度确实不错。',
-  },
-  {
-    id: '4',
-    userName: '静水流深',
-    content: '这里有一股淡淡的书卷气，很喜欢。',
-    date: '2024-05-18 16:20',
-    isPrivate: false,
-    isReplied: false,
-    reply: '',
-  },
-  {
-    id: '5',
-    userName: '晨曦微露',
-    content: '博主能不能出一个搭建博客的教程？想学习一下。',
-    date: '2024-05-15 11:08',
-    isPrivate: false,
-    isReplied: true,
-    reply: '教程已经在写了，等写完会发出来。',
+    user: '匿名',
+    content: '悄悄话...',
+    date: '2024.05.10',
+    isPrivate: true,
   },
 ];
 ---
 
-<BookLayout title="访客留言">
-  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
-    <div>
-      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">访客留言</h2>
-      <p class="text-sm font-hand text-[#8b3a3a]">说些什么吧 · 时光见证</p>
+<BookLayout title="访客留言" currentPage="guestbook">
+  <!-- 页眉 -->
+  <header class="page-header">
+    <div class="header-left">
+      <h2 class="page-title">留言板</h2>
+      <p class="page-subtitle">留下你的足迹</p>
     </div>
-    <div class="text-sm font-hand text-[#8b7355]">
-      共 {messages.length} 条留言
+    <div class="header-right">
+      <span class="page-header-bg">Guestbook</span>
+      <div class="seal-stamp">留</div>
     </div>
-  </div>
+  </header>
 
   <!-- 主人寄语 -->
-  <div class="stat-card card-highlight mb-8">
-    <div class="flex gap-4">
-      <div class="text-4xl text-[#8b3a3a]/30 flex-shrink-0">
-        <i class="ph ph-quotes"></i>
-      </div>
-      <div class="flex-1">
-        <p class="font-hand text-[#5d5d5d] text-base leading-relaxed whitespace-pre-line">
-          {hostMessage.content}
-        </p>
-        <p class="text-right font-calligraphy text-[#8b3a3a] mt-3">
-          {hostMessage.signature}
-        </p>
-      </div>
+  <section class="host-section">
+    <div class="host-card">
+      <p class="host-label">主人寄语</p>
+      <p class="host-content">"{hostMessage.content}"</p>
+      <p class="host-signature">{hostMessage.signature}</p>
     </div>
-  </div>
+  </section>
 
-  <!-- 发表评论 -->
-  <div class="stat-card mb-8">
-    <h3 class="font-serif font-bold text-[#2c2c2c] mb-4 flex items-center gap-2">
-      <i class="ph ph-pencil-simple text-[#8b3a3a]"></i>
-      留下你的足迹
-    </h3>
-    
-    <form id="message-form" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="form-group">
-          <label class="form-label">昵称 *</label>
-          <input 
-            type="text" 
-            class="form-input" 
-            placeholder="贵姓大名？"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label">邮箱（选填）</label>
-          <input 
-            type="email" 
-            class="form-input" 
-            placeholder="your@email.com"
-          />
-        </div>
+  <!-- 留言表单 -->
+  <section class="form-section">
+    <h3 class="section-title">写留言</h3>
+    <form class="message-form">
+      <div class="form-row">
+        <input type="text" placeholder="您的称呼" class="input-paper" required />
+        <input type="email" placeholder="邮箱（选填）" class="input-paper" />
       </div>
-      
-      <div class="form-group">
-        <label class="form-label">留言内容 *</label>
-        <textarea 
-          class="form-input" 
-          rows="4" 
-          placeholder="说点什么..."
-          required
-        ></textarea>
-      </div>
-      
-      <div class="flex justify-between items-center">
-        <label class="flex items-center gap-2 text-sm font-hand text-[#5d5d5d] cursor-pointer">
-          <input 
-            type="checkbox" 
-            id="is-private"
-            class="accent-[#8b3a3a] w-4 h-4"
-          />
-          <i class="ph ph-eye-slash"></i>
-          悄悄话（仅博主可见）
+      <textarea placeholder="写下您的留言..." class="input-paper textarea" required></textarea>
+      <div class="form-footer">
+        <label class="private-checkbox">
+          <input type="checkbox" />
+          <span>悄悄话（仅主人可见）</span>
         </label>
-        
-        <button type="submit" class="btn btn-primary">
-          <i class="ph ph-paper-plane-right mr-1"></i>
-          发送留言
-        </button>
+        <button type="submit" class="btn-paper">提交留言</button>
       </div>
     </form>
-  </div>
+  </section>
 
   <!-- 留言列表 -->
-  <div class="space-y-4">
-    {messages.map((msg) => (
-      <div class={`stat-card ${msg.isPrivate ? 'border-dashed border-[#dcd3b2]' : ''}`}>
-        <div class="flex justify-between items-start mb-3">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-[#dcd3b2] flex items-center justify-center text-[#8b3a3a]">
-              <i class="ph ph-user text-lg"></i>
-            </div>
-            <div>
-              <span class="font-serif font-bold">{msg.userName}</span>
-              {msg.isPrivate && (
-                <span class="ml-2 text-xs text-[#8b7355]">
-                  <i class="ph ph-eye-slash mr-1"></i>
-                  悄悄话
-                </span>
-              )}
-            </div>
+  <section class="messages-section">
+    <h3 class="section-title">访客留言 <span class="count">({messages.filter(m => !m.isPrivate).length})</span></h3>
+    <div class="messages-list">
+      {messages.filter(m => !m.isPrivate).map(msg => (
+        <div class="message-item">
+          <div class="message-header">
+            <span class="message-user">{msg.user}</span>
+            <span class="message-date">{msg.date}</span>
           </div>
-          <div class="flex items-center gap-3">
-            {msg.isReplied && (
-              <span class="tag tag-green text-xs">
-                <i class="ph ph-check mr-1"></i>
-                已回复
-              </span>
-            )}
-            <span class="text-xs text-[#999] font-hand">{msg.date}</span>
-          </div>
+          <p class="message-content">{msg.content}</p>
         </div>
-        
-        <p class="font-hand text-[#444] leading-relaxed mb-3 whitespace-pre-line">
-          {msg.content}
-        </p>
-        
-        {msg.isReplied && msg.reply && (
-          <div class="bg-[#f7f1e3] border-l-4 border-[#8b3a3a] pl-4 py-3 rounded-r-md">
-            <div class="flex items-center gap-2 mb-2">
-              <i class="ph ph-chat-circle-dots text-[#8b3a3a]"></i>
-              <span class="text-xs font-calligraphy text-[#8b3a3a]">博主回复</span>
-            </div>
-            <p class="text-sm font-hand text-[#5d5d5d] whitespace-pre-line">
-              {msg.reply}
-            </p>
-          </div>
-        )}
-        
-        <div class="flex gap-4 mt-3 pt-3 border-t border-[#dcd3b2]/50">
-          <button class="text-xs font-hand text-[#8b7355] hover:text-[#8b3a3a] transition-colors">
-            <i class="ph ph-arrow-bend-up-left mr-1"></i>
-            回复
-          </button>
-          <button class="text-xs font-hand text-[#8b7355] hover:text-[#8b3a3a] transition-colors">
-            <i class="ph ph-heart mr-1"></i>
-            喜欢
-          </button>
-        </div>
-      </div>
-    ))}
-  </div>
-
-  <!-- 分页 -->
-  <div class="pagination mt-8">
-    <span class="pagination-link disabled">
-      <i class="ph ph-caret-left mr-1"></i>
-      上一页
-    </span>
-    <span class="pagination-link active">【壹】</span>
-    <span class="pagination-link disabled">
-      下一页
-      <i class="ph ph-caret-right ml-1"></i>
-    </span>
-  </div>
-
-  <!-- 底部 -->
-  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
-    <p class="text-sm font-hand text-[#8b7355]">
-      朝花夕拾 · 岁月静好
-    </p>
-  </footer>
+      ))}
+    </div>
+  </section>
 </BookLayout>
 
-<script>
-  // 处理留言表单提交
-  const form = document.getElementById('message-form') as HTMLFormElement;
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    const data = {
-      userName: formData.get('userName'),
-      email: formData.get('email'),
-      content: formData.get('content'),
-      isPrivate: document.getElementById('is-private')?.checked,
-    };
-    console.log('提交留言:', data);
-    // TODO: 调用 API
-    alert('留言已提交，感谢您的留言！');
-    form.reset();
-  });
-</script>
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .header-left {
+    z-index: 1;
+  }
+
+  .page-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.25rem 0;
+    font-family: var(--font-serif);
+  }
+
+  .page-subtitle {
+    color: var(--text-light);
+    font-size: 0.875rem;
+    font-family: var(--font-serif);
+  }
+
+  .header-right {
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-header-bg {
+    font-size: 3rem;
+    font-weight: 300;
+    color: #cfcfcf;
+    position: absolute;
+    top: -1rem;
+    right: 3.5rem;
+    opacity: 0.3;
+    user-select: none;
+    font-family: var(--font-serif);
+  }
+
+  .seal-stamp {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color);
+    font-size: 14px;
+    font-weight: bold;
+    transform: rotate(12deg);
+    opacity: 0.7;
+    font-family: var(--font-serif);
+  }
+
+  .host-section {
+    margin-bottom: 2rem;
+  }
+
+  .host-card {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(139, 58, 58, 0.05) 0%, rgba(139, 58, 58, 0.02) 100%);
+    border: 1px solid var(--line-color);
+    border-left: 4px solid var(--accent-color);
+  }
+
+  .host-label {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    letter-spacing: 0.2em;
+    margin: 0 0 0.75rem 0;
+    font-family: var(--font-serif);
+  }
+
+  .host-content {
+    font-size: 1rem;
+    line-height: 1.8;
+    margin: 0 0 1rem 0;
+    color: var(--text-main);
+    font-family: var(--font-serif);
+  }
+
+  .host-signature {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    text-align: right;
+    margin: 0;
+    font-family: var(--font-serif);
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    border-left: 4px solid var(--accent-color);
+    padding-left: 0.75rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+    letter-spacing: 0.1em;
+    font-family: var(--font-serif);
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .message-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .input-paper {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--line-color);
+    background-color: rgba(255,255,255,0.5);
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+  }
+
+  .input-paper:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background-color: white;
+  }
+
+  .textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .private-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-light);
+    cursor: pointer;
+    font-family: var(--font-serif);
+  }
+
+  .private-checkbox input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent-color);
+  }
+
+  .btn-paper {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    font-family: var(--font-serif);
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-paper:hover {
+    background-color: #6b2a2a;
+  }
+
+  .messages-section {
+    margin-top: 2rem;
+  }
+
+  .count {
+    font-weight: 400;
+    color: var(--text-light);
+    font-size: 0.875rem;
+  }
+
+  .messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .message-item {
+    padding: 1rem;
+    border: 1px solid var(--line-color);
+    background: rgba(255,255,255,0.4);
+  }
+
+  .message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .message-user {
+    font-weight: 600;
+    color: var(--accent-color);
+    font-size: 0.875rem;
+    font-family: var(--font-serif);
+  }
+
+  .message-date {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-family: var(--font-serif);
+  }
+
+  .message-content {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--text-main);
+    font-family: var(--font-serif);
+  }
+</style>

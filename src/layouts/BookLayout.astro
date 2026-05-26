@@ -1,91 +1,57 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import Sidebar from '../components/Sidebar.astro';
-import '../styles/global.css';
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
-  showBackButton?: boolean;
-  backUrl?: string;
-  backText?: string;
+  currentPage?: string;
 }
 
-const { 
-  title, 
-  description,
-  showBackButton = false,
-  backUrl = '/',
-  backText = '返回首页'
+const {
+  title = '三十而立',
+  description = '记录 · 沉淀 · 回忆',
+  currentPage = 'home'
 } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description}>
   <div class="book-container">
-    <!-- 移动端头部 -->
-    <header class="mobile-header md:hidden">
-      <button id="mobile-menu-btn" class="p-2 focus:outline-none">
-        <i class="ph ph-list text-2xl text-[#dcd3b2]"></i>
-      </button>
-      <h1 class="font-calligraphy text-xl tracking-widest text-[#dcd3b2]">{title}</h1>
-      {showBackButton && (
-        <a href={backUrl} class="w-7 h-7 border border-[#bfa57d] text-[#bfa57d] bg-[#bfa57d]/10 flex items-center justify-center text-[10px] font-bold">
-          返
-        </a>
-      )}
-    </header>
-    
-    <!-- 移动端遮罩 -->
-    <div id="sidebar-overlay" class="sidebar-overlay"></div>
-    
-    <!-- 侧边栏 -->
-    <Sidebar currentPath={Astro.url.pathname} />
-    
-    <!-- 主内容 -->
-    <main class="content">
+    <!-- 左侧书脊 -->
+    <Sidebar currentPage={currentPage} />
+
+    <!-- 右侧内容区 -->
+    <main class="content paper-texture book-shadow">
       <slot />
     </main>
   </div>
 </BaseLayout>
 
-<script>
-  // 移动端菜单
-  const menuBtn = document.getElementById('mobile-menu-btn');
-  const sidebar = document.querySelector('.sidebar') as HTMLElement;
-  const overlay = document.getElementById('sidebar-overlay');
-  
-  function toggleMobileMenu() {
-    sidebar?.classList.toggle('open');
-    overlay?.classList.toggle('open');
-  }
-  
-  menuBtn?.addEventListener('click', toggleMobileMenu);
-  overlay?.addEventListener('click', toggleMobileMenu);
-  
-  // 返回按钮点击关闭移动端菜单
-  const backBtn = document.querySelector('.mobile-header a');
-  backBtn?.addEventListener('click', () => {
-    sidebar?.classList.remove('open');
-    overlay?.classList.remove('open');
-  });
-</script>
-
 <style>
-  .mobile-header {
-    display: none;
+  .book-container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 90vh;
+    margin: 0 auto;
   }
-  
+
+  .content {
+    flex: 1;
+    padding: 3rem;
+    overflow-y: auto;
+  }
+
   @media (max-width: 768px) {
-    .mobile-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-      background-color: var(--color-spine, #2c2a29);
-      color: var(--color-bg, #f7f1e3);
-      position: sticky;
-      top: 0;
-      z-index: 30;
+    .book-container {
+      flex-direction: column;
+      max-width: 100%;
+      min-height: auto;
+    }
+
+    .content {
+      padding: 1.5rem;
+      min-height: 70vh;
     }
   }
 </style>

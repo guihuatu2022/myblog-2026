@@ -1,100 +1,58 @@
 ---
 import BookLayout from '../layouts/BookLayout.astro';
 
-// 模拟数据
 const categories = [
   {
-    name: '技术博客',
-    icon: 'ph-code',
+    name: '技术学习',
     sites: [
-      { name: 'GitHub', url: 'https://github.com', desc: '代码托管平台', favicon: 'https://github.githubassets.com/favicons/favicon.svg' },
-      { name: 'Stack Overflow', url: 'https://stackoverflow.com', desc: '技术问答社区', favicon: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico' },
-      { name: 'MDN Web Docs', url: 'https://developer.mozilla.org', desc: 'Web 开发文档', favicon: 'https://developer.mozilla.org/favicon-48x48.png' },
-      { name: 'Vercel', url: 'https://vercel.com', desc: '前端部署平台', favicon: 'https://assets.vercel.com/favicon.ico' },
+      { name: 'MDN Web Docs', url: 'https://developer.mozilla.org', desc: '前端开发文档' },
+      { name: 'GitHub', url: 'https://github.com', desc: '代码托管平台' },
+      { name: 'Stack Overflow', url: 'https://stackoverflow.com', desc: '技术问答社区' },
     ]
   },
   {
     name: '设计资源',
-    icon: 'ph-palette',
     sites: [
-      { name: 'Unsplash', url: 'https://unsplash.com', desc: '免费高清图片', favicon: 'https://unsplash.com/favicon.ico' },
-      { name: 'Pexels', url: 'https://pexels.com', desc: '免费图片素材', favicon: 'https://www.pexels.com/favicon.ico' },
-      { name: 'Iconify', url: 'https://icon-sets.iconify.design', desc: '图标库集合', favicon: 'https://icon-sets.iconify.design/favicon.ico' },
-      { name: 'Google Fonts', url: 'https://fonts.google.com', desc: '免费字体', favicon: 'https://fonts.gstatic.com/s/images/favicon.ico' },
+      { name: 'Unsplash', url: 'https://unsplash.com', desc: '免费高清图片' },
+      { name: 'Iconfont', url: 'https://iconfont.cn', desc: '阿里巴巴矢量图标库' },
+      { name: 'Figma', url: 'https://figma.com', desc: '在线设计工具' },
     ]
   },
   {
     name: '效率工具',
-    icon: 'ph-tools',
     sites: [
-      { name: 'Notion', url: 'https://notion.so', desc: '笔记与知识管理', favicon: 'https://www.notion.so/images/favicon.ico' },
-      { name: 'Obsidian', url: 'https://obsidian.md', desc: 'Markdown 笔记', favicon: 'https://obsidian.md/favicon.svg' },
-      { name: 'Raycast', url: 'https://raycast.com', desc: '效率启动器', favicon: 'https://www.raycast.com/favicon.ico' },
-    ]
-  },
-  {
-    name: '学习园地',
-    icon: 'ph-graduation-cap',
-    sites: [
-      { name: 'Bilibili', url: 'https://bilibili.com', desc: '视频学习网站', favicon: 'https://www.bilibili.com/favicon.ico' },
-      { name: '网易公开课', url: 'https://open.163.com', desc: '名校公开课', favicon: 'https://shared.ydstatic.com/fanyi/ubox/pc/images/favicon.ico' },
-      { name: 'Coursera', url: 'https://coursera.org', desc: '在线课程平台', favicon: 'https://www.coursera.org/favicon.ico' },
-    ]
-  },
-  {
-    name: '生活娱乐',
-    icon: 'ph-coffee',
-    sites: [
-      { name: '豆瓣', url: 'https://douban.com', desc: '读书影音', favicon: 'https://www.douban.com/favicon.ico' },
-      { name: '知乎', url: 'https://zhihu.com', desc: '问答社区', favicon: 'https://static.zhihu.com/heifetz/favicon.ico' },
-      { name: '即刻', url: 'https://jike.city', desc: '兴趣社区', favicon: 'https://s3.jike.city/jike/favicon.ico' },
+      { name: 'Notion', url: 'https://notion.so', desc: '笔记与协作工具' },
+      { name: 'Obsidian', url: 'https://obsidian.md', desc: '本地笔记软件' },
     ]
   },
 ];
 ---
 
-<BookLayout title="常用导航">
-  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
-    <div>
-      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">常用导航</h2>
-      <p class="text-sm font-hand text-[#8b3a3a]">收藏夹 · 数字生活</p>
+<BookLayout title="常用导航" currentPage="nav">
+  <!-- 页眉 -->
+  <header class="page-header">
+    <div class="header-left">
+      <h2 class="page-title">收藏夹</h2>
+      <p class="page-subtitle">日常使用的网站导航</p>
     </div>
-  </div>
+    <div class="header-right">
+      <span class="page-header-bg">Nav</span>
+      <div class="seal-stamp">链</div>
+    </div>
+  </header>
 
-  <!-- 站点分类 -->
-  <div class="space-y-8">
-    {categories.map((category) => (
-      <section>
-        <h3 class="text-xl font-serif font-bold text-[#8b3a3a] mb-4 flex items-center gap-2">
-          <i class={`${category.icon} text-[#8b3a3a]`}></i>
-          {category.name}
-        </h3>
-        
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {category.sites.map((site) => (
-            <a 
-              href={site.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="stat-card group hover:shadow-lg transition-all duration-300"
-            >
-              <div class="flex items-start gap-3 mb-2">
-                <img 
-                  src={site.favicon}
-                  alt={site.name}
-                  class="w-8 h-8 rounded object-contain bg-white p-1 shadow-sm"
-                  onerror="this.style.display='none'"
-                />
-                <div class="flex-1 min-w-0">
-                  <h4 class="font-serif font-bold text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors truncate">
-                    {site.name}
-                  </h4>
-                  <p class="text-xs text-[#8b7355] font-hand truncate">{site.desc}</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-1 text-xs text-[#bbb]">
-                <span class="truncate">{site.url}</span>
-                <i class="ph ph-arrow-square-out flex-shrink-0"></i>
+  <!-- 导航分类 -->
+  <div class="nav-categories">
+    {categories.map(cat => (
+      <section class="nav-category">
+        <h3 class="category-title">{cat.name}</h3>
+        <div class="sites-grid">
+          {cat.sites.map(site => (
+            <a href={site.url} target="_blank" rel="noopener" class="site-card">
+              <div class="site-icon">🔗</div>
+              <div class="site-info">
+                <span class="site-name">{site.name}</span>
+                <span class="site-desc">{site.desc}</span>
               </div>
             </a>
           ))}
@@ -102,11 +60,149 @@ const categories = [
       </section>
     ))}
   </div>
-
-  <!-- 底部 -->
-  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
-    <p class="text-sm font-hand text-[#8b7355]">
-      朝花夕拾 · 岁月静好
-    </p>
-  </footer>
 </BookLayout>
+
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .header-left {
+    z-index: 1;
+  }
+
+  .page-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.25rem 0;
+    font-family: var(--font-serif);
+  }
+
+  .page-subtitle {
+    color: var(--text-light);
+    font-size: 0.875rem;
+    font-family: var(--font-serif);
+  }
+
+  .header-right {
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-header-bg {
+    font-size: 4rem;
+    font-weight: 300;
+    color: #cfcfcf;
+    position: absolute;
+    top: -1.5rem;
+    right: 3.5rem;
+    opacity: 0.3;
+    user-select: none;
+    font-family: var(--font-serif);
+  }
+
+  .seal-stamp {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color);
+    font-size: 14px;
+    font-weight: bold;
+    transform: rotate(12deg);
+    opacity: 0.7;
+    font-family: var(--font-serif);
+  }
+
+  .nav-category {
+    margin-bottom: 2rem;
+  }
+
+  .category-title {
+    font-size: 1rem;
+    font-weight: 700;
+    border-left: 4px solid var(--accent-color);
+    padding-left: 0.75rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+    letter-spacing: 0.1em;
+    font-family: var(--font-serif);
+  }
+
+  .sites-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .sites-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .sites-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .site-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--line-color);
+    background: rgba(255,255,255,0.4);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+  }
+
+  .site-card:hover {
+    background: white;
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .site-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .site-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .site-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+    font-family: var(--font-serif);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .site-desc {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-family: var(--font-serif);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>

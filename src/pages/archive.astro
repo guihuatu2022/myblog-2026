@@ -1,166 +1,278 @@
 ---
 import BookLayout from '../layouts/BookLayout.astro';
-import Pagination from '../components/Pagination.astro';
 
-// 模拟数据 - 按年份归档
-const archiveData = [
+const timeline = [
   {
-    year: 2024,
+    year: '2024',
     months: [
       {
-        month: 5,
+        month: '五月',
         posts: [
-          { id: '1', title: '三十岁的第一个清晨', date: '2024-05-20', category: '随笔' },
-          { id: '2', title: '胶片里的老街', date: '2024-05-18', category: '摄影' },
-          { id: '3', title: '搭建博客的一些心得', date: '2024-05-15', category: '技术' },
-          { id: '4', title: '读《瓦尔登湖》', date: '2024-05-10', category: '读书' },
+          { id: '1', title: '三十岁的第一个清晨', date: '05-20', category: '随笔' },
+          { id: '2', title: '胶片里的老街', date: '05-18', category: '摄影' },
+          { id: '3', title: '搭建博客的一些心得', date: '05-15', category: '技术' },
         ]
       },
       {
-        month: 4,
+        month: '四月',
         posts: [
-          { id: '5', title: '夏日午后的咖啡馆', date: '2024-04-28', category: '随笔' },
-          { id: '6', title: '城市的黄昏', date: '2024-04-25', category: '摄影' },
+          { id: '9', title: '清明时节', date: '04-04', category: '随笔' },
         ]
       },
       {
-        month: 3,
+        month: '三月',
         posts: [
-          { id: '7', title: '关于 TypeScript 的思考', date: '2024-03-20', category: '技术' },
+          { id: '8', title: '春日骑行', date: '03-25', category: '生活' },
         ]
       },
     ]
   },
   {
-    year: 2023,
+    year: '2023',
     months: [
       {
-        month: 12,
+        month: '十二月',
         posts: [
-          { id: '8', title: '年终总结', date: '2023-12-31', category: '随笔' },
-          { id: '9', title: '冬日暖阳', date: '2023-12-20', category: '摄影' },
-        ]
-      },
-      {
-        month: 11,
-        posts: [
-          { id: '10', title: '秋天的童话', date: '2023-11-15', category: '随笔' },
+          { id: '9', title: '年终总结', date: '12-31', category: '随笔' },
+          { id: '10', title: '冬至', date: '12-22', category: '生活' },
         ]
       },
     ]
   },
 ];
-
-// 数字转汉字
-function toChineseNum(num: number): string {
-  const chars = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-  if (num <= 10) return chars[num];
-  if (num < 20) return '十' + chars[num - 10];
-  if (num < 100) return chars[Math.floor(num / 10)] + '十' + (num % 10 ? chars[num % 10] : '');
-  return num.toString();
-}
-
-// 获取月份名称
-function getMonthName(month: number): string {
-  return toChineseNum(month) + '月';
-}
-
-// 统计总文章数
-const totalPosts = archiveData.reduce((sum, year) => {
-  return sum + year.months.reduce((msum, m) => msum + m.posts.length, 0);
-}, 0);
 ---
 
-<BookLayout title="文章归档">
-  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
-    <div>
-      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">文章归档</h2>
-      <p class="text-sm font-hand text-[#8b3a3a]">时间线 · 岁月留痕</p>
+<BookLayout title="文章归档" currentPage="archive">
+  <!-- 页眉 -->
+  <header class="page-header">
+    <div class="header-left">
+      <h2 class="page-title">时光轴</h2>
+      <p class="page-subtitle">记录走过的每一天</p>
     </div>
-    <div class="text-sm font-hand text-[#8b7355]">
-      共 {totalPosts} 篇文章
+    <div class="header-right">
+      <span class="page-header-bg">Archive</span>
+      <div class="seal-stamp">纪</div>
     </div>
-  </div>
+  </header>
 
   <!-- 时间线 -->
-  <div class="relative">
-    <!-- 中轴线 -->
-    <div class="absolute left-1/2 top-0 bottom-0 w-px bg-[#dcd3b2] -translate-x-1/2 hidden md:block"></div>
-    
-    <div class="space-y-8">
-      {archiveData.map((yearData, yearIndex) => (
-        <section class="relative">
-          <!-- 年份标题 -->
-          <div class="text-center mb-6">
-            <div class="inline-block bg-[#8b3a3a] text-white px-6 py-2 rounded-full font-serif font-bold text-lg shadow-md">
-              {yearData.year} 年
+  <div class="timeline">
+    {timeline.map(yearData => (
+      <div class="year-section">
+        <h3 class="year-title">{yearData.year}</h3>
+        <div class="year-posts">
+          {yearData.months.map(monthData => (
+            <div class="month-group">
+              <div class="month-label">
+                <span class="month-name">{monthData.month}</span>
+                <span class="month-count">{monthData.posts.length} 篇</span>
+              </div>
+              <div class="month-posts">
+                {monthData.posts.map(post => (
+                  <a href={`/log/${post.id}`} class="timeline-item">
+                    <span class="item-date">{post.date}</span>
+                    <span class="item-title">{post.title}</span>
+                    <span class="item-category">{post.category}</span>
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-          
-          <!-- 月份列表 -->
-          <div class="space-y-6">
-            {yearData.months.map((monthData, monthIndex) => {
-              const isLeft = (yearIndex + monthIndex) % 2 === 0;
-              return (
-                <div class={`flex items-start gap-6 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                  <!-- 节点 -->
-                  <div class="hidden md:flex flex-col items-center flex-shrink-0 w-8">
-                    <div class="w-4 h-4 bg-[#8b3a3a] rounded-full border-4 border-[#f7f1e3] shadow-md z-10"></div>
-                    <div class="w-px h-full bg-[#dcd3b2]"></div>
-                  </div>
-                  
-                  <!-- 内容卡片 -->
-                  <div class={`flex-1 stat-card ${isLeft ? '' : 'md:text-right'}`}>
-                    <div class={`flex items-center gap-2 mb-3 ${isLeft ? '' : 'md:flex-row-reverse'}`}>
-                      <h3 class="font-serif font-bold text-[#8b3a3a]">
-                        {getMonthName(monthData.month)}
-                      </h3>
-                      <span class="text-xs text-[#8b7355] font-hand">
-                        ({monthData.posts.length} 篇)
-                      </span>
-                    </div>
-                    
-                    <div class="space-y-2">
-                      {monthData.posts.map((post) => (
-                        <a 
-                          href={`/log/${post.id}`}
-                          class={`block group ${isLeft ? '' : 'md:text-right'}`}
-                        >
-                          <span class="font-hand text-xs text-[#8b7355] mr-2">{post.date}</span>
-                          <span class="font-serif font-bold group-hover:text-[#8b3a3a] transition-colors">
-                            {post.title}
-                          </span>
-                          <span class="tag tag-red text-xs ml-2">{post.category}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ))}
-    </div>
+          ))}
+        </div>
+      </div>
+    ))}
   </div>
-
-  <!-- 分页 -->
-  <div class="pagination mt-10">
-    <span class="pagination-link disabled">
-      <i class="ph ph-caret-left mr-1"></i>
-      上一页
-    </span>
-    <span class="pagination-link active">【壹】</span>
-    <span class="pagination-link disabled">
-      下一页
-      <i class="ph ph-caret-right ml-1"></i>
-    </span>
-  </div>
-
-  <!-- 底部 -->
-  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
-    <p class="text-sm font-hand text-[#8b7355]">
-      朝花夕拾 · 岁月静好
-    </p>
-  </footer>
 </BookLayout>
+
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .header-left {
+    z-index: 1;
+  }
+
+  .page-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.25rem 0;
+    font-family: var(--font-serif);
+  }
+
+  .page-subtitle {
+    color: var(--text-light);
+    font-size: 0.875rem;
+    font-family: var(--font-serif);
+  }
+
+  .header-right {
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-header-bg {
+    font-size: 4rem;
+    font-weight: 300;
+    color: #cfcfcf;
+    position: absolute;
+    top: -1.5rem;
+    right: 3.5rem;
+    opacity: 0.3;
+    user-select: none;
+    font-family: var(--font-serif);
+  }
+
+  .seal-stamp {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color);
+    font-size: 14px;
+    font-weight: bold;
+    transform: rotate(12deg);
+    opacity: 0.7;
+    font-family: var(--font-serif);
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--line-color);
+  }
+
+  .year-section {
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .year-section::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 0.5rem;
+    width: 10px;
+    height: 10px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    transform: translateX(-4px);
+  }
+
+  .year-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin: 0 0 1.5rem 0;
+    font-family: var(--font-serif);
+  }
+
+  .month-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .month-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .month-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    font-family: var(--font-serif);
+  }
+
+  .month-count {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-family: var(--font-serif);
+  }
+
+  .month-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--line-color);
+    background: rgba(255,255,255,0.4);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+  }
+
+  .timeline-item:hover {
+    background: white;
+    border-color: var(--accent-color);
+    padding-left: 1rem;
+  }
+
+  .timeline-item:hover .item-title {
+    color: var(--accent-color);
+  }
+
+  .item-date {
+    width: 45px;
+    font-size: 0.8125rem;
+    color: var(--text-light);
+    font-family: var(--font-serif);
+  }
+
+  .item-title {
+    flex: 1;
+    font-size: 0.875rem;
+    transition: color 0.2s ease;
+    font-family: var(--font-serif);
+  }
+
+  .item-category {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    opacity: 0.7;
+    font-family: var(--font-serif);
+  }
+
+  @media (max-width: 768px) {
+    .timeline {
+      padding-left: 1.5rem;
+    }
+
+    .timeline::before {
+      left: -0.25rem;
+    }
+
+    .year-section::before {
+      left: -1.75rem;
+    }
+
+    .item-category {
+      display: none;
+    }
+  }
+</style>

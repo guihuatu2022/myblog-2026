@@ -2,195 +2,327 @@
 import BookLayout from '../../layouts/BookLayout.astro';
 import Pagination from '../../components/Pagination.astro';
 
+interface Props {
+  year: number;
+  month: number;
+  day: number;
+  lunarDate: string;
+}
+
+const { year, month, day, lunarDate } = Astro.props;
+
+const currentYear = new Date().getFullYear();
+const lunarYear = '甲辰年';
+
 // 模拟数据
-const categories = [
-  { name: '全部', count: 42 },
-  { name: '随笔', count: 18 },
-  { name: '摄影', count: 12 },
-  { name: '技术', count: 8 },
-  { name: '读书', count: 4 },
+const postsByYear = [
+  {
+    year: '2024',
+    posts: [
+      { id: '1', title: '三十岁的第一个清晨', category: '随笔', date: '05-20', permission: 'public', status: 'published' },
+      { id: '2', title: '胶片里的老街', category: '摄影', date: '05-18', permission: 'encrypted', status: 'published' },
+      { id: '3', title: '搭建博客的一些心得', category: '技术', date: '05-15', status: 'published' },
+      { id: '4', title: '关于写作这件事', category: '随笔', date: '05-10', status: 'published' },
+      { id: '5', title: '周末的午后', category: '生活', date: '05-05', status: 'published' },
+      { id: '6', title: '读《百年孤独》', category: '读书', date: '04-28', status: 'published' },
+    ]
+  },
+  {
+    year: '2024',
+    posts: [
+      { id: '7', title: '清明时节', category: '随笔', date: '04-04', status: 'published' },
+      { id: '8', title: '春日骑行', category: '生活', date: '03-25', status: 'published' },
+    ]
+  },
+  {
+    year: '2023',
+    posts: [
+      { id: '9', title: '年终总结', category: '随笔', date: '12-31', status: 'published' },
+      { id: '10', title: '冬至', category: '生活', date: '12-22', status: 'published' },
+    ]
+  },
 ];
 
-// 获取 URL 参数
-const url = new URL(Astro.request.url);
-const page = parseInt(url.searchParams.get('page') || '1');
-const category = url.searchParams.get('category') || '全部';
-const permission = url.searchParams.get('permission') || 'all';
-const search = url.searchParams.get('search') || '';
+// 计算年份分组
+const totalYears = postsByYear.length;
+const itemsPerPage = 5;
+const currentPage = 1;
+const totalPages = Math.ceil(totalYears / itemsPerPage);
+const startIndex = (currentPage - 1) * itemsPerPage;
+const displayYears = postsByYear.slice(startIndex, startIndex + itemsPerPage);
 
-// 模拟文章数据
-const allPosts = [
-  { id: '1', title: '三十岁的第一个清晨', category: '随笔', date: '2024-05-20', permission: 'public', isPinned: true },
-  { id: '2', title: '胶片里的老街', category: '摄影', date: '2024-05-18', permission: 'public', isPinned: false },
-  { id: '3', title: '搭建博客的一些心得', category: '技术', date: '2024-05-15', permission: 'public', isPinned: false },
-  { id: '4', title: '读《瓦尔登湖》', category: '读书', date: '2024-05-10', permission: 'public', isPinned: false },
-  { id: '5', title: '夏日午后的咖啡馆', category: '随笔', date: '2024-05-08', permission: 'encrypted', isPinned: false },
-  { id: '6', title: '城市的黄昏', category: '摄影', date: '2024-05-05', permission: 'public', isPinned: false },
-  { id: '7', title: '关于 TypeScript 的思考', category: '技术', date: '2024-05-02', permission: 'public', isPinned: false },
-  { id: '8', title: '童年记忆', category: '随笔', date: '2024-04-28', permission: 'private', isPinned: false },
-  { id: '9', title: '海边的风', category: '摄影', date: '2024-04-25', permission: 'public', isPinned: false },
-  { id: '10', title: '读《百年孤独》', category: '读书', date: '2024-04-20', permission: 'public', isPinned: false },
-  { id: '11', title: '三十岁的第一个清晨', category: '随笔', date: '2024-04-15', permission: 'public', isPinned: false },
-  { id: '12', title: '城市夜景', category: '摄影', date: '2024-04-10', permission: 'public', isPinned: false },
-  { id: '13', title: '代码的优雅', category: '技术', date: '2024-04-05', permission: 'public', isPinned: false },
-  { id: '14', title: '父亲的背影', category: '随笔', date: '2024-03-28', permission: 'public', isPinned: false },
-  { id: '15', title: '春天的花', category: '摄影', date: '2024-03-25', permission: 'public', isPinned: false },
-];
-
-// 按年份分组
-function groupByYear(posts: typeof allPosts) {
-  const groups = new Map<number, typeof posts>();
-  posts.forEach(post => {
-    const year = new Date(post.date).getFullYear();
-    if (!groups.has(year)) {
-      groups.set(year, []);
-    }
-    groups.get(year)!.push(post);
-  });
-  return Array.from(groups.entries())
-    .sort((a, b) => b[0] - a[0])
-    .map(([year, items]) => ({ year, posts: items }));
-}
-
-// 分页（每5个年份为一页）
-const groupSize = 5;
-const yearGroups = groupByYear(allPosts);
-const totalGroups = Math.ceil(yearGroups.length / groupSize);
-const currentGroup = Math.min(Math.max(1, page), totalGroups);
-const startIndex = (currentGroup - 1) * groupSize;
-const visibleGroups = yearGroups.slice(startIndex, startIndex + groupSize);
-
-// 获取权限图标
-function getPermissionIcon(p: string) {
-  if (p === 'encrypted') return '🔐';
-  if (p === 'private') return '🔒';
-  return '🌐';
-}
+const categories = ['全部', '随笔', '摄影', '技术', '生活', '读书'];
 ---
 
-<BookLayout title="岁月日志">
-  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
-    <div>
-      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">岁月日志</h2>
-      <p class="text-sm font-hand text-[#8b3a3a]">存于 D1 · 时光的印记</p>
+<BookLayout title="岁月日志" currentPage="log">
+  <!-- 页眉 -->
+  <header class="page-header">
+    <div class="header-left">
+      <h2 class="year-display">二零二四</h2>
+      <p class="lunar-info">农历 {lunarYear}</p>
     </div>
-    <div class="text-sm font-hand text-[#8b7355]">
-      共 {allPosts.length} 篇
+    <div class="header-right">
+      <span class="page-header-bg">Log</span>
+      <div class="seal-stamp">阅</div>
     </div>
-  </div>
+  </header>
 
   <!-- 筛选栏 -->
   <div class="filter-bar">
-    <!-- 分类筛选 -->
-    <div class="flex items-center gap-2">
-      <span class="text-xs text-[#999] font-serif">分类</span>
-      {categories.map((cat) => (
-        <span 
-          class={`index-link ${category === cat.name ? 'active' : ''}`}
-          onclick={`window.location.href='/log?category=${cat.name}'`}
-        >
-          {cat.name}
-          <span class="text-[10px] text-[#bbb] ml-1">({cat.count})</span>
-        </span>
-        <span class="filter-separator">/</span>
+    <div class="filter-group">
+      {categories.map((cat, i) => (
+        <button class={i === 0 ? 'filter-btn active' : 'filter-btn'}>{cat}</button>
       ))}
     </div>
-    
-    <div class="w-px h-4 bg-[#dcd3b2] mx-2"></div>
-    
-    <!-- 权限筛选 -->
-    <div class="flex items-center gap-2">
-      <span class="text-xs text-[#999] font-serif">权限</span>
-      <span 
-        class={`index-link ${permission === 'all' ? 'active' : ''}`}
-        onclick={`window.location.href='/log?permission=all'`}
-      >
-        全部
-      </span>
-      <span class="filter-separator">/</span>
-      <span 
-        class={`index-link ${permission === 'public' ? 'active' : ''}`}
-        onclick={`window.location.href='/log?permission=public'`}
-      >
-        公开
-      </span>
-      <span class="filter-separator">/</span>
-      <span 
-        class={`index-link ${permission === 'encrypted' ? 'active' : ''}`}
-        onclick={`window.location.href='/log?permission=encrypted'`}
-      >
-        加密
-      </span>
-    </div>
-    
-    <!-- 搜索框 -->
-    <div class="relative ml-auto">
-      <i class="ph ph-magnifying-glass absolute left-0 top-1/2 -translate-y-1/2 text-[#a8a8a8]"></i>
-      <input 
-        type="text" 
-        placeholder="搜索日志..." 
-        class="vintage-search"
-        value={search}
-      />
+    <div class="search-box">
+      <input type="text" placeholder="搜索日志..." class="input-paper search-input" />
     </div>
   </div>
 
-  <!-- 年份分组列表 -->
-  <div class="space-y-8">
-    {visibleGroups.map((group) => (
-      <section>
-        <h3 class="text-xl font-serif font-bold text-[#8b3a3a] mb-4 flex items-center gap-2 sticky top-0 bg-paper py-2 z-10">
-          <i class="ph ph-calendar-blank"></i>
-          {group.year} 年
-          <span class="text-sm font-hand text-[#8b7355] font-normal">
-            ({group.posts.length} 篇)
-          </span>
-        </h3>
-        
-        <div class="space-y-3">
-          {group.posts.map((post) => (
-            <a 
-              href={`/log/${post.id}`}
-              class="stat-card flex items-center gap-4 hover:shadow-md transition-shadow group"
-            >
-              <div class="flex-1 flex items-center gap-3">
-                {post.isPinned && (
-                  <span class="text-[#8b3a3a] text-sm" title="置顶">
-                    <i class="ph ph-push-pin"></i>
-                  </span>
-                )}
-                <span class="font-serif font-bold text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors">
-                  {post.title}
-                </span>
-                <span class="tag tag-red text-xs">{post.category}</span>
+  <!-- 日志列表 -->
+  <article class="log-list">
+    {displayYears.map(yearGroup => (
+      <div class="year-group">
+        <h3 class="year-title">{yearGroup.year} 年 <span class="year-count">({yearGroup.posts.length} 篇)</span></h3>
+        <div class="posts-list">
+          {yearGroup.posts.map(post => (
+            <a href={`/log/${post.id}`} class="log-item">
+              <div class="log-date">{post.date}</div>
+              <div class="log-content">
+                <span class="log-title">{post.title}</span>
+                {post.permission === 'encrypted' && <span class="permission-badge">🔐</span>}
               </div>
-              <div class="flex items-center gap-4 text-sm">
-                <span class="font-hand text-[#8b7355]">
-                  {post.date.slice(5)}
-                </span>
-                <span class="text-lg">
-                  {getPermissionIcon(post.permission)}
-                </span>
-              </div>
+              <div class="log-category">{post.category}</div>
             </a>
           ))}
         </div>
-      </section>
+      </div>
     ))}
-  </div>
+  </article>
 
   <!-- 分页 -->
-  <Pagination 
-    currentPage={currentGroup}
-    totalPages={totalGroups}
-    baseUrl="/log"
-    groupSize={5}
-  />
-
-  <!-- 底部 -->
-  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
-    <p class="text-sm font-hand text-[#8b7355]">
-      朝花夕拾 · 岁月静好
-    </p>
-  </footer>
+  <Pagination currentPage={currentPage} totalPages={totalPages} />
 </BookLayout>
+
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .header-left {
+    z-index: 1;
+  }
+
+  .year-display {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.25rem 0;
+    font-family: var(--font-serif);
+  }
+
+  .lunar-info {
+    color: var(--accent-color);
+    font-size: 0.875rem;
+    letter-spacing: 0.1em;
+    font-family: var(--font-serif);
+  }
+
+  .header-right {
+    text-align: right;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-header-bg {
+    font-size: 4rem;
+    font-weight: 300;
+    color: #cfcfcf;
+    position: absolute;
+    top: -1.5rem;
+    right: 3.5rem;
+    opacity: 0.3;
+    user-select: none;
+    font-family: var(--font-serif);
+  }
+
+  .seal-stamp {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color);
+    font-size: 14px;
+    font-weight: bold;
+    transform: rotate(12deg);
+    opacity: 0.7;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-family: var(--font-serif);
+  }
+
+  .filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .filter-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 0.375rem 0.875rem;
+    border: 1px solid var(--line-color);
+    background: white;
+    color: var(--text-main);
+    font-family: var(--font-serif);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+  }
+
+  .filter-btn.active {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+  }
+
+  .search-input {
+    width: 200px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--line-color);
+    background-color: rgba(255,255,255,0.5);
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background-color: white;
+  }
+
+  .log-list {
+    margin-bottom: 2rem;
+  }
+
+  .year-group {
+    margin-bottom: 2rem;
+  }
+
+  .year-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
+    font-family: var(--font-serif);
+  }
+
+  .year-count {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    font-weight: 400;
+  }
+
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .log-item {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 0;
+    border-bottom: 1px dashed var(--line-color);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .log-item:last-child {
+    border-bottom: none;
+  }
+
+  .log-item:hover {
+    padding-left: 0.5rem;
+  }
+
+  .log-item:hover .log-title {
+    color: var(--accent-color);
+  }
+
+  .log-date {
+    width: 50px;
+    font-size: 0.875rem;
+    color: var(--text-light);
+    font-family: var(--font-serif);
+  }
+
+  .log-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .log-title {
+    font-size: 1rem;
+    transition: color 0.2s ease;
+    font-family: var(--font-serif);
+  }
+
+  .permission-badge {
+    font-size: 0.875rem;
+  }
+
+  .log-category {
+    width: 60px;
+    text-align: right;
+    font-size: 0.8125rem;
+    color: var(--accent-color);
+    opacity: 0.7;
+    font-family: var(--font-serif);
+  }
+
+  @media (max-width: 768px) {
+    .filter-bar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .search-input {
+      width: 100%;
+    }
+
+    .log-item {
+      flex-wrap: wrap;
+    }
+
+    .log-category {
+      width: auto;
+      text-align: left;
+      margin-left: auto;
+    }
+  }
+</style>
