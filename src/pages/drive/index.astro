@@ -2,7 +2,6 @@
 import BookLayout from '../../layouts/BookLayout.astro';
 import Pagination from '../../components/Pagination.astro';
 
-// 模拟数据
 const categories = [
   { name: '全部', count: 127 },
   { name: '文档', count: 45 },
@@ -22,7 +21,6 @@ const files = [
   { id: '8', name: '学习资料合集.pdf', category: '文档', size: '45 MB', date: '2024-04-10', downloads: 156, permission: 'public' },
 ];
 
-// 获取文件图标
 function getFileIcon(filename: string): string {
   const ext = filename.split('.').pop()?.toLowerCase() || '';
   const iconMap: Record<string, string> = {
@@ -81,7 +79,6 @@ function getIconColor(filename: string): string {
     </div>
   </div>
 
-  <!-- 筛选栏 -->
   <div class="filter-bar">
     <div class="flex items-center gap-2">
       <span class="text-xs text-[#999] font-serif">分类</span>
@@ -90,23 +87,12 @@ function getIconColor(filename: string): string {
           {cat.name}
           <span class="text-[10px] text-[#bbb] ml-1">({cat.count})</span>
         </span>
-        {i < categories.length - 1 && <span class="filter-separator">/</span>}
       ))}
-    </div>
-    
-    <div class="relative ml-auto">
-      <i class="ph ph-magnifying-glass absolute left-0 top-1/2 -translate-y-1/2 text-[#a8a8a8]"></i>
-      <input 
-        type="text" 
-        placeholder="搜索文件..." 
-        class="vintage-search"
-      />
     </div>
   </div>
 
-  <!-- 文件列表 -->
   <div class="stat-card">
-    <table class="admin-table">
+    <table class="vintage-table">
       <thead>
         <tr>
           <th style="width:50%">文件名</th>
@@ -118,21 +104,16 @@ function getIconColor(filename: string): string {
       </thead>
       <tbody>
         {files.map((file) => (
-          <tr class="group">
+          <tr>
             <td>
               <div class="flex items-center gap-3">
-                <i class={`${getFileIcon(file.name)} text-2xl`} style={`color: ${getIconColor(file.name)}`}></i>
+                <span style={`color: ${getIconColor(file.name)}`}>{getFileIcon(file.name)}</span>
                 <div>
-                  <a 
-                    href={`/api/download/${file.id}`}
-                    class="font-serif font-bold group-hover:text-[#8b3a3a] transition-colors"
-                  >
+                  <a href={`/api/download/${file.id}`} class="font-serif font-bold hover:text-[#8b3a3a]">
                     {file.name}
                   </a>
                   {file.permission === 'encrypted' && (
-                    <span class="ml-2">
-                      <i class="ph ph-lock-simple text-[#8b7355] text-sm"></i>
-                    </span>
+                    <span class="ml-2 text-[#8b7355]">🔒</span>
                   )}
                 </div>
               </div>
@@ -140,39 +121,22 @@ function getIconColor(filename: string): string {
             <td>
               <span class="tag tag-blue text-xs">{file.category}</span>
             </td>
-            <td class="font-hand text-sm text-[#5d5d5d]">
-              {file.size}
-            </td>
-            <td class="font-hand text-sm text-[#8b7355]">
-              <i class="ph ph-download-simple mr-1"></i>
-              {file.downloads}
-            </td>
-            <td class="font-hand text-sm text-[#8b7355]">
-              {file.date}
-            </td>
+            <td class="font-hand text-sm text-[#5d5d5d]">{file.size}</td>
+            <td class="font-hand text-sm text-[#8b7355]">↓ {file.downloads}</td>
+            <td class="font-hand text-sm text-[#8b7355]">{file.date}</td>
           </tr>
         ))}
       </tbody>
     </table>
   </div>
 
-  <!-- 分页 -->
   <div class="pagination">
-    <span class="pagination-link disabled">
-      <i class="ph ph-caret-left mr-1"></i>
-      上一页
-    </span>
+    <span class="pagination-link disabled">上一页</span>
     <span class="pagination-link active">【壹】</span>
-    <span class="pagination-link disabled">
-      下一页
-      <i class="ph ph-caret-right ml-1"></i>
-    </span>
+    <span class="pagination-link disabled">下一页</span>
   </div>
 
-  <!-- 底部 -->
   <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
-    <p class="text-sm font-hand text-[#8b7355]">
-      朝花夕拾 · 岁月静好
-    </p>
+    <p class="text-sm font-hand text-[#8b7355]">朝花夕拾 · 岁月静好</p>
   </footer>
 </BookLayout>

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createUser, verifyPassword, generateToken } from '../../../lib/auth';
+import { createUser, verifyPassword, generateToken } from '../../lib/auth';
 import { nanoid } from 'nanoid';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
