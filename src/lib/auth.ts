@@ -187,6 +187,27 @@ export function createSessionCookie(token: string, expiresDays: number = 7): str
   return `session_token=${token}; Path=/; HttpOnly; SameSite=Lax; Expires=${expires.toUTCString()}`;
 }
 
+// 创建用户
+export async function createUser(
+  db: Db,
+  name: string,
+  email: string,
+  password: string,
+  role: 'admin' | 'user' = 'user'
+): Promise<typeof users.$inferSelect> {
+  const passwordHash = await hashPassword(password);
+  
+  const result = await db.insert(users).values({
+    id: crypto.randomUUID(),
+    name,
+    email,
+    passwordHash,
+    role,
+  }).returning();
+  
+  return result[0];
+}
+
 // 创建登出 cookie
 export function createLogoutCookie(): string {
   return 'session_token=; Path=/; HttpOnly; SameSite=Lax; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
