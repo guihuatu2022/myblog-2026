@@ -1,0 +1,126 @@
+---
+interface Props {
+  name: string;
+  label?: string;
+  value?: string;
+  accept?: string;
+  maxSize?: number; // MB
+}
+
+const { 
+  name, 
+  label, 
+  value = '', 
+  accept = 'image/*',
+  maxSize = 5
+} = Astro.props;
+---
+
+<div class="space-y-2">
+  {label && (
+    <label class="block text-sm font-medium text-[#2c2c2c]">{label}</label>
+  )}
+  
+  <div class="flex items-start gap-4">
+    <!-- 预览区 -->
+    <div class="w-32 h-32 border-2 border-dashed border-[#dcd3b2] rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
+      {value ? (
+        <img src={value} alt="预览" class="w-full h-full object-cover" id={`${name}-preview`}>
+      ) : (
+        <div id={`${name}-placeholder`} class="text-center text-gray-400">
+          <i class="ph ph-image text-3xl"></i>
+          <p class="text-xs mt-1">暂无图片</p>
+        </div>
+      )}
+    </div>
+    
+    <!-- 上传区 -->
+    <div class="flex-1">
+      <div 
+        id={`${name}-dropzone`}
+        class="border-2 border-dashed border-[#dcd3b2] rounded-lg p-4 text-center cursor-pointer hover:border-[#8b3a3a] hover:bg-[#8b3a3a]/5 transition-colors"
+      >
+        <input 
+          type="file"
+          id={name}
+          name={name}
+          accept={accept}
+          class="hidden"
+          data-max-size={maxSize}
+        >
+        <label for={name} class="cursor-pointer">
+          <i class="ph ph-upload-simple text-2xl text-gray-400"></i>
+          <p class="text-sm text-gray-500 mt-1">点击上传或拖拽图片到这里</p>
+          <p class="text-xs text-gray-400 mt-1">支持 JPG, PNG, GIF, WebP，最大 {maxSize}MB</p>
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 隐藏的 URL 存储 -->
+  <input type="hidden" name={`${name}_url`} value={value} id={`${name}-url`}>
+</div>
+
+<script define:vars={{ name, maxSize }}>
+  const input = document.getElementById(name);
+  const preview = document.getElementById(`${name}-preview`);
+  const placeholder = document.getElementById(`${name}-placeholder`);
+  const urlInput = document.getElementById(`${name}-url`);
+  const dropzone = document.getElementById(`${name}-dropzone`);
+  
+  input?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // 检查文件大小
+    if (file.size > maxSize * 1024 * 1024) {
+      alert(`文件大小不能超过 ${maxSize}MB`);
+      return;
+    }
+    
+    // 本地预览
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (preview) {
+        preview.src = e.target.result;
+        preview.classList.remove('hidden');
+      }
+      if (placeholder) {
+        placeholder.classList.add('hidden');
+      }
+    };
+    reader.readAsDataURL(file);
+    
+    // TODO: 上传到 OpenList
+    // const formData = new FormData();
+    // formData.append('file', file);
+    // const response = await fetch('/api/upload/image', { method: 'POST', body: formData });
+    // const data = await response.json();
+    // if (data.url && urlInput) {
+    //   urlInput.value = data.url;
+    // }
+  });
+  
+  // 拖拽支持
+  dropzone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('border-[#8b3a3a]', 'bg-[#8b3a3a]/5');
+  });
+  
+  dropzone?.addEventListener('dragleave', () => {
+    dropzone.classList.remove('border-[#8b3a3a]', 'bg-[#8b3a3a]/5');
+  });
+  
+  dropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('border-[#8b3a3a]', 'bg-[#8b3a3a]/5');
+    
+    const file = e.dataTransfer?.files[0];
+    if (file && input) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+</script>

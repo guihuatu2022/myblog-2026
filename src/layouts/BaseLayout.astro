@@ -1,0 +1,91 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = '记录三十岁以后的生活琐碎。没有算法推荐，没有红点通知，只有一方安静的岁月自留地。' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content={description}>
+  <title>{title}</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 字体 -->
+  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont@1.1.0/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- 图标 -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <!-- 全局样式 -->
+  <link rel="stylesheet" href="/styles/global.css">
+  
+  <script is:inline>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#f7f1e3',
+            'paper-light': '#faf7ef',
+            surface: '#cfc6b5',
+            spine: '#2c2a29',
+            accent: '#8b3a3a',
+            'accent-hover': '#6d2d2d',
+            border: '#dcd3b2',
+          },
+          fontFamily: {
+            serif: ['Noto Serif SC', 'Songti SC', 'SimSun', 'serif'],
+            hand: ['LXGW WenKai Screen', 'KaiTi', 'cursive'],
+            calligraphy: ['Ma Shan Zheng', 'cursive'],
+          },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-paper paper-texture">
+  <slot />
+  
+  <!-- Toast 容器 -->
+  <div id="toast" class="toast"></div>
+  
+  <script>
+    // Toast 提示
+    function showToast(message: string, duration: number = 3000) {
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, duration);
+      }
+    }
+    
+    // 暴露到全局
+    (window as any).showToast = showToast;
+  </script>
+</body>
+</html>
+
+<style is:global>
+  /* 页面切换动画 */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  main {
+    animation: fadeIn 0.3s ease-out;
+  }
+</style>

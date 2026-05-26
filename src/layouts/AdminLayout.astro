@@ -1,0 +1,157 @@
+---
+interface Props {
+  title: string;
+  activeMenu?: string;
+}
+
+const { title, activeMenu = 'dashboard' } = Astro.props;
+
+// 获取当前路径
+const pathname = Astro.url.pathname;
+
+// 菜单项
+const menuItems = [
+  { id: 'dashboard', label: '仪表盘', icon: 'ph-chart-pie', href: '/admin' },
+  { id: 'log', label: '日志管理', icon: 'ph-article', href: '/admin/log', sub: [
+    { id: 'log-list', label: '文章列表', href: '/admin/log' },
+    { id: 'log-new', label: '写文章', href: '/admin/log/new' },
+  ]},
+  { id: 'album', label: '相册管理', icon: 'ph-images', href: '/admin/album' },
+  { id: 'drive', label: '网盘管理', icon: 'ph-folder-simple', href: '/admin/drive' },
+  { id: 'nav', label: '导航管理', icon: 'ph-compass', href: '/admin/nav' },
+  { id: 'message', label: '留言管理', icon: 'ph-chat-circle-dots', href: '/admin/message' },
+  { id: 'todo', label: '待办清单', icon: 'ph-check-square', href: '/admin/todo' },
+  { id: 'settings', label: '系统设置', icon: 'ph-gear', href: '/admin/settings' },
+];
+
+// 判断当前菜单是否激活
+function isActive(item: typeof menuItems[0]): boolean {
+  if (item.href === '/admin') {
+    return pathname === '/admin' || pathname === '/admin/';
+  }
+  return pathname.startsWith(item.href);
+}
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} - 博客管理后台</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css" />
+  <link rel="stylesheet" href="/styles/admin.css" />
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- 侧边栏 -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <a href="/" class="flex items-center gap-2 text-white">
+          <i class="ph ph-house-simple text-xl"></i>
+          <span class="font-serif font-bold">博客管理</span>
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        {menuItems.map((item) => (
+          <div class="nav-group">
+            <a 
+              href={item.href}
+              class={`nav-item ${isActive(item) ? 'active' : ''}`}
+            >
+              <i class={`${item.icon}`}></i>
+              <span>{item.label}</span>
+            </a>
+            
+            {item.sub && isActive(item) && (
+              <div class="nav-sub">
+                {item.sub.map((subItem) => (
+                  <a 
+                    href={subItem.href}
+                    class={`nav-sub-item ${pathname === subItem.href ? 'active' : ''}`}
+                  >
+                    <i class="ph ph-caret-right"></i>
+                    {subItem.label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-[#8b3a3a] flex items-center justify-center text-white">
+            <i class="ph ph-user text-sm"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-white font-medium truncate">博主</p>
+            <p class="text-xs text-white/60">管理员</p>
+          </div>
+        </div>
+        <a href="/admin/logout" class="logout-btn" title="退出登录">
+          <i class="ph ph-sign-out"></i>
+        </a>
+      </div>
+    </aside>
+    
+    <!-- 主内容区 -->
+    <div class="admin-main">
+      <!-- 顶部栏 -->
+      <header class="admin-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <i class="ph ph-list"></i>
+          </button>
+          <div class="breadcrumb">
+            <a href="/admin" class="breadcrumb-item">
+              <i class="ph ph-house"></i>
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item">{title}</span>
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <a href="/" target="_blank" class="header-btn" title="访问前台">
+            <i class="ph ph-arrow-square-out"></i>
+          </a>
+          <button class="header-btn" title="刷新">
+            <i class="ph ph-arrows-clockwise"></i>
+          </button>
+        </div>
+      </header>
+      
+      <!-- 页面内容 -->
+      <main class="admin-content">
+        <slot />
+      </main>
+    </div>
+  </div>
+
+  <!-- 移动端菜单遮罩 -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <script>
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const overlay = document.getElementById('sidebar-overlay');
+    const sidebar = document.querySelector('.admin-sidebar');
+    
+    menuBtn?.addEventListener('click', () => {
+      sidebar?.classList.toggle('open');
+      overlay?.classList.toggle('open');
+    });
+    
+    overlay?.addEventListener('click', () => {
+      sidebar?.classList.remove('open');
+      overlay?.classList.remove('open');
+    });
+  </script>
+</body>
+</html>

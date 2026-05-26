@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理 · 仪表盘</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont@1.1.0/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="../assets/css/shared.css">
+<link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+.mobile-header-fix {
+  display: flex !important;
+}
+@media (min-width: 768px) {
+  .mobile-header-fix {
+    display: none !important;
+  }
+}
+</style>
+</head>
+<body class="is-admin">
+<div class="reading-progress"></div>
+<button id="back-to-top" class="back-to-top"><i class="ph ph-arrow-up"></i></button>
+<div class="book-container book-shadow">
+
+<header class="mobile-header-fix md:hidden flex items-center justify-between p-4 bg-[#2c2a29] text-[#dcd3b2] shadow-md relative z-30 shrink-0">
+  <button onclick="toggleMobileMenu()" class="p-1 focus:outline-none"><i class="ph ph-list text-2xl"></i></button>
+  <h1 class="font-calligraphy text-2xl tracking-widest absolute left-1/2 -translate-x-1/2 mt-1">后台管理</h1>
+  <button onclick="location.href='../pages/首页.html'" class="w-7 h-7 border border-[#bfa57d] text-[#bfa57d] bg-[#bfa57d]/10 flex items-center justify-center text-[10px] font-bold focus:outline-none transition-colors" title="返回前台">返</button>
+</header>
+
+<div id="mobile-backdrop" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"></div>
+
+<aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-[240px] shrink-0 bg-[#2c2a29] text-gray-300 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+  <button class="md:hidden absolute top-5 right-5 text-gray-400 hover:text-white" onclick="toggleMobileMenu()">
+    <i class="ph ph-x text-2xl"></i>
+  </button>
+  <div class="sidebar-top">
+                <div class="flex items-center justify-center md:justify-between w-full mb-3">
+                    <h1 class="font-calligraphy text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest">后台管理</h1>
+                    <button onclick="location.href='../pages/首页.html'" class="seal-btn seal-btn-return hidden md:flex" title="返回前台">返</button>
+                </div>
+                <p class="mt-3 text-xs text-[#a8a8a8] tracking-[0.4em] font-hand opacity-90 hidden md:block">内容管理 · 系统配置</p>
+                <p class="mt-3 text-[10px] text-gray-500 tracking-[0.3em] uppercase font-serif opacity-50 w-full text-center border-t border-gray-700/30 pt-2 hidden md:block">Admin Panel</p>
+            </div>
+  <nav class="flex-1 py-6 px-5 overflow-y-auto">
+    <ul class="space-y-2">
+      <li><a href="仪表盘.html" class="nav-link active"><i class="ph ph-gauge"></i><span class="menu-item-text">管理仪表盘</span></a></li>
+      <li><a href="文章管理.html" class="nav-link"><i class="ph ph-pen-nib"></i><span class="menu-item-text">文章管理</span></a></li>
+      <li><a href="相册管理.html" class="nav-link"><i class="ph ph-image"></i><span class="menu-item-text">相册管理</span></a></li>
+      <li><a href="网盘管理.html" class="nav-link"><i class="ph ph-hard-drives"></i><span class="menu-item-text">网盘管理</span></a></li>
+      <li><a href="导航管理.html" class="nav-link"><i class="ph ph-compass"></i><span class="menu-item-text">导航管理</span></a></li>
+      <li><a href="留言管理.html" class="nav-link"><i class="ph ph-envelope-simple"></i><span class="menu-item-text">留言管理</span></a></li>
+      <li><a href="设置.html" class="nav-link"><i class="ph ph-gear"></i><span class="menu-item-text">系统设置</span></a></li>
+    </ul>
+  </nav>
+  <div class="p-5 text-[10px] text-gray-500 text-center border-t border-gray-700/20 shrink-0">
+    <p>&copy; 2024 - 2064</p>
+    <p class="mt-1 font-serif opacity-70">朝花夕拾 · 岁月静好</p>
+  </div>
+</aside>
+
+<main class="content paper-texture">
+  <header class="page-header">
+    <div class="page-header-title"><h2>管理仪表盘</h2><p>内容概览 · 快捷入口</p></div>
+    <div class="page-header-seal"><span class="seal-bg-text">Admin</span><div class="seal-icon" style="transform:rotate(-6deg)">治</div></div>
+  </header>
+  <div class="admin-stat-grid">
+    <div class="stat-card"><div class="stat-label">文章总数</div><div class="stat-value">20</div><div class="stat-sub">本月新增 3 篇 · 2 篇草稿 · 1 篇置顶</div></div>
+    <div class="stat-card"><div class="stat-label">相册总数</div><div class="stat-value">6</div><div class="stat-sub">共 181 张 · 3 个私密 · 1 个加密</div></div>
+    <div class="stat-card"><div class="stat-label">网盘文件</div><div class="stat-value">13</div><div class="stat-sub">占用 3.3 GB · 3 个分类 · 1 个私密</div></div>
+    <div class="stat-card"><div class="stat-label">待审留言</div><div class="stat-value">3</div><div class="stat-sub">共 3 条留言 · 5 条评论 · 2 条待回复</div></div>
+    <div class="stat-card"><div class="stat-label">待办事项</div><div class="stat-value">10</div><div class="stat-sub">总计 10 项 · 已完成 3 · 进行中 7</div></div>
+    <div class="stat-card"><div class="stat-label">存储用量</div><div class="stat-value">3.3G</div><div class="stat-sub">OpenList 在线 · R2 正常</div></div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div>
+      <div class="admin-section-title">最近文章</div>
+      <table class="admin-table">
+        <thead><tr><th>标题</th><th>分类</th><th>日期</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>三十岁的第一个清晨</td><td><span class="tag tag-red">随笔</span></td><td>05-20</td><td><span class="tag tag-green">已发布</span></td></tr>
+          <tr><td>胶片里的秘密</td><td><span class="tag tag-red">摄影</span></td><td>05-18</td><td><span class="tag tag-green">已发布</span></td></tr>
+          <tr><td>搭建个人博客的心得</td><td><span class="tag tag-red">技术</span></td><td>05-15</td><td><span class="tag tag-gray">草稿</span></td></tr>
+          <tr><td>春游西湖记</td><td><span class="tag tag-red">游记</span></td><td>03-12</td><td><span class="tag tag-green">已发布</span></td></tr>
+        </tbody>
+      </table>
+      <div class="text-right mt-2"><a href="文章管理.html" class="text-xs text-[#8b3a3a] hover:underline font-hand">查看全部 20 篇 →</a></div>
+    </div>
+    <div>
+      <div class="admin-section-title">快捷操作</div>
+      <div class="grid grid-cols-2 gap-3">
+        <a href="文章编辑.html" class="stat-card text-center no-underline hover:border-[#8b3a3a] cursor-pointer block"><i class="ph ph-pen-nib text-2xl text-[#8b3a3a] mb-2 block"></i><span class="font-serif font-bold text-sm text-[#2c2c2c]">写新文章</span><p class="text-xs text-[#999] font-hand mt-1">存入 D1 数据库</p></a>
+        <a href="相册管理.html" class="stat-card text-center no-underline hover:border-[#8b3a3a] cursor-pointer block"><i class="ph ph-image text-2xl text-[#8b3a3a] mb-2 block"></i><span class="font-serif font-bold text-sm text-[#2c2c2c]">新建相册</span><p class="text-xs text-[#999] font-hand mt-1">在 OpenList 创建目录</p></a>
+        <a href="网盘管理.html" class="stat-card text-center no-underline hover:border-[#8b3a3a] cursor-pointer block"><i class="ph ph-cloud-arrow-up text-2xl text-[#8b3a3a] mb-2 block"></i><span class="font-serif font-bold text-sm text-[#2c2c2c]">上传文件</span><p class="text-xs text-[#999] font-hand mt-1">到 OpenList 网盘</p></a>
+        <a href="../pages/待办.html" class="stat-card text-center no-underline hover:border-[#8b3a3a] cursor-pointer block"><i class="ph ph-check-square-offset text-2xl text-[#8b3a3a] mb-2 block"></i><span class="font-serif font-bold text-sm text-[#2c2c2c]">我的待办</span><p class="text-xs text-[#999] font-hand mt-1">10 项进行中</p></a>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const backdrop = document.getElementById('mobile-backdrop');
+function toggleMobileMenu() {
+  const isClosed = sidebar.classList.contains('-translate-x-full');
+  if (isClosed) {
+    backdrop.classList.remove('hidden');
+    setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+    sidebar.classList.remove('-translate-x-full');
+  } else {
+    backdrop.classList.add('opacity-0');
+    sidebar.classList.add('-translate-x-full');
+    setTimeout(() => backdrop.classList.add('hidden'), 300);
+  }
+}
+</script>
+<script src="../assets/js/shared.js"></script>
+</body>
+</html>

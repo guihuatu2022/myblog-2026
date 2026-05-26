@@ -1,0 +1,60 @@
+---
+interface Props {
+  message: string;
+  type?: 'success' | 'error' | 'info' | 'warning';
+  duration?: number;
+}
+
+const { message, type = 'info', duration = 3000 } = Astro.props;
+
+const typeConfig = {
+  success: { icon: 'ph-check-circle', color: 'text-green-600', bg: 'bg-green-50' },
+  error: { icon: 'ph-x-circle', color: 'text-red-600', bg: 'bg-red-50' },
+  info: { icon: 'ph-info', color: 'text-blue-600', bg: 'bg-blue-50' },
+  warning: { icon: 'ph-warning', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+};
+
+const config = typeConfig[type];
+---
+
+<div 
+  id="toast-container"
+  class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"
+>
+</div>
+
+<script define:vars={{ config, message: message, duration }}>
+  function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${config[type].bg} transform translate-x-full transition-transform duration-300`;
+    
+    toast.innerHTML = `
+      <i class="${config[type].icon} ${config[type].color} text-xl"></i>
+      <span class="text-sm text-gray-700">${msg}</span>
+    `;
+    
+    container.appendChild(toast);
+    
+    // 显示动画
+    requestAnimationFrame(() => {
+      toast.classList.remove('translate-x-full');
+    });
+    
+    // 自动隐藏
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+  
+  // 全局函数
+  window.showToast = showToast;
+  
+  // 如果有默认消息，自动显示
+  if (message) {
+    showToast(message, type);
+  }
+</script>

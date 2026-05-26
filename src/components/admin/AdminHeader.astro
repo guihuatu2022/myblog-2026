@@ -1,0 +1,40 @@
+---
+interface Props {
+  title: string;
+  showBack?: boolean;
+  backHref?: string;
+}
+
+const { title, showBack = false, backHref = '/admin' } = Astro.props;
+---
+
+<header class="h-16 bg-white border-b border-[#dcd3b2] flex items-center justify-between px-6 sticky top-0 z-10">
+  <div class="flex items-center gap-4">
+    {showBack && (
+      <a 
+        href={backHref}
+        class="flex items-center gap-2 text-gray-500 hover:text-[#8b3a3a] transition-colors"
+      >
+        <i class="ph ph-arrow-left text-lg"></i>
+        <span class="text-sm">返回</span>
+      </a>
+    )}
+    <h2 class="text-lg font-bold text-[#2c2c2c]">{title}</h2>
+  </div>
+  
+  <div class="flex items-center gap-4">
+    <!-- 通知 -->
+    <button class="relative p-2 text-gray-500 hover:text-[#8b3a3a] transition-colors">
+      <i class="ph ph-bell text-xl"></i>
+      <span class="absolute top-1 right-1 w-2 h-2 bg-[#8b3a3a] rounded-full"></span>
+    </button>
+    
+    <!-- 用户菜单 -->
+    <div class="flex items-center gap-2 pl-4 border-l border-gray-200">
+      <span class="text-sm text-gray-600">管理员</span>
+      <div class="w-8 h-8 bg-[#8b3a3a] rounded-full flex items-center justify-center text-white text-sm font-bold">
+        管
+      </div>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,463 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+// 存储实例
+const storageInstances = [
+  {
+    id: '1',
+    name: '主力存储',
+    apiUrl: 'https://openlist.example.com/api',
+    rootPath: '/blog-storage',
+    status: 'online',
+    usedStorage: '12.3 GB',
+    business: '文章/相册',
+  },
+  {
+    id: '2',
+    name: '备份存储',
+    apiUrl: 'https://backup.example.com/api',
+    rootPath: '/blog-backup',
+    status: 'online',
+    usedStorage: '8.7 GB',
+    business: '网盘',
+  },
+];
+
+// 业务映射
+const mappings = [
+  { business: '文章封面与附件', instance: '主力存储', rootPath: '/posts' },
+  { business: '相册照片', instance: '主力存储', rootPath: '/albums' },
+  { business: '网盘文件', instance: '备份存储', rootPath: '/drive' },
+];
+---
+
+<AdminLayout title="系统设置" activeMenu="settings">
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <h1 class="page-title">系统设置</h1>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div class="admin-card">
+    <div class="flex gap-2 mb-6">
+      <button class="tab-btn active" data-tab="basic">
+        <i class="ph ph-gear mr-1"></i>
+        基础设置
+      </button>
+      <button class="tab-btn" data-tab="storage">
+        <i class="ph ph-database mr-1"></i>
+        存储设置
+      </button>
+      <button class="tab-btn" data-tab="ai">
+        <i class="ph ph-robot mr-1"></i>
+        AI 设置
+      </button>
+      <button class="tab-btn" data-tab="security">
+        <i class="ph ph-shield-check mr-1"></i>
+        安全设置
+      </button>
+    </div>
+
+    <!-- 基础设置 Tab -->
+    <div id="tab-basic" class="tab-content">
+      <div class="max-w-xl">
+        <div class="form-group">
+          <label class="form-label">博客名称</label>
+          <input type="text" class="form-input" value="三十而立" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">副标题</label>
+          <input type="text" class="form-input" value="记录 · 沉淀 · 回忆" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">博主昵称</label>
+          <input type="text" class="form-input" value="博主" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">博客描述</label>
+          <textarea class="form-input" rows="3">欢迎来到我的数字庭院，这里记录着生活的点滴...</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">博客地址</label>
+          <input type="url" class="form-input" value="https://example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">时区</label>
+          <select class="form-input">
+            <option value="Asia/Shanghai" selected>Asia/Shanghai (UTC+8)</option>
+            <option value="UTC">UTC</option>
+          </select>
+        </div>
+        
+        <div class="flex justify-end">
+          <button class="btn btn-primary">
+            <i class="ph ph-floppy-disk mr-1"></i>
+            保存设置
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 存储设置 Tab -->
+    <div id="tab-storage" class="tab-content hidden">
+      <div class="mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h3 class="font-medium">存储介质配置</h3>
+            <p class="text-sm text-[#999]">管理 OpenList 存储实例</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="add-instance-btn">
+            <i class="ph ph-plus mr-1"></i>
+            添加实例
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          {storageInstances.map((instance) => (
+            <div class="storage-card p-4 border border-[#e8e8e8] rounded-lg">
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center gap-3">
+                  <span class={`status-dot ${instance.status === 'online' ? 'online' : 'offline'}`}></span>
+                  <h4 class="font-medium">{instance.name}</h4>
+                </div>
+                <div class="flex gap-2">
+                  <button class="text-[#999] hover:text-[#8b3a3a]">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-[#999] hover:text-red-500">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="text-[#999]">API 地址</span>
+                  <p class="mt-1 break-all">{instance.apiUrl}</p>
+                </div>
+                <div>
+                  <span class="text-[#999]">根目录</span>
+                  <p class="mt-1">{instance.rootPath}</p>
+                </div>
+                <div>
+                  <span class="text-[#999]">已用存储</span>
+                  <p class="mt-1">{instance.usedStorage}</p>
+                </div>
+                <div>
+                  <span class="text-[#999]">业务范围</span>
+                  <p class="mt-1">{instance.business}</p>
+                </div>
+              </div>
+              <div class="mt-3 pt-3 border-t border-[#e8e8e8]">
+                <button class="btn btn-default btn-sm">
+                  <i class="ph ph-plug mr-1"></i>
+                  测试连接
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="border-t border-[#e8e8e8] pt-6">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h3 class="font-medium">业务存储映射</h3>
+            <p class="text-sm text-[#999]">配置各业务使用哪个存储实例</p>
+          </div>
+        </div>
+        
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>业务类型</th>
+              <th>存储实例</th>
+              <th>存储路径</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {mappings.map((map) => (
+              <tr>
+                <td>{map.business}</td>
+                <td><span class="tag tag-blue">{map.instance}</span></td>
+                <td class="text-[#999]">{map.rootPath}</td>
+                <td>
+                  <button class="text-[#999] hover:text-[#8b3a3a]">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI 设置 Tab -->
+    <div id="tab-ai" class="tab-content hidden">
+      <div class="max-w-xl">
+        <div class="form-group">
+          <label class="form-label">AI 服务提供商</label>
+          <select class="form-input" id="ai-provider">
+            <option value="deepseek">DeepSeek</option>
+            <option value="kimi">Kimi</option>
+            <option value="doubao">豆包</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">API Key</label>
+          <input type="password" class="form-input" id="ai-api-key" placeholder="sk-xxxxxxxx" />
+          <p class="text-xs text-[#999] mt-1">API Key 将加密存储，不会明文显示</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">API 地址</label>
+          <input type="url" class="form-input" id="ai-api-url" placeholder="https://api.deepseek.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">模型</label>
+          <select class="form-input" id="ai-model">
+            <option value="deepseek-chat">deepseek-chat</option>
+            <option value="deepseek-coder">deepseek-coder</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Temperature</label>
+          <input type="range" min="0" max="1" step="0.1" value="0.7" class="w-full" />
+          <p class="text-xs text-[#999] mt-1">控制输出的随机性，值越低越确定性</p>
+        </div>
+        
+        <div class="bg-[#fafafa] p-4 rounded-lg mb-6">
+          <h4 class="font-medium mb-2">AI 功能说明</h4>
+          <ul class="text-sm text-[#666] space-y-1">
+            <li>• 错别字检查：自动检测文本中的错别字</li>
+            <li>• 标题推荐：根据内容生成多个标题备选</li>
+            <li>• 标签推荐：推荐相关的文章标签</li>
+            <li>• 内容摘要：生成文章摘要</li>
+            <li>• 内容润色：优化文字表达</li>
+            <li>• 内容续写：扩展续写现有内容</li>
+          </ul>
+        </div>
+        
+        <div class="flex justify-end">
+          <button class="btn btn-primary" id="test-ai-btn">
+            <i class="ph ph-plug mr-1"></i>
+            测试连接
+          </button>
+          <button class="btn btn-primary ml-2">
+            <i class="ph ph-floppy-disk mr-1"></i>
+            保存设置
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 安全设置 Tab -->
+    <div id="tab-security" class="tab-content hidden">
+      <div class="max-w-xl">
+        <div class="form-group">
+          <label class="form-label">当前密码</label>
+          <input type="password" class="form-input" placeholder="输入当前密码" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">新密码</label>
+          <input type="password" class="form-input" placeholder="输入新密码" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">确认新密码</label>
+          <input type="password" class="form-input" placeholder="再次输入新密码" />
+        </div>
+        
+        <div class="border-t border-[#e8e8e8] pt-6 mt-6">
+          <h4 class="font-medium mb-4">登录安全</h4>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between cursor-pointer">
+              <span>登录验证码</span>
+              <input type="checkbox" class="w-4 h-4 accent-[#8b3a3a]" checked />
+            </label>
+            <label class="flex items-center justify-between cursor-pointer">
+              <span>登录邮件通知</span>
+              <input type="checkbox" class="w-4 h-4 accent-[#8b3a3a]" />
+            </label>
+          </label>
+        </div>
+        
+        <div class="flex justify-end mt-6">
+          <button class="btn btn-primary">
+            <i class="ph ph-floppy-disk mr-1"></i>
+            保存设置
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加存储实例弹窗 -->
+  <div id="add-instance-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>添加存储实例</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">实例名称 *</label>
+          <input type="text" class="form-input" placeholder="例如：主力存储" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">OpenList API 地址 *</label>
+          <input type="url" class="form-input" placeholder="https://openlist.example.com/api" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">API Token *</label>
+          <input type="password" class="form-input" placeholder="输入 API Token" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">根目录</label>
+          <input type="text" class="form-input" placeholder="/blog-storage" value="/blog-storage" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default modal-cancel">取消</button>
+        <button class="btn btn-primary">添加</button>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .tab-btn {
+    padding: 8px 16px;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn:hover {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn.active {
+    background: #8b3a3a;
+    border-color: #8b3a3a;
+    color: #fff;
+  }
+  
+  .storage-card {
+    transition: all 0.3s;
+  }
+  
+  .storage-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  
+  .status-dot.online {
+    background: #52c41a;
+    box-shadow: 0 0 0 2px #b7eb8f;
+  }
+  
+  .status-dot.offline {
+    background: #ff4d4f;
+    box-shadow: 0 0 0 2px #ffccc7;
+  }
+  
+  /* 弹窗 */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #e8e8e8;
+  }
+</style>
+
+<script>
+  // Tab 切换
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = (btn as HTMLElement).dataset.tab;
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById(`tab-${tab}`)?.classList.remove('hidden');
+    });
+  });
+  
+  // 添加实例弹窗
+  const modal = document.getElementById('add-instance-modal');
+  document.getElementById('add-instance-btn')?.addEventListener('click', () => {
+    modal?.classList.remove('hidden');
+  });
+  
+  document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modal?.classList.add('hidden');
+    });
+  });
+  
+  // AI 提供商切换
+  document.getElementById('ai-provider')?.addEventListener('change', (e) => {
+    const provider = (e.target as HTMLSelectElement).value;
+    const apiUrl = document.getElementById('ai-api-url') as HTMLInputElement;
+    if (provider === 'deepseek') {
+      apiUrl.value = 'https://api.deepseek.com';
+    } else if (provider === 'kimi') {
+      apiUrl.value = 'https://api.moonshot.cn';
+    } else if (provider === 'doubao') {
+      apiUrl.value = 'https://ark.cn-beijing.volces.com';
+    }
+  });
+</script>

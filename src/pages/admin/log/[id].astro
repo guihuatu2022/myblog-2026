@@ -1,0 +1,625 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+
+// 获取路由参数
+const { id } = Astro.params;
+
+// 判断是新建还是编辑
+const isNew = id === 'new';
+
+// 模拟数据（编辑时）
+const post = isNew ? null : {
+  id: id,
+  title: '三十岁的第一个清晨',
+  content: `窗外的第一缕阳光透过窗帘的缝隙，在墙上投下一道金色的光痕。
+
+我躺在床上，听着远处隐约的鸟鸣，感受着这个与往常不同的早晨。今天，是我三十岁的第一天。
+
+## 早晨的仪式
+
+我没有睡懒觉。六点准时醒来，像往常一样。但今天的早餐，我想做得认真一些。
+
+> "三十而立，不是成就，而是一种内心的笃定。"
+
+## 关于"立"
+
+什么是"立"？我想了很久。也许是经济上的独立，又或许只是简单地知道自己想要什么、适合什么。
+
+继续走吧，路还很长。`,
+  categoryId: '1',
+  category: '随笔',
+  permission: 'public',
+  status: 'published',
+  date: '2024-05-20',
+  weather: '晴',
+  mood: '平静',
+  tags: ['生活', '三十岁', '感悟'],
+  coverImage: 'https://picsum.photos/seed/1/800/400',
+  isPinned: true,
+};
+
+// 分类选项
+const categories = [
+  { id: '1', name: '随笔' },
+  { id: '2', name: '摄影' },
+  { id: '3', name: '技术' },
+  { id: '4', name: '读书' },
+];
+
+// 权限选项
+const permissions = [
+  { value: 'public', label: '公开', icon: '🌐' },
+  { value: 'encrypted', label: '加密', icon: '🔐' },
+  { value: 'private', label: '私有', icon: '🔒' },
+];
+
+// 附件
+const attachments = isNew ? [] : [
+  { id: '1', name: '博客搭建完整教程.pdf', size: '2.3 MB' },
+];
+---
+
+<AdminLayout title={isNew ? '写文章' : '编辑文章'} activeMenu="log">
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <div class="flex items-center gap-4">
+      <a href="/admin/log" class="btn btn-default">
+        <i class="ph ph-arrow-left mr-1"></i>
+        返回
+      </a>
+      <h1 class="page-title">{isNew ? '写文章' : '编辑文章'}</h1>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn btn-default" id="save-draft">
+        <i class="ph ph-floppy-disk mr-1"></i>
+        保存草稿
+      </button>
+      <button class="btn btn-primary" id="publish">
+        <i class="ph ph-paper-plane-tilt mr-1"></i>
+        发布
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+    <!-- 主内容区 -->
+    <div class="xl:col-span-3 space-y-6">
+      <!-- 标题 -->
+      <div class="admin-card">
+        <input 
+          type="text" 
+          id="post-title"
+          class="title-input"
+          placeholder="输入文章标题..."
+          value={post?.title || ''}
+        />
+      </div>
+
+      <!-- 内容编辑器 -->
+      <div class="admin-card">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-[#e8e8e8]">
+          <div class="flex gap-2">
+            <button class="editor-btn" title="加粗" data-command="bold">
+              <i class="ph ph-text-b"></i>
+            </button>
+            <button class="editor-btn" title="斜体" data-command="italic">
+              <i class="ph ph-text-italic"></i>
+            </button>
+            <button class="editor-btn" title="引用" data-command="quote">
+              <i class="ph ph-quotes"></i>
+            </button>
+            <span class="w-px h-6 bg-[#e8e8e8] mx-2"></span>
+            <button class="editor-btn" title="标题1" data-command="h1">
+              <i class="ph ph-text-h-one"></i>
+            </button>
+            <button class="editor-btn" title="标题2" data-command="h2">
+              <i class="ph ph-text-h-two"></i>
+            </button>
+            <span class="w-px h-6 bg-[#e8e8e8] mx-2"></span>
+            <button class="editor-btn" title="列表" data-command="ul">
+              <i class="ph ph-list-bullets"></i>
+            </button>
+            <button class="editor-btn" title="代码" data-command="code">
+              <i class="ph ph-code"></i>
+            </button>
+            <button class="editor-btn" title="链接" data-command="link">
+              <i class="ph ph-link"></i>
+            </button>
+            <button class="editor-btn" title="图片" data-command="image">
+              <i class="ph ph-image"></i>
+            </button>
+          </div>
+          <button class="editor-btn" id="toggle-ai" title="AI 辅助">
+            <i class="ph ph-robot"></i>
+            <span class="ml-1 text-sm">AI</span>
+          </button>
+        </div>
+        
+        <textarea 
+          id="post-content"
+          class="content-editor"
+          placeholder="在此输入文章内容..."
+        >{post?.content || ''}</textarea>
+      </div>
+
+      <!-- AI 辅助面板 -->
+      <div class="admin-card ai-panel hidden" id="ai-panel">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="ph ph-robot mr-2"></i>
+            AI 写作助手
+          </h3>
+          <button class="text-[#999] hover:text-[#8b3a3a]" id="close-ai">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+        
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button class="ai-btn" id="ai-check">
+            <i class="ph ph-magnifying-glass mr-1"></i>
+            错别字检查
+          </button>
+          <button class="ai-btn" id="ai-title">
+            <i class="ph ph-text-aa mr-1"></i>
+            标题推荐
+          </button>
+          <button class="ai-btn" id="ai-tags">
+            <i class="ph ph-tag mr-1"></i>
+            标签推荐
+          </button>
+          <button class="ai-btn" id="ai-summary">
+            <i class="ph ph-list-dashes mr-1"></i>
+            生成摘要
+          </button>
+          <button class="ai-btn" id="ai-rewrite">
+            <i class="ph ph-magic-wand mr-1"></i>
+            内容润色
+          </button>
+          <button class="ai-btn" id="ai-continue">
+            <i class="ph ph-arrow-right mr-1"></i>
+            内容续写
+          </button>
+        </div>
+        
+        <div id="ai-result" class="ai-result hidden">
+          <div class="ai-loading">
+            <i class="ph ph-spinner animate-spin mr-2"></i>
+            AI 正在处理中...
+          </div>
+        </div>
+      </div>
+
+      <!-- 文章附件 -->
+      <div class="admin-card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="ph ph-paperclip mr-2"></i>
+            文章附件
+          </h3>
+        </div>
+        
+        <div id="attachment-list" class="space-y-2 mb-4">
+          {attachments.map(att => (
+            <div class="flex items-center justify-between p-3 bg-[#fafafa] rounded-lg">
+              <div class="flex items-center gap-3">
+                <i class="ph ph-file text-xl text-[#8b3a3a]"></i>
+                <span>{att.name}</span>
+                <span class="text-sm text-[#999]">{att.size}</span>
+              </div>
+              <div class="flex gap-2">
+                <button class="text-[#999] hover:text-[#8b3a3a]">
+                  <i class="ph ph-download-simple"></i>
+                </button>
+                <button class="text-[#999] hover:text-red-500">
+                  <i class="ph ph-trash"></i>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div class="border-2 border-dashed border-[#dcd3b2] rounded-lg p-8 text-center">
+          <i class="ph ph-cloud-arrow-up text-4xl text-[#ccc] mb-2"></i>
+          <p class="text-[#999] mb-2">点击或拖拽文件到此处上传</p>
+          <p class="text-xs text-[#ccc]">支持 PDF、Word、图片等文件</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 侧边栏设置 -->
+    <div class="xl:col-span-1 space-y-6">
+      <!-- 基本设置 -->
+      <div class="admin-card">
+        <h3 class="card-title mb-4">
+          <i class="ph ph-sliders mr-2"></i>
+          基本设置
+        </h3>
+        
+        <div class="space-y-4">
+          <div class="form-group">
+            <label class="form-label">分类</label>
+            <select id="post-category" class="form-input">
+              {categories.map(cat => (
+                <option value={cat.id} selected={post?.categoryId === cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">权限</label>
+            <div class="grid grid-cols-3 gap-2">
+              {permissions.map(p => (
+                <button 
+                  class={`permission-btn ${post?.permission === p.value ? 'active' : ''}`}
+                  data-value={p.value}
+                >
+                  <span class="text-lg">{p.icon}</span>
+                  <span class="text-xs">{p.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">发布日期</label>
+            <input 
+              type="date" 
+              id="post-date"
+              class="form-input"
+              value={post?.date || new Date().toISOString().split('T')[0]}
+            />
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">天气</label>
+            <select id="post-weather" class="form-input">
+              <option value="">选择天气</option>
+              <option value="晴" selected={post?.weather === '晴'}>晴</option>
+              <option value="多云" selected={post?.weather === '多云'}>多云</option>
+              <option value="阴" selected={post?.weather === '阴'}>阴</option>
+              <option value="雨" selected={post?.weather === '雨'}>雨</option>
+              <option value="雪" selected={post?.weather === '雪'}>雪</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">心情</label>
+            <input 
+              type="text" 
+              id="post-mood"
+              class="form-input"
+              placeholder="如：平静、喜悦、感慨"
+              value={post?.mood || ''}
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 标签 -->
+      <div class="admin-card">
+        <h3 class="card-title mb-4">
+          <i class="ph ph-tag mr-2"></i>
+          文章标签
+        </h3>
+        <div class="flex flex-wrap gap-2 mb-3" id="tag-list">
+          {(post?.tags || []).map(tag => (
+            <span class="tag tag-blue flex items-center gap-1">
+              #{tag}
+              <button class="remove-tag ml-1">&times;</button>
+            </span>
+          ))}
+        </div>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="new-tag"
+            class="form-input flex-1"
+            placeholder="输入标签后按回车"
+          />
+          <button class="btn btn-default" id="add-tag">
+            <i class="ph ph-plus"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 封面图 -->
+      <div class="admin-card">
+        <h3 class="card-title mb-4">
+          <i class="ph ph-image mr-2"></i>
+          封面图片
+        </h3>
+        
+        <div id="cover-preview" class="mb-3">
+          {post?.coverImage && (
+            <img src={post.coverImage} alt="封面" class="w-full h-40 object-cover rounded-lg" />
+          )}
+        </div>
+        
+        <div class="border-2 border-dashed border-[#dcd3b2] rounded-lg p-4 text-center cursor-pointer hover:border-[#8b3a3a] transition-colors">
+          <i class="ph ph-upload-simple text-2xl text-[#ccc] mb-1"></i>
+          <p class="text-sm text-[#999]">点击上传封面图</p>
+        </div>
+        
+        <input type="hidden" id="cover-url" value={post?.coverImage || ''} />
+      </div>
+
+      <!-- 高级设置 -->
+      <div class="admin-card">
+        <h3 class="card-title mb-4">
+          <i class="ph ph-gear mr-2"></i>
+          高级设置
+        </h3>
+        
+        <div class="space-y-3">
+          <label class="flex items-center justify-between cursor-pointer">
+            <span class="text-sm">置顶文章</span>
+            <input type="checkbox" id="is-pinned" class="w-4 h-4 accent-[#8b3a3a]" checked={post?.isPinned} />
+          </label>
+          
+          <label class="flex items-center justify-between cursor-pointer">
+            <span class="text-sm">允许评论</span>
+            <input type="checkbox" id="allow-comment" class="w-4 h-4 accent-[#8b3a3a]" checked />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .title-input {
+    width: 100%;
+    border: none;
+    font-size: 24px;
+    font-weight: 600;
+    font-family: inherit;
+    padding: 8px 0;
+    background: transparent;
+  }
+  
+  .title-input:focus {
+    outline: none;
+  }
+  
+  .title-input::placeholder {
+    color: #ccc;
+  }
+  
+  .content-editor {
+    width: 100%;
+    min-height: 400px;
+    border: none;
+    font-size: 15px;
+    line-height: 1.8;
+    font-family: inherit;
+    resize: vertical;
+    background: transparent;
+  }
+  
+  .content-editor:focus {
+    outline: none;
+  }
+  
+  .editor-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .editor-btn:hover {
+    background: #f0f2f5;
+    color: #8b3a3a;
+  }
+  
+  .ai-panel {
+    border: 2px solid var(--primary);
+  }
+  
+  .ai-btn {
+    padding: 8px 14px;
+    border: 1px solid #e8e8e8;
+    border-radius: 20px;
+    background: #fff;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .ai-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  
+  .ai-result {
+    padding: 16px;
+    background: #fafafa;
+    border-radius: 8px;
+    min-height: 100px;
+  }
+  
+  .ai-loading {
+    display: flex;
+    align-items: center;
+    color: #666;
+  }
+  
+  .permission-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .permission-btn:hover {
+    border-color: var(--primary);
+  }
+  
+  .permission-btn.active {
+    border-color: var(--primary);
+    background: #fff2f0;
+    color: var(--primary);
+  }
+  
+  .remove-tag {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: inherit;
+    opacity: 0.7;
+  }
+  
+  .remove-tag:hover {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  // AI 面板切换
+  const toggleAi = document.getElementById('toggle-ai');
+  const closeAi = document.getElementById('close-ai');
+  const aiPanel = document.getElementById('ai-panel');
+  
+  toggleAi?.addEventListener('click', () => {
+    aiPanel?.classList.toggle('hidden');
+  });
+  
+  closeAi?.addEventListener('click', () => {
+    aiPanel?.classList.add('hidden');
+  });
+  
+  // AI 功能
+  const aiFunctions = {
+    'ai-check': { prompt: '检查以下文本的错别字', icon: 'ph-magnifying-glass' },
+    'ai-title': { prompt: '根据以下内容推荐5个标题', icon: 'ph-text-aa' },
+    'ai-tags': { prompt: '根据以下内容推荐相关标签', icon: 'ph-tag' },
+    'ai-summary': { prompt: '为以下内容生成摘要', icon: 'ph-list-dashes' },
+    'ai-rewrite': { prompt: '润色以下内容', icon: 'ph-magic-wand' },
+    'ai-continue': { prompt: '续写以下内容', icon: 'ph-arrow-right' },
+  };
+  
+  Object.entries(aiFunctions).forEach(([id, config]) => {
+    const btn = document.getElementById(id);
+    btn?.addEventListener('click', async () => {
+      const content = (document.getElementById('post-content') as HTMLTextAreaElement)?.value;
+      if (!content) {
+        alert('请先输入文章内容');
+        return;
+      }
+      
+      const resultDiv = document.getElementById('ai-result');
+      if (resultDiv) {
+        resultDiv.classList.remove('hidden');
+        resultDiv.innerHTML = `
+          <div class="ai-loading">
+            <i class="ph ph-spinner animate-spin mr-2"></i>
+            AI 正在处理中，请稍候...
+          </div>
+        `;
+      }
+      
+      // TODO: 调用 AI API
+      console.log('调用 AI:', config.prompt, content);
+      
+      // 模拟响应
+      setTimeout(() => {
+        if (resultDiv) {
+          resultDiv.innerHTML = `
+            <div class="space-y-3">
+              <p class="text-sm text-[#666]">${config.prompt}结果：</p>
+              <div class="p-3 bg-white rounded border border-[#e8e8e8]">
+                <p class="text-sm">这是 AI 返回的示例结果。实际使用时将调用真实的 AI API。</p>
+              </div>
+              <div class="flex gap-2">
+                <button class="btn btn-primary btn-sm">插入内容</button>
+                <button class="btn btn-default btn-sm">复制</button>
+              </div>
+            </div>
+          `;
+        }
+      }, 2000);
+    });
+  });
+  
+  // 标签添加
+  const tagInput = document.getElementById('new-tag') as HTMLInputElement;
+  const addTagBtn = document.getElementById('add-tag');
+  const tagList = document.getElementById('tag-list');
+  
+  function addTag(tag: string) {
+    if (!tag || tagList?.querySelector(`span:contains(#${tag})`)) return;
+    
+    const span = document.createElement('span');
+    span.className = 'tag tag-blue flex items-center gap-1';
+    span.innerHTML = `#${tag}<button class="remove-tag ml-1">&times;</button>`;
+    tagList?.appendChild(span);
+    
+    span.querySelector('.remove-tag')?.addEventListener('click', () => {
+      span.remove();
+    });
+  }
+  
+  tagInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag(tagInput.value.trim());
+      tagInput.value = '';
+    }
+  });
+  
+  addTagBtn?.addEventListener('click', () => {
+    addTag(tagInput.value.trim());
+    tagInput.value = '';
+  });
+  
+  // 保存草稿 / 发布
+  document.getElementById('save-draft')?.addEventListener('click', () => {
+    savePost('draft');
+  });
+  
+  document.getElementById('publish')?.addEventListener('click', () => {
+    savePost('published');
+  });
+  
+  function savePost(status: string) {
+    const title = (document.getElementById('post-title') as HTMLInputElement)?.value;
+    const content = (document.getElementById('post-content') as HTMLTextAreaElement)?.value;
+    
+    if (!title) {
+      alert('请输入文章标题');
+      return;
+    }
+    
+    const data = {
+      title,
+      content,
+      category: (document.getElementById('post-category') as HTMLSelectElement)?.value,
+      permission: document.querySelector('.permission-btn.active')?.getAttribute('data-value'),
+      date: (document.getElementById('post-date') as HTMLInputElement)?.value,
+      weather: (document.getElementById('post-weather') as HTMLSelectElement)?.value,
+      mood: (document.getElementById('post-mood') as HTMLInputElement)?.value,
+      status,
+      isPinned: (document.getElementById('is-pinned') as HTMLInputElement)?.checked,
+    };
+    
+    console.log('保存文章:', data);
+    alert(`文章已${status === 'draft' ? '保存为草稿' : '发布'}！`);
+  }
+</script>

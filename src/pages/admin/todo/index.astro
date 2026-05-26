@@ -1,0 +1,298 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+// 待办数据
+const todos = [
+  { id: '1', content: '完成博客系统开发', status: 'done', dueDate: '2024-05-31' },
+  { id: '2', content: '学习 Astro 框架进阶用法', status: 'done', dueDate: '2024-05-25' },
+  { id: '3', content: '搭建 OpenList 文件存储服务', status: 'in_progress', dueDate: '2024-06-15' },
+  { id: '4', content: '配置 Cloudflare D1 数据库', status: 'pending', dueDate: '2024-06-10' },
+  { id: '5', content: '部署博客到 Cloudflare Pages', status: 'pending', dueDate: '2024-06-20' },
+  { id: '6', content: '申请 DeepSeek API 用于 AI 辅助', status: 'pending', dueDate: '2024-06-25' },
+];
+
+const statusLabels: Record<string, { label: string; class: string }> = {
+  done: { label: '已完成', class: 'tag-green' },
+  in_progress: { label: '进行中', class: 'tag-yellow' },
+  pending: { label: '待开始', class: 'tag-gray' },
+};
+---
+
+<AdminLayout title="待办清单" activeMenu="todo">
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <h1 class="page-title">待办清单</h1>
+    <button class="btn btn-primary" id="add-todo-btn">
+      <i class="ph ph-plus"></i>
+      添加待办
+    </button>
+  </div>
+
+  <!-- 统计卡片 -->
+  <div class="stat-cards mb-6">
+    <div class="stat-card-admin">
+      <div class="stat-icon primary">
+        <i class="ph ph-list-checks"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{todos.length}</h3>
+        <p>全部待办</p>
+      </div>
+    </div>
+    <div class="stat-card-admin">
+      <div class="stat-icon success">
+        <i class="ph ph-check-circle"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{todos.filter(t => t.status === 'done').length}</h3>
+        <p>已完成</p>
+      </div>
+    </div>
+    <div class="stat-card-admin">
+      <div class="stat-icon warning">
+        <i class="ph ph-clock"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{todos.filter(t => t.status === 'in_progress').length}</h3>
+        <p>进行中</p>
+      </div>
+    </div>
+    <div class="stat-card-admin">
+      <div class="stat-icon info">
+        <i class="ph ph-hourglass"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{todos.filter(t => t.status === 'pending').length}</h3>
+        <p>待开始</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 筛选 -->
+  <div class="flex items-center gap-4 mb-6">
+    <span class="text-sm text-[#999]">状态筛选</span>
+    <div class="flex gap-2">
+      <button class="tab-btn-sm active">全部</button>
+      <button class="tab-btn-sm">进行中</button>
+      <button class="tab-btn-sm">待开始</button>
+      <button class="tab-btn-sm">已完成</button>
+    </div>
+  </div>
+
+  <!-- 待办列表 -->
+  <div class="admin-card">
+    <div class="space-y-3" id="todo-list">
+      {todos.map((todo) => (
+        <div 
+          class={`todo-item flex items-center gap-4 p-4 border border-[#e8e8e8] rounded-lg ${
+            todo.status === 'done' ? 'bg-[#fafafa] opacity-60' : ''
+          }`}
+          data-status={todo.status}
+        >
+          <button 
+            class={`status-btn w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+              todo.status === 'done' 
+                ? 'bg-[#52c41a] border-[#52c41a] text-white' 
+                : todo.status === 'in_progress'
+                ? 'border-[#faad14] text-[#faad14]'
+                : 'border-[#d9d9d9] hover:border-[#8b3a3a]'
+            }`}
+            data-id={todo.id}
+          >
+            {todo.status === 'done' && <i class="ph ph-check text-sm"></i>}
+            {todo.status === 'in_progress' && <i class="ph ph-circle-dashed text-sm"></i>}
+          </button>
+          
+          <div class="flex-1">
+            <p class={`font-medium ${todo.status === 'done' ? 'line-through text-[#999]' : ''}`}>
+              {todo.content}
+            </p>
+            <p class="text-xs text-[#999] mt-1">
+              <i class="ph ph-calendar mr-1"></i>
+              {todo.dueDate}
+            </p>
+          </div>
+          
+          <span class={`tag text-xs ${statusLabels[todo.status].class}`}>
+            {statusLabels[todo.status].label}
+          </span>
+          
+          <div class="flex gap-2">
+            <button class="text-[#999] hover:text-[#8b3a3a] edit-todo" data-id={todo.id} title="编辑">
+              <i class="ph ph-pencil-simple"></i>
+            </button>
+            <button class="text-[#999] hover:text-red-500 delete-todo" data-id={todo.id} title="删除">
+              <i class="ph ph-trash"></i>
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- 添加待办弹窗 -->
+  <div id="add-todo-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>添加待办</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">待办内容 *</label>
+          <input type="text" class="form-input" id="todo-content" placeholder="输入待办事项..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">截止日期</label>
+          <input type="date" class="form-input" id="todo-date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">状态</label>
+          <select class="form-input" id="todo-status">
+            <option value="pending">待开始</option>
+            <option value="in_progress">进行中</option>
+            <option value="done">已完成</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default modal-cancel">取消</button>
+        <button class="btn btn-primary" id="save-todo">添加</button>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .tab-btn-sm {
+    padding: 6px 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn-sm:hover,
+  .tab-btn-sm.active {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn-sm.active {
+    background: #fff2f0;
+  }
+  
+  .status-btn {
+    cursor: pointer;
+    background: transparent;
+  }
+  
+  .todo-item {
+    transition: all 0.3s;
+  }
+  
+  .todo-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  /* 弹窗 */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #e8e8e8;
+  }
+</style>
+
+<script>
+  // 添加待办弹窗
+  const modal = document.getElementById('add-todo-modal');
+  document.getElementById('add-todo-btn')?.addEventListener('click', () => {
+    modal?.classList.remove('hidden');
+  });
+  
+  document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modal?.classList.add('hidden');
+    });
+  });
+  
+  // 保存待办
+  document.getElementById('save-todo')?.addEventListener('click', () => {
+    const content = (document.getElementById('todo-content') as HTMLInputElement)?.value;
+    const date = (document.getElementById('todo-date') as HTMLInputElement)?.value;
+    const status = (document.getElementById('todo-status') as HTMLSelectElement)?.value;
+    
+    if (!content) {
+      alert('请输入待办内容');
+      return;
+    }
+    
+    console.log('添加待办:', { content, date, status });
+    modal?.classList.add('hidden');
+    alert('待办已添加！');
+  });
+  
+  // 删除待办
+  document.querySelectorAll('.delete-todo').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (confirm('确定要删除这个待办吗？')) {
+        console.log('删除待办:', (btn as HTMLElement).dataset.id);
+      }
+    });
+  });
+  
+  // 切换状态
+  document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      console.log('切换状态:', (btn as HTMLElement).dataset.id);
+    });
+  });
+</script>

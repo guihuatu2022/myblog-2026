@@ -1,0 +1,40 @@
+{
+  "name": "blog",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "wrangler pages dev ./dist --compatibility-date=2024-05-14",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "wrangler d1 execute blog-db --local --file=./drizzle/*.sql",
+    "db:push:remote": "wrangler d1 execute blog-db --remote --file=./drizzle/*.sql",
+    "db:studio": "drizzle-kit studio",
+    "deploy": "npm run build && wrangler pages deploy ./dist",
+    "deploy:preview": "npm run build && wrangler pages deploy ./dist --branch=preview"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^10.0.0",
+    "@astrojs/react": "^3.0.0",
+    "@astrojs/tailwind": "^5.0.0",
+    "astro": "^4.0.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.0.0",
+    "nanoid": "^5.0.0",
+    "postcss": "^8.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.0",
+    "drizzle-kit": "^0.20.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
+  }
+}

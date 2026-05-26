@@ -1,0 +1,121 @@
+---
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+// 判断当前路径是否激活
+function isActive(path: string): boolean {
+  if (path === '/') {
+    return currentPath === '/';
+  }
+  return currentPath.startsWith(path);
+}
+
+// 导航项
+const navItems = [
+  { path: '/', icon: 'ph-house', label: '博客首页' },
+  { path: '/log', icon: 'ph-pen-nib', label: '岁月日志' },
+  { path: '/album', icon: 'ph-images', label: '生活相册' },
+  { path: '/drive', icon: 'ph-hard-drives', label: '个人网盘' },
+  { path: '/nav', icon: 'ph-compass', label: '常用导航' },
+  { path: '/archive', icon: 'ph-archive', label: '文章归档' },
+  { path: '/guestbook', icon: 'ph-envelope-simple', label: '访客留言' },
+];
+
+const adminItems = [
+  { path: '/todo', icon: 'ph-check-square', label: '我的待办' },
+  { path: '/admin', icon: 'ph-gear', label: '后台管理' },
+];
+---
+
+<aside class="sidebar">
+  <!-- 顶部 -->
+  <div class="sidebar-top">
+    <div class="flex items-center justify-between w-full mb-2">
+      <h1 class="font-calligraphy text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest">
+        三十而立
+      </h1>
+      <a href="/" class="seal-btn hidden md:flex" title="返回首页">
+        返
+      </a>
+    </div>
+    <p class="text-[10px] text-[#a8a8a8] tracking-[0.3em] font-hand opacity-90">
+      记录 · 沉淀 · 回忆
+    </p>
+    <p class="text-[10px] text-gray-600 tracking-[0.2em] uppercase font-serif opacity-50 w-full text-center border-t border-gray-700/30 pt-2 mt-3">
+      Life in Progress
+    </p>
+  </div>
+  
+  <!-- 导航 -->
+  <nav class="sidebar-nav flex-1">
+    <ul class="space-y-1">
+      {navItems.map((item) => (
+        <li>
+          <a 
+            href={item.path} 
+            class={`nav-link ${isActive(item.path) ? 'active' : ''}`}
+          >
+            <i class={item.icon}></i>
+            <span class="menu-item-text">{item.label}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    
+    <div class="border-t border-gray-700/30 my-4 pt-4">
+      <p class="text-[10px] text-gray-600 tracking-[0.2em] uppercase font-serif opacity-50 px-4 mb-2">
+        私人空间
+      </p>
+      <ul class="space-y-1">
+        {adminItems.map((item) => (
+          <li>
+            <a 
+              href={item.path} 
+              class={`nav-link ${isActive(item.path) ? 'active' : ''}`}
+            >
+              <i class={item.icon}></i>
+              <span class="menu-item-text">{item.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </nav>
+  
+  <!-- 底部 -->
+  <div class="sidebar-footer">
+    <p>&copy; 2024 - 2064</p>
+    <p class="font-serif opacity-70">朝花夕拾 · 岁月静好</p>
+  </div>
+</aside>
+
+<style>
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    
+    .menu-item-text {
+      display: block;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .menu-item-text {
+      display: block;
+    }
+  }
+</style>

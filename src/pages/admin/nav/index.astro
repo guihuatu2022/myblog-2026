@@ -1,0 +1,302 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+// 分类
+const categories = [
+  { id: '1', name: '技术博客' },
+  { id: '2', name: '设计资源' },
+  { id: '3', name: '效率工具' },
+  { id: '4', name: '学习园地' },
+  { id: '5', name: '生活娱乐' },
+];
+
+// 站点数据
+const sites = [
+  { id: '1', title: 'GitHub', url: 'https://github.com', desc: '代码托管平台', category: '技术博客', icon: 'https://github.githubassets.com/favicons/favicon.svg' },
+  { id: '2', title: 'Stack Overflow', url: 'https://stackoverflow.com', desc: '技术问答社区', category: '技术博客', icon: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico' },
+  { id: '3', title: 'MDN Web Docs', url: 'https://developer.mozilla.org', desc: 'Web 开发文档', category: '技术博客', icon: 'https://developer.mozilla.org/favicon-48x48.png' },
+  { id: '4', title: 'Unsplash', url: 'https://unsplash.com', desc: '免费高清图片', category: '设计资源', icon: 'https://unsplash.com/favicon.ico' },
+  { id: '5', title: 'Iconify', url: 'https://icon-sets.iconify.design', desc: '图标库集合', category: '设计资源', icon: 'https://icon-sets.iconify.design/favicon.ico' },
+  { id: '6', title: 'Notion', url: 'https://notion.so', desc: '笔记与知识管理', category: '效率工具', icon: 'https://www.notion.so/favicon.ico' },
+  { id: '7', title: 'Bilibili', url: 'https://bilibili.com', desc: '视频学习网站', category: '学习园地', icon: 'https://www.bilibili.com/favicon.ico' },
+  { id: '8', title: '豆瓣', url: 'https://douban.com', desc: '读书影音', category: '生活娱乐', icon: 'https://www.douban.com/favicon.ico' },
+];
+---
+
+<AdminLayout title="导航管理" activeMenu="nav">
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <h1 class="page-title">导航管理</h1>
+    <button class="btn btn-primary" id="add-site-btn">
+      <i class="ph ph-plus"></i>
+      添加站点
+    </button>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div class="admin-card">
+    <div class="flex gap-2 mb-6">
+      <button class="tab-btn active" data-tab="sites">
+        <i class="ph ph-link-simple mr-1"></i>
+        站点列表
+      </button>
+      <button class="tab-btn" data-tab="categories">
+        <i class="ph ph-folder-simple mr-1"></i>
+        分类管理
+      </button>
+    </div>
+
+    <!-- 站点列表 Tab -->
+    <div id="tab-sites" class="tab-content">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;">
+              <input type="checkbox" class="w-4 h-4 accent-[#8b3a3a]" />
+            </th>
+            <th>站点名称</th>
+            <th>URL</th>
+            <th style="width: 100px;">分类</th>
+            <th style="width: 120px;">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sites.map((site) => (
+            <tr>
+              <td>
+                <input type="checkbox" class="site-checkbox w-4 h-4 accent-[#8b3a3a]" />
+              </td>
+              <td>
+                <div class="flex items-center gap-3">
+                  <img src={site.icon} alt="" class="w-6 h-6 rounded" onerror="this.style.display='none'" />
+                  <span class="font-medium">{site.title}</span>
+                  <span class="text-sm text-[#999]">{site.desc}</span>
+                </div>
+              </td>
+              <td class="text-[#999] truncate max-w-xs">{site.url}</td>
+              <td><span class="tag tag-blue">{site.category}</span></td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="text-[#999] hover:text-[#8b3a3a] edit-site" data-id={site.id} title="编辑">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-[#999] hover:text-red-500 delete-site" data-id={site.id} title="删除">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 分类管理 Tab -->
+    <div id="tab-categories" class="tab-content hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-medium">分类列表</h3>
+        <button class="btn btn-primary btn-sm" id="add-category-btn">
+          <i class="ph ph-plus mr-1"></i>
+          添加分类
+        </button>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>分类名称</th>
+            <th>英文标识</th>
+            <th>图标</th>
+            <th>站点数量</th>
+            <th>排序</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {categories.map((cat, i) => (
+            <tr>
+              <td class="font-medium">
+                <i class={`ph ${['ph-code', 'ph-palette', 'ph-tools', 'ph-graduation-cap', 'ph-coffee'][i]} mr-2 text-[#8b3a3a]`}></i>
+                {cat.name}
+              </td>
+              <td class="text-[#999]">{cat.name.toLowerCase().replace(' ', '-')}</td>
+              <td>{['code', 'palette', 'tools', 'graduation-cap', 'coffee'][i]}</td>
+              <td>{sites.filter(s => s.category === cat.name).length}</td>
+              <td>
+                <div class="flex items-center gap-1">
+                  <button class="text-[#ccc] hover:text-[#8b3a3a]">
+                    <i class="ph ph-caret-up"></i>
+                  </button>
+                  <button class="text-[#ccc] hover:text-[#8b3a3a]">
+                    <i class="ph ph-caret-down"></i>
+                  </button>
+                </div>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="text-[#999] hover:text-[#8b3a3a]">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-[#999] hover:text-red-500">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 添加站点弹窗 -->
+  <div id="add-site-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>添加站点</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">站点名称 *</label>
+          <input type="text" class="form-input" placeholder="例如：GitHub" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL 地址 *</label>
+          <input type="url" class="form-input" placeholder="https://example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">描述</label>
+          <input type="text" class="form-input" placeholder="站点描述（可选）" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">分类 *</label>
+          <select class="form-input">
+            {categories.map(cat => (
+              <option value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">图标 URL</label>
+          <input type="url" class="form-input" placeholder="https://example.com/favicon.ico" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default modal-cancel">取消</button>
+        <button class="btn btn-primary">添加站点</button>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .tab-btn {
+    padding: 8px 16px;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn:hover {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn.active {
+    background: #8b3a3a;
+    border-color: #8b3a3a;
+    color: #fff;
+  }
+  
+  /* 弹窗 */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #e8e8e8;
+  }
+</style>
+
+<script>
+  // Tab 切换
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = (btn as HTMLElement).dataset.tab;
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById(`tab-${tab}`)?.classList.remove('hidden');
+    });
+  });
+  
+  // 添加站点弹窗
+  const addSiteModal = document.getElementById('add-site-modal');
+  document.getElementById('add-site-btn')?.addEventListener('click', () => {
+    addSiteModal?.classList.remove('hidden');
+  });
+  
+  document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      addSiteModal?.classList.add('hidden');
+    });
+  });
+  
+  // 删除站点
+  document.querySelectorAll('.delete-site').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (confirm('确定要删除这个站点吗？')) {
+        console.log('删除站点:', (btn as HTMLElement).dataset.id);
+      }
+    });
+  });
+</script>

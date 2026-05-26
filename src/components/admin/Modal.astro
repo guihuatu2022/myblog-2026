@@ -1,0 +1,95 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const { id, title, size = 'md' } = Astro.props;
+
+const sizeClasses = {
+  sm: 'max-w-sm',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+};
+---
+
+<div 
+  id={id}
+  class="fixed inset-0 z-50 hidden"
+  x-data="{ show: false }"
+  x-show="show"
+  x-transition:enter="transition ease-out duration-200"
+  x-transition:enter-start="opacity-0"
+  x-transition:enter-end="opacity-100"
+  x-transition:leave="transition ease-in duration-150"
+  x-transition:leave-start="opacity-100"
+  x-transition:leave-end="opacity-0"
+>
+  <!-- 遮罩 -->
+  <div class="absolute inset-0 bg-black/50" @click="$dispatch('close-modal')"></div>
+  
+  <!-- 弹窗内容 -->
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div 
+      class={`bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]}`}
+      @click.stop
+    >
+      <!-- 头部 -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#dcd3b2]">
+        <h3 class="text-lg font-bold text-[#2c2c2c]">{title}</h3>
+        <button 
+          type="button"
+          class="text-gray-400 hover:text-gray-600 transition-colors"
+          @click="$dispatch('close-modal')"
+        >
+          <i class="ph ph-x text-xl"></i>
+        </button>
+      </div>
+      
+      <!-- 内容 -->
+      <div class="px-6 py-4">
+        <slot />
+      </div>
+      
+      <!-- 底部 -->
+      <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex items-center justify-end gap-3">
+        <slot name="footer">
+          <button 
+            type="button"
+            class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            @click="$dispatch('close-modal')"
+          >
+            取消
+          </button>
+          <button 
+            type="button"
+            class="px-4 py-2 text-sm bg-[#8b3a3a] text-white rounded hover:bg-[#a94444] transition-colors"
+          >
+            确认
+          </button>
+        </slot>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 使用方式 -->
+<!-- 
+<Modal id="delete-modal" title="确认删除">
+  <p>确定要删除这条记录吗？</p>
+  <Fragment slot="footer">
+    <button @click="$dispatch('close-modal')">取消</button>
+    <button @click="handleDelete">删除</button>
+  </Fragment>
+</Modal>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('delete-modal');
+    modal?.addEventListener('close-modal', () => {
+      modal.classList.add('hidden');
+    });
+  });
+</script>
+-->

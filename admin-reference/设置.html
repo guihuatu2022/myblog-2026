@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>系统设置 · 后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont@1.1.0/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="../assets/css/shared.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <style>
+        .mobile-header-fix { display: flex !important; }
+        @media (min-width: 768px) { .mobile-header-fix { display: none !important; } }
+        .instance-card { transition: all 0.2s ease; border-left: 3px solid #dcd3b2; }
+        .instance-card.active { border-left-color: #8b3a3a; background: rgba(139,58,58,0.03); }
+        .instance-card.disabled { border-left-color: #c4493c; background: rgba(196,73,60,0.03); opacity: 0.8; }
+        .instance-card.disabled * { opacity: 0.9; }
+        .status-badge { padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+        .path-badge { background: rgba(74,107,101,0.08); color: #4a6b65; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-family: var(--font-hand); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: #f7f1e3; padding: 24px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .file-browser { border: 1px solid var(--line-color); background: white; border-radius: 4px; max-height: 300px; overflow-y: auto; }
+        .fb-item { padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f0ebe0; }
+        .fb-item:hover { background: rgba(139,58,58,0.03); }
+        .fb-item.selected { background: rgba(139,58,58,0.08); }
+        .fb-item i { color: #bfa57d; font-size: 18px; }
+        .sub-tab-bar { display: flex; gap: 4px; border-bottom: 1px solid #dcd3b2; padding-bottom: 0; margin-bottom: 20px; }
+        .sub-tab-btn { padding: 8px 16px; border: none; background: transparent; font-family: var(--font-serif); font-size: 14px; cursor: pointer; color: #5d5d5d; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
+        .sub-tab-btn:hover { color: #8b3a3a; }
+        .sub-tab-btn.active { color: #8b3a3a; border-bottom-color: #8b3a3a; font-weight: bold; }
+        .sub-tab-panel { display: none; }
+        .sub-tab-panel.active { display: block; }
+    </style>
+</head>
+<body class="is-admin">
+    <div class="reading-progress"></div>
+    <button id="back-to-top" class="back-to-top"><i class="ph ph-arrow-up"></i></button>
+    <div class="book-container book-shadow">
+        
+        <header class="mobile-header-fix md:hidden flex items-center justify-between p-4 bg-[#2c2a29] text-[#dcd3b2] shadow-md relative z-30 shrink-0">
+            <button onclick="toggleMobileMenu()" class="p-1 focus:outline-none"><i class="ph ph-list text-2xl"></i></button>
+            <h1 class="font-calligraphy text-2xl tracking-widest absolute left-1/2 -translate-x-1/2 mt-1">后台管理</h1>
+            <button onclick="location.href='../pages/首页.html'" class="w-7 h-7 border border-[#bfa57d] text-[#bfa57d] bg-[#bfa57d]/10 flex items-center justify-center text-[10px] font-bold focus:outline-none transition-colors" title="返回前台">返</button>
+        </header>
+
+        <div id="mobile-backdrop" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"></div>
+
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-[240px] shrink-0 bg-[#2c2a29] text-gray-300 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+            <button class="md:hidden absolute top-5 right-5 text-gray-400 hover:text-white" onclick="toggleMobileMenu()">
+                <i class="ph ph-x text-2xl"></i>
+            </button>
+            <div class="sidebar-top">
+                <div class="flex items-center justify-center md:justify-between w-full mb-3">
+                    <h1 class="font-calligraphy text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest">后台管理</h1>
+                    <button onclick="location.href='../pages/首页.html'" class="seal-btn seal-btn-return hidden md:flex" title="返回前台">返</button>
+                </div>
+                <p class="mt-3 text-xs text-[#a8a8a8] tracking-[0.4em] font-hand opacity-90 hidden md:block">内容管理 · 系统配置</p>
+                <p class="mt-3 text-[10px] text-gray-500 tracking-[0.3em] uppercase font-serif opacity-50 w-full text-center border-t border-gray-700/30 pt-2 hidden md:block">Admin Panel</p>
+            </div>
+            <nav class="flex-1 py-6 px-5 overflow-y-auto">
+                <ul class="space-y-2">
+                    <li><a href="仪表盘.html" class="nav-link"><i class="ph ph-gauge"></i><span class="menu-item-text">管理仪表盘</span></a></li>
+                    <li><a href="文章管理.html" class="nav-link"><i class="ph ph-pen-nib"></i><span class="menu-item-text">文章管理</span></a></li>
+                    <li><a href="相册管理.html" class="nav-link"><i class="ph ph-image"></i><span class="menu-item-text">相册管理</span></a></li>
+                    <li><a href="网盘管理.html" class="nav-link"><i class="ph ph-hard-drives"></i><span class="menu-item-text">网盘管理</span></a></li>
+                    <li><a href="导航管理.html" class="nav-link"><i class="ph ph-compass"></i><span class="menu-item-text">导航管理</span></a></li>
+                    <li><a href="留言管理.html" class="nav-link"><i class="ph ph-envelope-simple"></i><span class="menu-item-text">留言管理</span></a></li>
+                    <li><a href="设置.html" class="nav-link active"><i class="ph ph-gear"></i><span class="menu-item-text">系统设置</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer"><p>&copy; 2024 - 2064</p><p class="mt-1 font-serif opacity-70">朝花夕拾 · 岁月静好</p></div>
+        </aside>
+        <div class="sidebar-overlay"></div>
+        <main class="content paper-texture">
+            <header class="flex justify-between items-end border-b border-[#dcd3b2] pb-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-[#2c2c2c] mb-1 font-serif">系统设置</h2>
+                    <p class="text-[#8b3a3a] text-sm font-serif">博客基础配置、存储管理与安全设置</p>
+                </div>
+                <button class="btn btn-primary" onclick="saveAllSettings()">
+                    <i class="ph ph-floppy-disk"></i> 保存全部设置
+                </button>
+            </header>
+
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab(this,'tab-basic')">
+                    <i class="ph ph-gear mr-1"></i> 基础设置
+                </button>
+                <button class="tab-btn" onclick="switchTab(this,'tab-storage')">
+                    <i class="ph ph-database mr-1"></i> 存储设置
+                </button>
+                <button class="tab-btn" onclick="switchTab(this,'tab-security')">
+                    <i class="ph ph-lock mr-1"></i> 安全设置
+                </button>
+                <button class="tab-btn" onclick="switchTab(this,'tab-timezone')">
+                    <i class="ph ph-clock mr-1"></i> 时区设置
+                </button>
+            </div>
+
+            <!-- Tab 1: 基础设置 -->
+            <div class="tab-panel active" id="tab-basic">
+                <div class="stat-card mb-8">
+                    <h4 class="font-serif font-bold text-lg mb-4">博客信息</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group"><label>博客标题</label><input type="text" class="form-input" value="三十而立"></div>
+                        <div class="form-group"><label>副标题</label><input type="text" class="form-input" value="记录 · 沉淀 · 回忆"></div>
+                        <div class="form-group"><label>每页文章数</label><input type="number" class="form-input" value="10" min="1"></div>
+                        <div class="form-group"><label>网站底部文字</label><input type="text" class="form-input" value="朝花夕拾 · 岁月静好"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card mb-8">
+                    <h4 class="font-serif font-bold text-lg mb-4">首页题记</h4>
+                    <div class="form-group">
+                        <label>题记内容</label>
+                        <textarea class="form-input" rows="5" placeholder="欢迎来到我的数字庭院...">欢迎来到我的数字庭院。
+
+这里没有算法推荐，没有红点通知，只有我三十岁以后的生活琐碎。我把这里当作一本泛黄的旧书，希望当你偶然翻开时，能闻到一点时间的味道。</textarea>
+                    </div>
+                    <div class="text-sm text-[#999] font-hand mt-2">
+                        <i class="ph ph-info text-[#4a6b65] mr-1"></i> 题记将显示在博客首页最上方
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveBasicSettings()"><i class="ph ph-floppy-disk"></i> 保存基础设置</button>
+
+                <div class="stat-card mt-8">
+                    <h4 class="font-serif font-bold text-lg mb-4">SEO 设置</h4>
+                    <p class="text-sm text-[#5d5d5d] font-hand mb-4">搜索引擎优化配置，影响网站在搜索结果中的展示</p>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="form-group">
+                            <label>页面标题 (Title)</label>
+                            <input type="text" class="form-input" id="seo-title" value="三十而立 - 岁月博客" placeholder="将显示在浏览器标签页和搜索结果中">
+                        </div>
+                        <div class="form-group">
+                            <label>关键词 (Keywords)</label>
+                            <input type="text" class="form-input" id="seo-keywords" value="个人博客,岁月,摄影,生活记录,三十而立" placeholder="多个关键词用逗号分隔">
+                        </div>
+                        <div class="form-group">
+                            <label>页面描述 (Description)</label>
+                            <textarea class="form-input" id="seo-description" rows="3" placeholder="简短描述，将显示在搜索结果摘要中">记录三十岁以后的生活琐碎。没有算法推荐，没有红点通知，只有一方安静的岁月自留地。</textarea>
+                        </div>
+                    </div>
+                    <div class="text-sm text-[#999] font-hand mt-3">
+                        <i class="ph ph-info text-[#4a6b65] mr-1"></i> 页面标题建议不超过 60 字符，描述建议不超过 160 字符
+                    </div>
+                </div>
+
+                <button class="btn btn-primary mt-4" onclick="saveSeoSettings()"><i class="ph ph-floppy-disk"></i> 保存 SEO 设置</button>
+            </div>
+
+            <!-- Tab 2: 存储设置 -->
+            <div class="tab-panel" id="tab-storage">
+                <div class="sub-tab-bar">
+                    <button class="sub-tab-btn active" onclick="switchSubTab(this,'subtab-media')">
+                        <i class="ph ph-server mr-1"></i> 介质配置
+                    </button>
+                    <button class="sub-tab-btn" onclick="switchSubTab(this,'subtab-business')">
+                        <i class="ph ph-folder-tree mr-1"></i> 业务配置
+                    </button>
+                </div>
+
+                <!-- 子Tab 1: 介质配置 -->
+                <div class="sub-tab-panel active" id="subtab-media">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="admin-section-title" style="margin:0;border:none;padding:0">OpenList 存储介质 — 配置多套存储介质</div>
+                        <button class="btn btn-primary" onclick="openInstanceModal()">
+                            <i class="ph ph-plus"></i> 添加实例
+                        </button>
+                    </div>
+
+                    <div class="space-y-4 mb-8" id="instance-list">
+                        <div class="stat-card instance-card active" data-id="1">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-serif font-bold text-lg">主力存储</h4>
+                                        <span class="status-badge" style="background:#4a6b65;color:white">
+                                            <i class="ph ph-check-circle"></i> 在线
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-[#5d5d5d] font-hand">https://openlist-main.example.com/api</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-outline btn-sm" onclick="testConnection(1)">
+                                        <i class="ph ph-arrows-clockwise"></i> 连通性测试
+                                    </button>
+                                    <button class="btn btn-outline btn-sm" onclick="editInstance(1)">
+                                        <i class="ph ph-pencil"></i> 编辑
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="disableInstance(1)">
+                                        <i class="ph ph-power"></i> 禁用
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-[#999] font-hand">根目录：</span><span class="path-badge">/blog-storage/</span></div>
+                                <div><span class="text-[#999] font-hand">已用空间：</span><span>12.3 GB</span></div>
+                                <div><span class="text-[#999] font-hand">挂载业务：</span><span class="tag tag-red">文章</span> <span class="tag tag-red">相册</span></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card instance-card active" data-id="2">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-serif font-bold text-lg">备份存储</h4>
+                                        <span class="status-badge" style="background:#4a6b65;color:white">
+                                            <i class="ph ph-check-circle"></i> 在线
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-[#5d5d5d] font-hand">https://openlist-backup.example.com/api</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-outline btn-sm" onclick="testConnection(2)">
+                                        <i class="ph ph-arrows-clockwise"></i> 连通性测试
+                                    </button>
+                                    <button class="btn btn-outline btn-sm" onclick="editInstance(2)">
+                                        <i class="ph ph-pencil"></i> 编辑
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="disableInstance(2)">
+                                        <i class="ph ph-power"></i> 禁用
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-[#999] font-hand">根目录：</span><span class="path-badge">/blog-backup/</span></div>
+                                <div><span class="text-[#999] font-hand">已用空间：</span><span>8.7 GB</span></div>
+                                <div><span class="text-[#999] font-hand">挂载业务：</span><span class="tag tag-red">网盘</span></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card instance-card disabled" data-id="3">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-serif font-bold text-lg" style="color:#c4493c">旧版存储 <i class="ph ph-warning-circle"></i></h4>
+                                        <span class="status-badge" style="background:#c4493c;color:white">
+                                            <i class="ph ph-x-circle"></i> 离线
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-[#5d5d5d] font-hand">https://old-openlist.example.com/api</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-outline btn-sm" onclick="testConnection(3)">
+                                        <i class="ph ph-arrows-clockwise"></i> 重连
+                                    </button>
+                                    <button class="btn btn-outline btn-sm" onclick="editInstance(3)">
+                                        <i class="ph ph-pencil"></i> 编辑
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteInstance(3)">
+                                        <i class="ph ph-trash"></i> 删除
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-[#999] font-hand">根目录：</span><span class="path-badge">/old-blog/</span></div>
+                                <div><span class="text-[#999] font-hand">状态：</span><span style="color:#c4493c">已失效，历史数据只读</span></div>
+                                <div><span class="text-[#999] font-hand">说明：</span><span class="tag tag-gray">禁止新业务选用</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <h4 class="font-serif font-bold text-sm mb-3">存储架构说明</h4>
+                        <div class="text-sm text-[#5d5d5d] font-hand leading-relaxed space-y-2">
+                            <p><strong>数据分离原则：</strong>所有文字信息（标题、描述、分类、EXIF、配置）全部存储在 D1 数据库；OpenList 仅存放物理文件（图片、附件、照片、网盘文件）。</p>
+                            <p><strong>删除策略：</strong>删除业务记录仅删除数据库条目，OpenList 中的物理文件永久保留不删除。</p>
+                            <p><strong>路径规范：</strong>分类路径以业务全局根目录为基准，下级子目录以上一级目录为基准。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 子Tab 2: 业务配置 -->
+                <div class="sub-tab-panel" id="subtab-business">
+                    <div class="admin-section-title">业务板块存储映射 — 为文章、相册、网盘配置专属根目录</div>
+
+                    <div class="stat-card mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-serif font-bold text-lg flex items-center gap-2">
+                                <i class="ph ph-pen-nib text-[#8b3a3a]"></i> 文章存储配置
+                            </h4>
+                            <span class="tag tag-green">自动归档</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="form-group">
+                                <label>存储实例</label>
+                                <select class="form-input" id="storage-post-instance">
+                                    <option value="1" selected>主力存储 (https://openlist-main.example.com)</option>
+                                    <option value="2">备份存储 (https://openlist-backup.example.com)</option>
+                                    <option value="3" disabled style="color:#999">旧版存储 (已失效)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>文章根目录</label>
+                                <div class="flex gap-2">
+                                    <input type="text" class="form-input" id="storage-post-path" value="/posts/" placeholder="输入相对路径">
+                                    <button class="btn btn-outline" onclick="openPathBrowser('post')">
+                                        <i class="ph ph-folder-open"></i> 浏览
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-[#5d5d5d] font-hand bg-[rgba(74,107,101,0.05)] p-3 rounded">
+                            <p class="flex items-center gap-2 mb-1"><i class="ph ph-info text-[#4a6b65]"></i> <strong>文章自动归档规则：</strong></p>
+                            <p class="pl-6">上传文章插图与附件时，系统在根目录下自动创建 <span class="path-badge">/posts/2024/05/20/</span> 格式的日期文件夹，当日文件统一存入同一目录，无需手动选择路径。</p>
+                            <p class="pl-6 mt-1">删除或迁移文章仅修改数据库，外部存储文件不删除、不移动。</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-serif font-bold text-lg flex items-center gap-2">
+                                <i class="ph ph-image text-[#8b3a3a]"></i> 相册存储配置
+                            </h4>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="form-group">
+                                <label>存储实例</label>
+                                <select class="form-input" id="storage-album-instance">
+                                    <option value="1" selected>主力存储 (https://openlist-main.example.com)</option>
+                                    <option value="2">备份存储 (https://openlist-backup.example.com)</option>
+                                    <option value="3" disabled style="color:#999">旧版存储 (已失效)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>相册全局根目录</label>
+                                <div class="flex gap-2">
+                                    <input type="text" class="form-input" id="storage-album-path" value="/albums/" placeholder="输入相对路径">
+                                    <button class="btn btn-outline" onclick="openPathBrowser('album')">
+                                        <i class="ph ph-folder-open"></i> 浏览
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-[#5d5d5d] font-hand bg-[rgba(74,107,101,0.05)] p-3 rounded">
+                            <p class="flex items-center gap-2 mb-1"><i class="ph ph-info text-[#4a6b65]"></i> <strong>相册路径结构：</strong></p>
+                            <p class="pl-6">相册分类配置专属目录 → 相册继承分类目录并配置独立子目录 → 照片自动存入相册目录。</p>
+                            <p class="pl-6 mt-1">示例：<span class="path-badge">/albums/travel/2024-italy/photo1.jpg</span></p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-serif font-bold text-lg flex items-center gap-2">
+                                <i class="ph ph-hard-drives text-[#8b3a3a]"></i> 网盘存储配置
+                            </h4>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="form-group">
+                                <label>存储实例</label>
+                                <select class="form-input" id="storage-drive-instance">
+                                    <option value="1">主力存储 (https://openlist-main.example.com)</option>
+                                    <option value="2" selected>备份存储 (https://openlist-backup.example.com)</option>
+                                    <option value="3" disabled style="color:#999">旧版存储 (已失效)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>网盘全局根目录</label>
+                                <div class="flex gap-2">
+                                    <input type="text" class="form-input" id="storage-drive-path" value="/drive/" placeholder="输入相对路径">
+                                    <button class="btn btn-outline" onclick="openPathBrowser('drive')">
+                                        <i class="ph ph-folder-open"></i> 浏览
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-[#5d5d5d] font-hand bg-[rgba(74,107,101,0.05)] p-3 rounded">
+                            <p class="flex items-center gap-2 mb-1"><i class="ph ph-info text-[#4a6b65]"></i> <strong>网盘路径结构：</strong></p>
+                            <p class="pl-6">网盘仅一级分类，无嵌套子目录。上传文件选择分类后自动存入对应目录。</p>
+                            <p class="pl-6 mt-1">示例：<span class="path-badge">/drive/documents/report.pdf</span></p>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveStorageConfig()">
+                        <i class="ph ph-floppy-disk"></i> 保存存储配置
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab 3: 安全设置 -->
+            <div class="tab-panel" id="tab-security">
+                <div class="stat-card mb-8">
+                    <h4 class="font-serif font-bold text-lg mb-4">管理员账号</h4>
+                    <div class="text-sm text-[#5d5d5d] font-hand mb-4">
+                        这是一个单用户博客系统，请妥善保管您的登录信息。
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group"><label>用户名</label><input type="text" class="form-input" value="admin" readonly style="background:#f0ebe0"></div>
+                        <div class="form-group"><label>当前密码</label><input type="password" class="form-input" id="security-current-pwd" placeholder="输入当前密码"></div>
+                        <div class="form-group"><label>新密码</label><input type="password" class="form-input" id="security-new-pwd" placeholder="输入新密码"></div>
+                        <div class="form-group"><label>确认新密码</label><input type="password" class="form-input" id="security-confirm-pwd" placeholder="再次输入新密码"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card mb-8">
+                    <h4 class="font-serif font-bold text-lg mb-4">会话安全</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-serif font-bold">记住登录状态</div>
+                                <div class="text-sm text-[#999] font-hand">关闭浏览器后保持登录</div>
+                            </div>
+                            <button class="btn btn-outline btn-sm" onclick="toggleSetting(this)">已启用</button>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-serif font-bold">会话超时</div>
+                                <div class="text-sm text-[#999] font-hand">7天无操作自动退出</div>
+                            </div>
+                            <select class="form-input" style="max-width:150px;">
+                                <option>3天</option>
+                                <option selected>7天</option>
+                                <option>30天</option>
+                                <option>永不</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-danger" onclick="changePassword()"><i class="ph ph-key"></i> 修改密码</button>
+            </div>
+
+            <!-- Tab 4: 时区设置 -->
+            <div class="tab-panel" id="tab-timezone">
+                <div class="stat-card mb-8">
+                    <h4 class="font-serif font-bold text-lg mb-4">时区与显示格式</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label>网站时区</label>
+                            <select class="form-input">
+                                <option value="Asia/Shanghai" selected>Asia/Shanghai (UTC+8) 北京时间</option>
+                                <option value="Asia/Tokyo">Asia/Tokyo (UTC+9) 东京时间</option>
+                                <option value="UTC">UTC 协调世界时</option>
+                                <option value="America/New_York">America/New_York (UTC-5) 纽约时间</option>
+                                <option value="Europe/London">Europe/London (UTC+0) 伦敦时间</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>日期格式</label>
+                            <select class="form-input">
+                                <option selected>YYYY-MM-DD (2024-05-20)</option>
+                                <option>YYYY年MM月DD日 (2024年05月20日)</option>
+                                <option>MM/DD/YYYY (05/20/2024)</option>
+                                <option>DD/MM/YYYY (20/05/2024)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>时间格式</label>
+                            <select class="form-input">
+                                <option selected>24小时制 (14:30)</option>
+                                <option>12小时制 (02:30 PM)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>每周第一天</label>
+                            <select class="form-input">
+                                <option selected>周一</option>
+                                <option>周日</option>
+                                <option>周六</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveTimezoneSettings()"><i class="ph ph-floppy-disk"></i> 保存时区设置</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- 实例编辑/新增 弹窗 -->
+    <div class="modal-overlay" id="instance-modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-serif text-xl font-bold">添加 OpenList 实例</h3>
+                <button class="btn btn-outline btn-sm" onclick="closeInstanceModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div class="form-group"><label>实例名称</label><input type="text" class="form-input" placeholder="如：主力存储"></div>
+                <div class="form-group"><label>API 地址</label><input type="text" class="form-input" placeholder="https://your-openlist-instance/api"></div>
+                <div class="form-group"><label>API Key（如有）</label><input type="password" class="form-input" placeholder="可选"></div>
+                <div class="form-group"><label>根目录路径</label><input type="text" class="form-input" value="/" placeholder="存储根目录，以 / 开头"></div>
+                <div class="form-group"><label>备注说明</label><textarea class="form-input" rows="2" placeholder="选填"></textarea></div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button class="btn btn-outline" onclick="closeInstanceModal()">取消</button>
+                <button class="btn btn-primary" onclick="testConnectionThenSave()">
+                    <i class="ph ph-arrows-clockwise"></i> 先测试连通性再保存
+                </button>
+                <button class="btn btn-primary" onclick="saveInstance()">
+                    <i class="ph ph-floppy-disk"></i> 直接保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 目录浏览器 弹窗 -->
+    <div class="modal-overlay" id="path-browser-modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-serif text-xl font-bold">浏览目录</h3>
+                <button class="btn btn-outline btn-sm" onclick="closePathBrowser()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="mb-4">
+                <div class="text-sm text-[#5d5d5d] font-hand mb-2">
+                    <i class="ph ph-folder-open text-[#bfa57d]"></i> 当前路径：<span id="browser-current-path" class="path-badge">/</span>
+                </div>
+                <div class="file-browser" id="browser-file-list">
+                    <div class="fb-item" onclick="navigateToFolder('/posts/')">
+                        <i class="ph ph-folder"></i><span>posts/</span>
+                    </div>
+                    <div class="fb-item" onclick="navigateToFolder('/albums/')">
+                        <i class="ph ph-folder"></i><span>albums/</span>
+                    </div>
+                    <div class="fb-item" onclick="navigateToFolder('/drive/')">
+                        <i class="ph ph-folder"></i><span>drive/</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <input type="text" class="form-input" id="new-folder-name" placeholder="输入新文件夹名称">
+                <button class="btn btn-primary" onclick="createNewFolder()"><i class="ph ph-folder-plus"></i> 新建</button>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-outline" onclick="closePathBrowser()">取消</button>
+                <button class="btn btn-primary" onclick="selectCurrentPath()"><i class="ph ph-check"></i> 选择此目录</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/shared.js"></script>
+    <script>
+    const sidebar=document.getElementById('sidebar');const backdrop=document.getElementById('mobile-backdrop');
+    function toggleMobileMenu(){const isClosed=sidebar.classList.contains('-translate-x-full');if(isClosed){backdrop.classList.remove('hidden');setTimeout(()=>backdrop.classList.remove('opacity-0'),10);sidebar.classList.remove('-translate-x-full')}else{backdrop.classList.add('opacity-0');sidebar.classList.add('-translate-x-full');setTimeout(()=>backdrop.classList.add('hidden'),300)}}
+    let currentPathBrowserType = null;
+        let browserCurrentPath = '/';
+
+        function switchSubTab(btn, id) {
+            btn.parentElement.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            btn.parentElement.parentElement.querySelectorAll('.sub-tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function openInstanceModal() {
+            document.getElementById('instance-modal').classList.add('active');
+        }
+        function closeInstanceModal() {
+            document.getElementById('instance-modal').classList.remove('active');
+        }
+        function editInstance(id) {
+            showToast('正在加载实例 #' + id + ' 配置...');
+            openInstanceModal();
+        }
+        function saveInstance() {
+            showToast('OpenList 实例配置已保存到 D1');
+            closeInstanceModal();
+        }
+        function testConnectionThenSave() {
+            showToast('正在测试连通性...');
+            setTimeout(() => {
+                showToast('连通性测试通过！');
+                saveInstance();
+            }, 1000);
+        }
+        function testConnection(id) {
+            const card = document.querySelector('.instance-card[data-id="' + id + '"]');
+            const badge = card.querySelector('.status-badge');
+            badge.innerHTML = '<i class="ph ph-spinner animate-spin"></i> 测试中...';
+            badge.style.background = '#d4ac0d';
+            setTimeout(() => {
+                badge.innerHTML = '<i class="ph ph-check-circle"></i> 在线';
+                badge.style.background = '#4a6b65';
+                showToast('实例 #' + id + ' 连通性测试通过');
+            }, 800);
+        }
+        function disableInstance(id) {
+            if(confirm('确定要禁用此实例吗？禁用后新业务无法选用，但历史数据仍可读。')) {
+                showToast('实例已禁用');
+            }
+        }
+        function deleteInstance(id) {
+            if(confirm('确定要删除此实例吗？')) {
+                showToast('实例已从配置中删除');
+            }
+        }
+        function openPathBrowser(type) {
+            currentPathBrowserType = type;
+            browserCurrentPath = '/';
+            document.getElementById('browser-current-path').textContent = browserCurrentPath;
+            document.getElementById('path-browser-modal').classList.add('active');
+        }
+        function closePathBrowser() {
+            document.getElementById('path-browser-modal').classList.remove('active');
+        }
+        function navigateToFolder(path) {
+            browserCurrentPath = path;
+            document.getElementById('browser-current-path').textContent = path;
+            showToast('已进入 ' + path);
+        }
+        function createNewFolder() {
+            const name = document.getElementById('new-folder-name').value;
+            if(name) {
+                showToast('文件夹 "' + name + '" 已创建');
+                document.getElementById('new-folder-name').value = '';
+            }
+        }
+        function selectCurrentPath() {
+            const inputId = 'storage-' + currentPathBrowserType + '-path';
+            const input = document.getElementById(inputId);
+            if(input) {
+                input.value = browserCurrentPath;
+            }
+            showToast('已选择路径: ' + browserCurrentPath);
+            closePathBrowser();
+        }
+        function saveStorageConfig() {
+            showToast('存储配置已保存到 D1');
+        }
+        function saveBasicSettings() {
+            showToast('基本设置已保存到 D1');
+        }
+        function saveSeoSettings() {
+            showToast('SEO 设置已保存到 D1');
+        }
+        function saveTimezoneSettings() {
+            showToast('时区设置已保存到 D1');
+        }
+        function toggleSetting(btn) {
+            if(btn.textContent === '已启用') {
+                btn.textContent = '已禁用';
+                showToast('已禁用此设置');
+            } else {
+                btn.textContent = '已启用';
+                showToast('已启用此设置');
+            }
+        }
+        function saveAllSettings() {
+            showToast('正在保存全部设置...');
+            setTimeout(function() {
+                showToast('全部设置已保存到 D1 ✓');
+            }, 500);
+        }
+
+        function changePassword() {
+            var cur = document.getElementById('security-current-pwd').value;
+            var newPwd = document.getElementById('security-new-pwd').value;
+            var confirm = document.getElementById('security-confirm-pwd').value;
+            if (!cur) { showToast('请输入当前密码'); return; }
+            if (!newPwd) { showToast('请输入新密码'); return; }
+            if (newPwd.length < 6) { showToast('新密码至少需要 6 位字符'); return; }
+            if (newPwd !== confirm) { showToast('两次输入的新密码不一致'); return; }
+            if (!confirm('确定要修改密码吗？修改后将需要重新登录。')) return;
+            showToast('密码已修改，请重新登录');
+        }
+    </script>
+</body>
+</html>

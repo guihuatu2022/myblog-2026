@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>留言管理 · 后台</title>
+<script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont@1.1.0/style.css"><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet"><script src="https://unpkg.com/@phosphor-icons/web"></script><link rel="stylesheet" href="../assets/css/shared.css"><link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+.mobile-header-fix { display: flex !important; }
+@media (min-width: 768px) { .mobile-header-fix { display: none !important; } }
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.active{display:flex}
+.modal-content{background:#f7f1e3;padding:24px;border-radius:8px;max-width:550px;width:90%;max-height:85vh;overflow-y:auto}
+</style>
+</head>
+<body class="is-admin">
+<div class="reading-progress"></div><button id="back-to-top" class="back-to-top"><i class="ph ph-arrow-up"></i></button>
+<div class="book-container book-shadow">
+
+<header class="mobile-header-fix md:hidden flex items-center justify-between p-4 bg-[#2c2a29] text-[#dcd3b2] shadow-md relative z-30 shrink-0">
+<button onclick="toggleMobileMenu()" class="p-1 focus:outline-none"><i class="ph ph-list text-2xl"></i></button>
+<h1 class="font-calligraphy text-2xl tracking-widest absolute left-1/2 -translate-x-1/2 mt-1">后台管理</h1>
+<button onclick="location.href='../pages/首页.html'" class="w-7 h-7 border border-[#bfa57d] text-[#bfa57d] bg-[#bfa57d]/10 flex items-center justify-center text-[10px] font-bold focus:outline-none transition-colors" title="返回前台">返</button>
+</header>
+<div id="mobile-backdrop" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"></div>
+<aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-[240px] shrink-0 bg-[#2c2a29] text-gray-300 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+<button class="md:hidden absolute top-5 right-5 text-gray-400 hover:text-white" onclick="toggleMobileMenu()"><i class="ph ph-x text-2xl"></i></button>
+<div class="sidebar-top"><div class="flex items-center justify-center md:justify-between w-full mb-3"><h1 class="font-calligraphy text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest">后台管理</h1><button onclick="location.href='../pages/首页.html'" class="seal-btn seal-btn-return hidden md:flex" title="返回前台">返</button></div><p class="mt-3 text-xs text-[#a8a8a8] tracking-[0.4em] font-hand opacity-90 hidden md:block">内容管理 · 系统配置</p><p class="mt-3 text-[10px] text-gray-500 tracking-[0.3em] uppercase font-serif opacity-50 w-full text-center border-t border-gray-700/30 pt-2 hidden md:block">Admin Panel</p></div>
+<nav class="flex-1 py-6 px-5 overflow-y-auto">
+<ul class="space-y-2">
+<li><a href="仪表盘.html" class="nav-link"><i class="ph ph-gauge"></i><span class="menu-item-text">管理仪表盘</span></a></li>
+<li><a href="文章管理.html" class="nav-link"><i class="ph ph-pen-nib"></i><span class="menu-item-text">文章管理</span></a></li>
+<li><a href="相册管理.html" class="nav-link"><i class="ph ph-image"></i><span class="menu-item-text">相册管理</span></a></li>
+<li><a href="网盘管理.html" class="nav-link"><i class="ph ph-hard-drives"></i><span class="menu-item-text">网盘管理</span></a></li>
+<li><a href="导航管理.html" class="nav-link"><i class="ph ph-compass"></i><span class="menu-item-text">导航管理</span></a></li>
+<li><a href="留言管理.html" class="nav-link active"><i class="ph ph-envelope-simple"></i><span class="menu-item-text">留言管理</span></a></li>
+<li><a href="设置.html" class="nav-link"><i class="ph ph-gear"></i><span class="menu-item-text">系统设置</span></a></li>
+</ul></nav><div class="sidebar-footer"><p>&copy; 2024 - 2064</p><p class="mt-1 font-serif opacity-70">朝花夕拾 · 岁月静好</p></div></aside>
+<div class="sidebar-overlay"></div>
+<main class="content paper-texture">
+<header class="flex justify-between items-end border-b border-[#dcd3b2] pb-4 mb-4">
+<div><h2 class="text-3xl font-bold text-[#2c2c2c] mb-1 font-serif">留言管理</h2><p class="text-[#8b3a3a] text-sm font-serif">存于 D1 · 3 条留言 · 5 条评论</p></div>
+</header>
+
+<div class="tab-bar">
+<button class="tab-btn active" onclick="switchTab(this,'tab-message')"><i class="ph ph-envelope-simple mr-1"></i> 留言管理 <span class="tab-count">3</span></button>
+<button class="tab-btn" onclick="switchTab(this,'tab-comment')"><i class="ph ph-chat-circle-text mr-1"></i> 评论管理 <span class="tab-count">5</span></button>
+</div>
+
+<!-- ===== Tab 1: 留言管理 ===== -->
+<div class="tab-panel active" id="tab-message">
+<div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-dashed border-[#dcd3b2] text-sm font-hand">
+<span class="font-bold text-[#2c2c2c] mr-2 font-serif">筛选：</span>
+<span class="index-link active" onclick="filterMessage(this,'all')">全部</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterMessage(this,'pending')">待回复</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterMessage(this,'whisper')">悄悄话</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterMessage(this,'replied')">已回复</span>
+</div>
+
+<!-- 主人寄语编辑 -->
+<div class="stat-card mb-6" id="host-message-card">
+<div class="flex justify-between items-center mb-3">
+<h4 class="font-serif font-bold text-sm"><i class="ph ph-quotes text-[#8b3a3a] mr-1"></i> 主人寄语</h4>
+<button class="btn btn-outline btn-sm" onclick="editHostMessage()"><i class="ph ph-pencil mr-1"></i> 编辑</button>
+</div>
+<div id="host-message-display" class="font-hand text-[#5d5d5d] leading-relaxed">
+<p>来者皆是客，不必拘礼。</p>
+<p>留下一言半语，便是缘分。</p>
+<div class="text-right font-calligraphy text-[#8b3a3a] mt-2">—— 主人敬上</div>
+</div>
+</div>
+
+<!-- 批量操作 -->
+<div class="batch-bar">
+<input type="checkbox" style="accent-color:#8b3a3a" onchange="toggleMsgSelectAll(this)">
+<span>全选</span>
+<span class="batch-count ml-2">3 条留言</span>
+<button class="btn btn-outline btn-sm ml-auto" onclick="batchMarkRead()"><i class="ph ph-check-circle"></i> 标记已读</button>
+<button class="btn btn-danger btn-sm" onclick="batchDeleteMsg()">批量删除</button>
+</div>
+
+<div class="space-y-4" id="message-list">
+<div class="stat-card" data-status="pending" data-type="whisper">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-3">
+<input type="checkbox" class="msg-checkbox" style="accent-color:#8b3a3a">
+<span class="text-xs text-[#8b3a3a] font-bold font-serif">#3</span>
+<span class="font-serif font-bold">竹林听雨</span>
+<span class="text-xs text-[#999] font-hand">zhulin@example.com</span>
+<span class="text-xs text-[#ccc] font-hand">5天前 · 留言板</span>
+</div>
+<span class="tag tag-gray">悄悄话</span>
+</div>
+<p class="font-hand text-[#444] text-sm leading-relaxed mb-3"><i class="ph ph-lock text-[#bfa57d] mr-1"></i> 博主你好，想请教一下这个博客是怎么搭建的？方便分享一下技术栈吗？</p>
+<div class="flex gap-2">
+<button class="btn btn-primary btn-sm" onclick="toggleReply(this)">回复</button>
+<button class="btn btn-danger btn-sm" onclick="deleteMsg(this)">删除</button>
+<button class="btn btn-outline btn-sm" onclick="markRead(this)"><i class="ph ph-check"></i> 已读</button>
+</div>
+<div class="hidden mt-3 reply-area"><textarea class="form-input" rows="2" placeholder="悄悄回复..."></textarea><button class="btn btn-primary btn-sm mt-2" onclick="sendReply(this)">发送回复</button></div>
+</div>
+
+<div class="stat-card" data-status="replied" data-type="normal">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-3">
+<input type="checkbox" class="msg-checkbox" style="accent-color:#8b3a3a">
+<span class="text-xs text-[#8b3a3a] font-bold font-serif">#2</span>
+<span class="font-serif font-bold">云中漫步</span>
+<span class="text-xs text-[#999] font-hand">yunzhong@example.com</span>
+<span class="text-xs text-[#ccc] font-hand">3天前 · 留言板</span>
+</div>
+<span class="tag tag-green">已回复</span>
+</div>
+<p class="font-hand text-[#444] text-sm leading-relaxed mb-3">偶然路过，被这个博客的气质吸引了。现在这样安静不浮躁的地方真的不多了。</p>
+<div class="card-comment mb-2"><span class="text-xs text-[#8b3a3a] font-calligraphy">我的回复</span><p class="text-sm font-hand text-[#5d5d5d] mt-1 mb-0">感谢来访。安静是这个时代最奢侈的东西，希望这里能给你片刻的宁静。</p></div>
+<button class="btn btn-danger btn-sm" onclick="deleteMsg(this)">删除</button>
+</div>
+
+<div class="stat-card" data-status="pending" data-type="normal">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-3">
+<input type="checkbox" class="msg-checkbox" style="accent-color:#8b3a3a">
+<span class="text-xs text-[#8b3a3a] font-bold font-serif">#1</span>
+<span class="font-serif font-bold">清风徐来</span>
+<span class="text-xs text-[#999] font-hand">qingfeng@example.com</span>
+<span class="text-xs text-[#ccc] font-hand">7天前 · 留言板</span>
+</div>
+<span class="tag tag-yellow">待回复</span>
+</div>
+<p class="font-hand text-[#444] text-sm leading-relaxed mb-3">博主好，这个博客很有特色。请问是用什么搭建的？</p>
+<div class="flex gap-2">
+<button class="btn btn-primary btn-sm" onclick="toggleReply(this)">回复</button>
+<button class="btn btn-danger btn-sm" onclick="deleteMsg(this)">删除</button>
+<button class="btn btn-outline btn-sm" onclick="markRead(this)"><i class="ph ph-check"></i> 已读</button>
+</div>
+<div class="hidden mt-3 reply-area"><textarea class="form-input" rows="2" placeholder="写下回复..."></textarea><button class="btn btn-primary btn-sm mt-2" onclick="sendReply(this)">发送回复</button></div>
+</div>
+</div>
+</div>
+
+<!-- ===== Tab 2: 评论管理 ===== -->
+<div class="tab-panel" id="tab-comment">
+<div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-dashed border-[#dcd3b2] text-sm font-hand">
+<span class="font-bold text-[#2c2c2c] mr-2 font-serif">筛选：</span>
+<span class="index-link active" onclick="filterComment(this,'all')">全部</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterComment(this,'journal')">来自日志</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterComment(this,'album')">来自相册</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterComment(this,'drive')">来自网盘</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterComment(this,'pending')">待回复</span>
+</div>
+
+<div class="batch-bar">
+<input type="checkbox" style="accent-color:#8b3a3a" onchange="toggleCommentSelectAll(this)">
+<span>全选</span>
+<span class="batch-count ml-2">5 条评论</span>
+<button class="btn btn-danger btn-sm ml-auto" onclick="batchDeleteComment()">批量删除</button>
+</div>
+
+<div class="space-y-4" id="comment-list">
+<div class="stat-card" data-source="journal" data-cstatus="pending">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-3">
+<input type="checkbox" class="comment-checkbox" style="accent-color:#8b3a3a">
+<span class="font-serif font-bold">海边旅人</span>
+<span class="text-xs text-[#999] font-hand">hai@example.com</span>
+<span class="tag tag-red">日志</span>
+<span class="text-xs text-[#ccc] font-hand">1周前</span>
+<span class="text-xs text-[#8b3a3a] font-hand">→ 「三十岁的第一个清晨」</span>
+</div>
+<span class="tag tag-yellow">待回复</span>
+</div>
+<p class="font-hand text-[#444] text-sm leading-relaxed mb-3">写得太好了。"立"不是成就，而是一种内心的笃定——深有同感。祝三十岁快乐！</p>
+<div class="flex gap-2">
+<button class="btn btn-primary btn-sm" onclick="toggleReply(this)">回复</button>
+<button class="btn btn-danger btn-sm" onclick="deleteComment(this)">删除</button>
+</div>
+<div class="hidden mt-3 reply-area"><textarea class="form-input" rows="2" placeholder="写下回复..."></textarea><button class="btn btn-primary btn-sm mt-2" onclick="sendReply(this)">发送回复</button></div>
+</div>
+
+<div class="stat-card" data-source="album" data-cstatus="pending">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-3">
+<input type="checkbox" class="comment-checkbox" style="accent-color:#8b3a3a">
+<span class="font-serif font-bold">摄影小白</span>
+<span class="text-xs text-[#999] font-hand">xiaobai@example.com</span>
+<span class="tag tag-red">相册</span>
+<span class="text-xs text-[#ccc] font-hand">2周前</span>
+<span class="text-xs text-[#8b3a3a] font-hand">→ 「五渔村的夏天」</span>
+</div>
+<span class="tag tag-yellow">待回复</span>
+</div>
+<p class="font-hand text-[#444] text-sm leading-relaxed mb-3">请问是用什么相机拍的？色调太有感觉了。</p>
+<div class="flex gap-2">
+<button class="btn btn-primary btn-sm" onclick="toggleReply(this)">回复</button>
+<button class="btn btn-danger btn-sm" onclick="deleteComment(this)">删除</button>
+</div>
+<div class="hidden mt-3 reply-area"><textarea class="form-input" rows="2" placeholder="写下回复..."></textarea><button class="btn btn-primary btn-sm mt-2" onclick="sendReply(this)">发送回复</button></div>
+</div>
+
+<div class="stat-card" data-source="journal" data-cstatus="replied">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-3">
+<input type="checkbox" class="comment-checkbox" style="accent-color:#8b3a3a">
+<span class="font-serif font-bold">云中鹤</span>
+<span class="text-xs text-[#999] font-hand">yunhe@example.com</span>
+<span class="tag tag-red">日志</span>
+<span class="text-xs text-[#ccc] font-hand">5天前</span>
+<span class="text-xs text-[#8b3a3a] font-hand">→ 「三十岁的第一个清晨」</span>
+</div>
+<span class="tag tag-green">已回复</span>
+</div>
+<p class="font-hand text-[#444] text-sm leading-relaxed mb-3">照片拍得真不错，尤其喜欢老街那张。我也在整理旧照片，同感啊！</p>
+<div class="card-comment mb-2"><span class="text-xs text-[#8b3a3a] font-calligraphy">我的回复</span><p class="text-sm font-hand text-[#5d5d5d] mt-1 mb-0">谢谢！用的是富士 X-T5 + 23mm f/1.4。</p></div>
+<button class="btn btn-danger btn-sm" onclick="deleteComment(this)">删除</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+<!-- 主人寄语编辑弹窗 -->
+<div class="modal-overlay" id="host-message-modal">
+<div class="modal-content">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-serif text-xl font-bold">编辑主人寄语</h3>
+<button class="btn btn-outline btn-sm" onclick="closeHostMessageModal()"><i class="ph ph-x"></i></button>
+</div>
+<div class="form-group mb-4">
+<label>寄语内容</label>
+<textarea class="form-input" id="host-message-text" rows="5" placeholder="输入主人寄语...">来者皆是客，不必拘礼。
+留下一言半语，便是缘分。</textarea>
+</div>
+<div class="form-group mb-4">
+<label>签名</label>
+<input type="text" class="form-input" id="host-signature" value="主人敬上" placeholder="签名">
+</div>
+<div class="flex justify-end gap-2">
+<button class="btn btn-outline" onclick="closeHostMessageModal()">取消</button>
+<button class="btn btn-primary" onclick="saveHostMessage()"><i class="ph ph-check"></i> 保存</button>
+</div>
+</div>
+</div>
+
+<script src="../assets/js/shared.js"></script>
+<script>
+const sidebar=document.getElementById('sidebar');const backdrop=document.getElementById('mobile-backdrop');
+function toggleMobileMenu(){const isClosed=sidebar.classList.contains('-translate-x-full');if(isClosed){backdrop.classList.remove('hidden');setTimeout(()=>backdrop.classList.remove('opacity-0'),10);sidebar.classList.remove('-translate-x-full')}else{backdrop.classList.add('opacity-0');sidebar.classList.add('-translate-x-full');setTimeout(()=>backdrop.classList.add('hidden'),300)}}
+function toggleReply(btn) {
+    var area = btn.parentElement.nextElementSibling;
+    if (area) area.classList.toggle('hidden');
+}
+
+function sendReply(btn) {
+    var area = btn.parentElement;
+    var ta = area.querySelector('textarea');
+    if (ta && ta.value) {
+        showToast('回复已保存到 D1');
+        area.classList.add('hidden');
+        ta.value = '';
+    } else {
+        showToast('请输入回复内容');
+    }
+}
+
+function deleteMsg(btn) {
+    if (confirm('确定要删除此留言吗？')) {
+        btn.closest('.stat-card').remove();
+        showToast('留言已删除');
+    }
+}
+
+function markRead(btn) {
+    var card = btn.closest('.stat-card');
+    card.setAttribute('data-status', 'read');
+    var badge = card.querySelector('.tag-yellow,.tag-gray');
+    if (badge) { badge.className = 'tag tag-green'; badge.textContent = '已读'; }
+    showToast('已标记为已读');
+}
+
+function deleteComment(btn) {
+    if (confirm('确定要删除此评论吗？')) {
+        btn.closest('.stat-card').remove();
+        showToast('评论已删除');
+    }
+}
+
+function toggleMsgSelectAll(cb) {
+    document.querySelectorAll('#message-list .msg-checkbox').forEach(function(c) { c.checked = cb.checked; });
+}
+
+function batchDeleteMsg() {
+    var checked = document.querySelectorAll('#message-list .msg-checkbox:checked');
+    if (checked.length === 0) { showToast('请先选择留言'); return; }
+    if (!confirm('确定删除选中的 ' + checked.length + ' 条留言吗？')) return;
+    checked.forEach(function(cb) { cb.closest('.stat-card').remove(); });
+    showToast('已批量删除');
+}
+
+function batchMarkRead() {
+    var checked = document.querySelectorAll('#message-list .msg-checkbox:checked');
+    if (checked.length === 0) { showToast('请先选择留言'); return; }
+    checked.forEach(function(cb) {
+        var card = cb.closest('.stat-card');
+        card.setAttribute('data-status', 'read');
+        var badge = card.querySelector('.tag-yellow,.tag-gray');
+        if (badge) { badge.className = 'tag tag-green'; badge.textContent = '已读'; }
+    });
+    showToast('已批量标记为已读');
+}
+
+function toggleCommentSelectAll(cb) {
+    document.querySelectorAll('#comment-list .comment-checkbox').forEach(function(c) { c.checked = cb.checked; });
+}
+
+function batchDeleteComment() {
+    var checked = document.querySelectorAll('#comment-list .comment-checkbox:checked');
+    if (checked.length === 0) { showToast('请先选择评论'); return; }
+    if (!confirm('确定删除选中的 ' + checked.length + ' 条评论吗？')) return;
+    checked.forEach(function(cb) { cb.closest('.stat-card').remove(); });
+    showToast('已批量删除');
+}
+
+function filterMessage(link, type) {
+    var bar = link.parentElement;
+    bar.querySelectorAll('.index-link').forEach(function(l) { l.classList.remove('active'); });
+    link.classList.add('active');
+    document.querySelectorAll('#message-list .stat-card').forEach(function(card) {
+        if (type === 'all') { card.style.display = ''; return; }
+        if (type === 'pending') { card.style.display = card.getAttribute('data-status') === 'pending' ? '' : 'none'; }
+        else if (type === 'whisper') { card.style.display = card.getAttribute('data-type') === 'whisper' ? '' : 'none'; }
+        else if (type === 'replied') { card.style.display = card.getAttribute('data-status') === 'replied' ? '' : 'none'; }
+    });
+}
+
+function filterComment(link, type) {
+    var bar = link.parentElement;
+    bar.querySelectorAll('.index-link').forEach(function(l) { l.classList.remove('active'); });
+    link.classList.add('active');
+    document.querySelectorAll('#comment-list .stat-card').forEach(function(card) {
+        if (type === 'all') { card.style.display = ''; return; }
+        if (type === 'pending') { card.style.display = card.getAttribute('data-cstatus') === 'pending' ? '' : 'none'; }
+        else { card.style.display = card.getAttribute('data-source') === type ? '' : 'none'; }
+    });
+}
+
+function editHostMessage() {
+    document.getElementById('host-message-modal').classList.add('active');
+}
+
+function closeHostMessageModal() {
+    document.getElementById('host-message-modal').classList.remove('active');
+}
+
+function saveHostMessage() {
+    var text = document.getElementById('host-message-text').value;
+    var sig = document.getElementById('host-signature').value;
+    var display = document.getElementById('host-message-display');
+    var lines = text.split('\n').filter(function(l) { return l.trim(); });
+    var html = '';
+    lines.forEach(function(l) { html += '<p>' + l + '</p>'; });
+    html += '<div class="text-right font-calligraphy text-[#8b3a3a] mt-2">—— ' + sig + '</div>';
+    display.innerHTML = html;
+    showToast('主人寄语已更新');
+    closeHostMessageModal();
+}
+</script>
+</body>
+</html>

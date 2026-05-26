@@ -1,0 +1,536 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+// 相册分类
+const categories = [
+  { id: '1', name: '全部', count: 8 },
+  { id: '2', name: '风景', count: 3 },
+  { id: '3', name: '人文', count: 2 },
+  { id: '4', name: '静物', count: 2 },
+  { id: '5', name: '旅行', count: 1 },
+];
+
+// 相册数据
+const albums = [
+  { id: '1', title: '五渔村的夏天', cover: 'https://picsum.photos/seed/album1/400/300', category: '旅行', photoCount: 48, date: '2024-05-01', permission: 'public' },
+  { id: '2', title: '城市角落', cover: 'https://picsum.photos/seed/album2/400/300', category: '人文', photoCount: 36, date: '2024-04-15', permission: 'public' },
+  { id: '3', title: '老街时光', cover: 'https://picsum.photos/seed/album3/400/300', category: '人文', photoCount: 52, date: '2024-04-01', permission: 'encrypted' },
+  { id: '4', title: '春日花语', cover: 'https://picsum.photos/seed/album4/400/300', category: '风景', photoCount: 28, date: '2024-03-20', permission: 'public' },
+];
+
+// 照片数据
+const photos = [
+  { id: '1', src: 'https://picsum.photos/seed/p1/200/200', caption: '彩色房子' },
+  { id: '2', src: 'https://picsum.photos/seed/p2/200/200', caption: '地中海的蓝' },
+  { id: '3', src: 'https://picsum.photos/seed/p3/200/200', caption: '小巷' },
+  { id: '4', src: 'https://picsum.photos/seed/p4/200/200', caption: '傍晚钟声' },
+  { id: '5', src: 'https://picsum.photos/seed/p5/200/200', caption: '彩色墙面' },
+  { id: '6', src: 'https://picsum.photos/seed/p6/200/200', caption: '柠檬摊' },
+  { id: '7', src: 'https://picsum.photos/seed/p7/200/200', caption: '海边晚餐' },
+  { id: '8', src: 'https://picsum.photos/seed/p8/200/200', caption: '灯塔' },
+  { id: '9', src: 'https://picsum.photos/seed/p9/200/200', caption: '手工艺品' },
+];
+---
+
+<AdminLayout title="相册管理" activeMenu="album">
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <h1 class="page-title">相册管理</h1>
+    <button class="btn btn-primary" id="new-album-btn">
+      <i class="ph ph-plus"></i>
+      新建相册
+    </button>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div class="admin-card">
+    <div class="flex gap-2 mb-6">
+      <button class="tab-btn active" data-tab="albums">
+        <i class="ph ph-images mr-1"></i>
+        相册列表
+      </button>
+      <button class="tab-btn" data-tab="categories">
+        <i class="ph ph-folder-simple mr-1"></i>
+        分类管理
+      </button>
+    </div>
+
+    <!-- 相册列表 Tab -->
+    <div id="tab-albums" class="tab-content">
+      <!-- 分类筛选 -->
+      <div class="flex items-center gap-4 mb-6 pb-4 border-b border-[#e8e8e8]">
+        <span class="text-sm text-[#999]">筛选</span>
+        <div class="flex gap-2 flex-wrap">
+          {categories.map((cat, i) => (
+            <button class={`tab-btn-sm ${i === 0 ? 'active' : ''}`}>
+              {cat.name}
+              <span class="ml-1 text-[10px]">({cat.count})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- 相册卡片网格 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {albums.map((album) => (
+          <div class="album-card">
+            <div class="album-cover">
+              <img src={album.cover} alt={album.title} class="album-img" />
+              <div class="album-overlay">
+                <div class="album-actions">
+                  <button class="album-action-btn" title="编辑">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="album-action-btn" title="上传照片">
+                    <i class="ph ph-upload"></i>
+                  </button>
+                  <button class="album-action-btn" title="预览">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="album-action-btn danger" title="删除">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </div>
+              {album.permission === 'encrypted' && (
+                <span class="album-badge">
+                  <i class="ph ph-lock-simple"></i>
+                </span>
+              )}
+            </div>
+            <div class="album-info">
+              <h3 class="album-title">{album.title}</h3>
+              <div class="flex justify-between items-center text-sm">
+                <span class="tag tag-blue">{album.category}</span>
+                <span class="text-[#999]">
+                  <i class="ph ph-images mr-1"></i>
+                  {album.photoCount}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- 分类管理 Tab -->
+    <div id="tab-categories" class="tab-content hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-medium">分类列表</h3>
+        <button class="btn btn-primary btn-sm" id="add-category-btn">
+          <i class="ph ph-plus mr-1"></i>
+          添加分类
+        </button>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>分类名称</th>
+            <th>英文标识</th>
+            <th>相册数量</th>
+            <th>排序</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {categories.slice(1).map((cat) => (
+            <tr>
+              <td class="font-medium">{cat.name}</td>
+              <td class="text-[#999]">{cat.name.toLowerCase()}</td>
+              <td>{cat.count}</td>
+              <td>
+                <div class="flex items-center gap-1">
+                  <button class="text-[#ccc] hover:text-[#8b3a3a]">
+                    <i class="ph ph-caret-up"></i>
+                  </button>
+                  <button class="text-[#ccc] hover:text-[#8b3a3a]">
+                    <i class="ph ph-caret-down"></i>
+                  </button>
+                </div>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="text-[#999] hover:text-[#8b3a3a]">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-[#999] hover:text-red-500">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 照片管理 Tab -->
+    <div id="tab-photos" class="tab-content hidden">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h3 class="font-medium">五渔村的夏天</h3>
+          <p class="text-sm text-[#999]">共 {photos.length} 张照片</p>
+        </div>
+        <button class="btn btn-primary btn-sm">
+          <i class="ph ph-upload mr-1"></i>
+          上传照片
+        </button>
+      </div>
+      
+      <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {photos.map((photo) => (
+          <div class="photo-item">
+            <img src={photo.src} alt={photo.caption} class="photo-img" />
+            <div class="photo-overlay">
+              <div class="photo-actions">
+                <button class="photo-action-btn" title="编辑说明">
+                  <i class="ph ph-pencil-simple"></i>
+                </button>
+                <button class="photo-action-btn" title="设为封面">
+                  <i class="ph ph-star"></i>
+                </button>
+                <button class="photo-action-btn danger" title="删除">
+                  <i class="ph ph-trash"></i>
+                </button>
+              </div>
+            </div>
+            <p class="photo-caption">{photo.caption}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- 新建相册弹窗 -->
+  <div id="new-album-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>新建相册</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">相册名称 *</label>
+          <input type="text" class="form-input" placeholder="输入相册名称" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">分类</label>
+          <select class="form-input">
+            <option value="">选择分类</option>
+            {categories.slice(1).map(cat => (
+              <option value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">描述</label>
+          <textarea class="form-input" rows="3" placeholder="相册描述（可选）"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">权限</label>
+          <select class="form-input">
+            <option value="public">公开</option>
+            <option value="encrypted">加密访问</option>
+            <option value="private">私有（仅自己可见）</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default modal-cancel">取消</button>
+        <button class="btn btn-primary">创建相册</button>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .tab-btn {
+    padding: 8px 16px;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn:hover {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn.active {
+    background: #8b3a3a;
+    border-color: #8b3a3a;
+    color: #fff;
+  }
+  
+  .tab-btn-sm {
+    padding: 6px 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn-sm:hover,
+  .tab-btn-sm.active {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn-sm.active {
+    background: #fff2f0;
+  }
+  
+  /* 相册卡片 */
+  .album-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+  }
+  
+  .album-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  .album-cover {
+    position: relative;
+    aspect-ratio: 4/3;
+  }
+  
+  .album-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .album-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .album-card:hover .album-overlay {
+    opacity: 1;
+  }
+  
+  .album-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .album-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    transition: all 0.3s;
+  }
+  
+  .album-action-btn:hover {
+    background: #8b3a3a;
+    color: #fff;
+  }
+  
+  .album-action-btn.danger:hover {
+    background: #ff4d4f;
+  }
+  
+  .album-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  
+  .album-info {
+    padding: 12px;
+  }
+  
+  .album-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  /* 照片网格 */
+  .photo-item {
+    position: relative;
+    aspect-ratio: 1;
+  }
+  
+  .photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .photo-item:hover .photo-overlay {
+    opacity: 1;
+  }
+  
+  .photo-actions {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .photo-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+  
+  .photo-action-btn:hover {
+    background: #8b3a3a;
+    color: #fff;
+  }
+  
+  .photo-action-btn.danger:hover {
+    background: #ff4d4f;
+  }
+  
+  .photo-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 4px 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 12px;
+    border-radius: 0 0 8px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* 弹窗 */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #e8e8e8;
+  }
+</style>
+
+<script>
+  // Tab 切换
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = (btn as HTMLElement).dataset.tab;
+      
+      // 更新按钮状态
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // 更新内容显示
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById(`tab-${tab}`)?.classList.remove('hidden');
+    });
+  });
+  
+  // 新建相册弹窗
+  const modal = document.getElementById('new-album-modal');
+  document.getElementById('new-album-btn')?.addEventListener('click', () => {
+    modal?.classList.remove('hidden');
+  });
+  
+  document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modal?.classList.add('hidden');
+    });
+  });
+</script>

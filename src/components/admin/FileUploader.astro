@@ -1,0 +1,151 @@
+---
+interface Props {
+  name: string;
+  label?: string;
+  accept?: string;
+  multiple?: boolean;
+  maxSize?: number; // MB
+}
+
+const { 
+  name, 
+  label, 
+  accept = '*',
+  multiple = false,
+  maxSize = 50
+} = Astro.props;
+---
+
+<div class="space-y-2">
+  {label && (
+    <label class="block text-sm font-medium text-[#2c2c2c]">{label}</label>
+  )}
+  
+  <!-- 上传区 -->
+  <div 
+    id={`${name}-dropzone`}
+    class="border-2 border-dashed border-[#dcd3b2] rounded-lg p-8 text-center cursor-pointer hover:border-[#8b3a3a] hover:bg-[#8b3a3a]/5 transition-colors"
+  >
+    <input 
+      type="file"
+      id={name}
+      name={name}
+      accept={accept}
+      multiple={multiple}
+      class="hidden"
+      data-max-size={maxSize}
+    >
+    <label for={name} class="cursor-pointer block">
+      <i class="ph ph-cloud-arrow-up text-4xl text-gray-400"></i>
+      <p class="text-base text-gray-600 mt-2">点击上传文件</p>
+      <p class="text-sm text-gray-400 mt-1">
+        {multiple ? '支持多文件' : '支持单个文件'}，最大 {maxSize}MB
+      </p>
+    </label>
+  </div>
+  
+  <!-- 已选择文件列表 -->
+  <div id={`${name}-filelist`} class="space-y-2 hidden">
+  </div>
+</div>
+
+<script define:vars={{ name, multiple, maxSize }}>
+  const input = document.getElementById(name);
+  const dropzone = document.getElementById(`${name}-dropzone`);
+  const filelist = document.getElementById(`${name}-filelist`);
+  let selectedFiles = [];
+  
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+  
+  function renderFileList() {
+    if (!filelist) return;
+    
+    if (selectedFiles.length === 0) {
+      filelist.classList.add('hidden');
+      return;
+    }
+    
+    filelist.classList.remove('hidden');
+    filelist.innerHTML = selectedFiles.map((file, index) => `
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div class="flex items-center gap-3">
+          <i class="ph ph-file text-xl text-gray-400"></i>
+          <div>
+            <p class="text-sm font-medium text-[#2c2c2c]">${file.name}</p>
+            <p class="text-xs text-gray-500">${formatSize(file.size)}</p>
+          </div>
+        </div>
+        <button type="button" class="text-gray-400 hover:text-red-500 remove-file" data-index="${index}">
+          <i class="ph ph-trash text-lg"></i>
+        </button>
+      </div>
+    `).join('');
+    
+    // 绑定删除事件
+    filelist.querySelectorAll('.remove-file').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const index = parseInt(btn.dataset.index);
+        selectedFiles.splice(index, 1);
+        updateInputFiles();
+        renderFileList();
+      });
+    });
+  }
+  
+  function updateInputFiles() {
+    if (!input) return;
+    const dt = new DataTransfer();
+    selectedFiles.forEach(file => dt.items.add(file));
+    input.files = dt.files;
+  }
+  
+  input?.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files || []);
+    
+    // 检查文件大小
+    const oversized = files.filter(f => f.size > maxSize * 1024 * 1024);
+    if (oversized.length > 0) {
+      alert(`以下文件超过 ${maxSize}MB: ${oversized.map(f => f.name).join(', ')}`);
+      return;
+    }
+    
+    if (multiple) {
+      selectedFiles = [...selectedFiles, ...files];
+    } else {
+      selectedFiles = files.slice(0, 1);
+    }
+    
+    renderFileList();
+  });
+  
+  // 拖拽支持
+  dropzone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('border-[#8b3a3a]', 'bg-[#8b3a3a]/5');
+  });
+  
+  dropzone?.addEventListener('dragleave', () => {
+    dropzone.classList.remove('border-[#8b3a3a]', 'bg-[#8b3a3a]/5');
+  });
+  
+  dropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('border-[#8b3a3a]', 'bg-[#8b3a3a]/5');
+    
+    const files = Array.from(e.dataTransfer?.files || []);
+    if (files.length > 0) {
+      const dt = new DataTransfer();
+      if (multiple) {
+        selectedFiles = [...selectedFiles, ...files];
+      } else {
+        selectedFiles = files.slice(0, 1);
+      }
+      updateInputFiles();
+      input?.dispatchEvent(new Event('change'));
+    }
+  });
+</script>

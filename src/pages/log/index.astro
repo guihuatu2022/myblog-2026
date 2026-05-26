@@ -1,0 +1,196 @@
+---
+import BookLayout from '../../layouts/BookLayout.astro';
+import Pagination from '../../components/Pagination.astro';
+
+// 模拟数据
+const categories = [
+  { name: '全部', count: 42 },
+  { name: '随笔', count: 18 },
+  { name: '摄影', count: 12 },
+  { name: '技术', count: 8 },
+  { name: '读书', count: 4 },
+];
+
+// 获取 URL 参数
+const url = new URL(Astro.request.url);
+const page = parseInt(url.searchParams.get('page') || '1');
+const category = url.searchParams.get('category') || '全部';
+const permission = url.searchParams.get('permission') || 'all';
+const search = url.searchParams.get('search') || '';
+
+// 模拟文章数据
+const allPosts = [
+  { id: '1', title: '三十岁的第一个清晨', category: '随笔', date: '2024-05-20', permission: 'public', isPinned: true },
+  { id: '2', title: '胶片里的老街', category: '摄影', date: '2024-05-18', permission: 'public', isPinned: false },
+  { id: '3', title: '搭建博客的一些心得', category: '技术', date: '2024-05-15', permission: 'public', isPinned: false },
+  { id: '4', title: '读《瓦尔登湖》', category: '读书', date: '2024-05-10', permission: 'public', isPinned: false },
+  { id: '5', title: '夏日午后的咖啡馆', category: '随笔', date: '2024-05-08', permission: 'encrypted', isPinned: false },
+  { id: '6', title: '城市的黄昏', category: '摄影', date: '2024-05-05', permission: 'public', isPinned: false },
+  { id: '7', title: '关于 TypeScript 的思考', category: '技术', date: '2024-05-02', permission: 'public', isPinned: false },
+  { id: '8', title: '童年记忆', category: '随笔', date: '2024-04-28', permission: 'private', isPinned: false },
+  { id: '9', title: '海边的风', category: '摄影', date: '2024-04-25', permission: 'public', isPinned: false },
+  { id: '10', title: '读《百年孤独》', category: '读书', date: '2024-04-20', permission: 'public', isPinned: false },
+  { id: '11', title: '三十岁的第一个清晨', category: '随笔', date: '2024-04-15', permission: 'public', isPinned: false },
+  { id: '12', title: '城市夜景', category: '摄影', date: '2024-04-10', permission: 'public', isPinned: false },
+  { id: '13', title: '代码的优雅', category: '技术', date: '2024-04-05', permission: 'public', isPinned: false },
+  { id: '14', title: '父亲的背影', category: '随笔', date: '2024-03-28', permission: 'public', isPinned: false },
+  { id: '15', title: '春天的花', category: '摄影', date: '2024-03-25', permission: 'public', isPinned: false },
+];
+
+// 按年份分组
+function groupByYear(posts: typeof allPosts) {
+  const groups = new Map<number, typeof posts>();
+  posts.forEach(post => {
+    const year = new Date(post.date).getFullYear();
+    if (!groups.has(year)) {
+      groups.set(year, []);
+    }
+    groups.get(year)!.push(post);
+  });
+  return Array.from(groups.entries())
+    .sort((a, b) => b[0] - a[0])
+    .map(([year, items]) => ({ year, posts: items }));
+}
+
+// 分页（每5个年份为一页）
+const groupSize = 5;
+const yearGroups = groupByYear(allPosts);
+const totalGroups = Math.ceil(yearGroups.length / groupSize);
+const currentGroup = Math.min(Math.max(1, page), totalGroups);
+const startIndex = (currentGroup - 1) * groupSize;
+const visibleGroups = yearGroups.slice(startIndex, startIndex + groupSize);
+
+// 获取权限图标
+function getPermissionIcon(p: string) {
+  if (p === 'encrypted') return '🔐';
+  if (p === 'private') return '🔒';
+  return '🌐';
+}
+---
+
+<BookLayout title="岁月日志">
+  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
+    <div>
+      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">岁月日志</h2>
+      <p class="text-sm font-hand text-[#8b3a3a]">存于 D1 · 时光的印记</p>
+    </div>
+    <div class="text-sm font-hand text-[#8b7355]">
+      共 {allPosts.length} 篇
+    </div>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="filter-bar">
+    <!-- 分类筛选 -->
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-[#999] font-serif">分类</span>
+      {categories.map((cat) => (
+        <span 
+          class={`index-link ${category === cat.name ? 'active' : ''}`}
+          onclick={`window.location.href='/log?category=${cat.name}'`}
+        >
+          {cat.name}
+          <span class="text-[10px] text-[#bbb] ml-1">({cat.count})</span>
+        </span>
+        <span class="filter-separator">/</span>
+      ))}
+    </div>
+    
+    <div class="w-px h-4 bg-[#dcd3b2] mx-2"></div>
+    
+    <!-- 权限筛选 -->
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-[#999] font-serif">权限</span>
+      <span 
+        class={`index-link ${permission === 'all' ? 'active' : ''}`}
+        onclick={`window.location.href='/log?permission=all'`}
+      >
+        全部
+      </span>
+      <span class="filter-separator">/</span>
+      <span 
+        class={`index-link ${permission === 'public' ? 'active' : ''}`}
+        onclick={`window.location.href='/log?permission=public'`}
+      >
+        公开
+      </span>
+      <span class="filter-separator">/</span>
+      <span 
+        class={`index-link ${permission === 'encrypted' ? 'active' : ''}`}
+        onclick={`window.location.href='/log?permission=encrypted'`}
+      >
+        加密
+      </span>
+    </div>
+    
+    <!-- 搜索框 -->
+    <div class="relative ml-auto">
+      <i class="ph ph-magnifying-glass absolute left-0 top-1/2 -translate-y-1/2 text-[#a8a8a8]"></i>
+      <input 
+        type="text" 
+        placeholder="搜索日志..." 
+        class="vintage-search"
+        value={search}
+      />
+    </div>
+  </div>
+
+  <!-- 年份分组列表 -->
+  <div class="space-y-8">
+    {visibleGroups.map((group) => (
+      <section>
+        <h3 class="text-xl font-serif font-bold text-[#8b3a3a] mb-4 flex items-center gap-2 sticky top-0 bg-paper py-2 z-10">
+          <i class="ph ph-calendar-blank"></i>
+          {group.year} 年
+          <span class="text-sm font-hand text-[#8b7355] font-normal">
+            ({group.posts.length} 篇)
+          </span>
+        </h3>
+        
+        <div class="space-y-3">
+          {group.posts.map((post) => (
+            <a 
+              href={`/log/${post.id}`}
+              class="stat-card flex items-center gap-4 hover:shadow-md transition-shadow group"
+            >
+              <div class="flex-1 flex items-center gap-3">
+                {post.isPinned && (
+                  <span class="text-[#8b3a3a] text-sm" title="置顶">
+                    <i class="ph ph-push-pin"></i>
+                  </span>
+                )}
+                <span class="font-serif font-bold text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors">
+                  {post.title}
+                </span>
+                <span class="tag tag-red text-xs">{post.category}</span>
+              </div>
+              <div class="flex items-center gap-4 text-sm">
+                <span class="font-hand text-[#8b7355]">
+                  {post.date.slice(5)}
+                </span>
+                <span class="text-lg">
+                  {getPermissionIcon(post.permission)}
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <!-- 分页 -->
+  <Pagination 
+    currentPage={currentGroup}
+    totalPages={totalGroups}
+    baseUrl="/log"
+    groupSize={5}
+  />
+
+  <!-- 底部 -->
+  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
+    <p class="text-sm font-hand text-[#8b7355]">
+      朝花夕拾 · 岁月静好
+    </p>
+  </footer>
+</BookLayout>

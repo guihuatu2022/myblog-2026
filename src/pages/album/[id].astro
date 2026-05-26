@@ -1,0 +1,215 @@
+---
+import BookLayout from '../../layouts/BookLayout.astro';
+
+// 获取路由参数
+const { id } = Astro.params;
+
+// 模拟数据
+const album = {
+  id: id,
+  title: '五渔村的夏天',
+  description: '意大利五渔村的彩色房子，蓝得发亮的地中海，还有每天傍晚准时响起的钟声。那些在悬崖上错落有致的房屋，像是大自然和人类共同创作的画卷。',
+  cover: 'https://picsum.photos/seed/album1/1200/600',
+  category: '旅行',
+  date: '2024-05-01',
+  location: '意大利·五渔村',
+  camera: 'Fujifilm X-T5',
+  permission: 'public',
+};
+
+const photos = [
+  { id: '1', src: 'https://picsum.photos/seed/p1/800/600', thumb: 'https://picsum.photos/seed/p1/200/150', caption: '彩色房子依山而建' },
+  { id: '2', src: 'https://picsum.photos/seed/p2/800/600', thumb: 'https://picsum.photos/seed/p2/200/150', caption: '地中海的蓝' },
+  { id: '3', src: 'https://picsum.photos/seed/p3/600/800', thumb: 'https://picsum.photos/seed/p3/150/200', caption: '穿行在小镇巷弄间' },
+  { id: '4', src: 'https://picsum.photos/seed/p4/800/600', thumb: 'https://picsum.photos/seed/p4/200/150', caption: '傍晚的钟声' },
+  { id: '5', src: 'https://picsum.photos/seed/p5/800/800', thumb: 'https://picsum.photos/seed/p5/200/200', caption: '阳光下的彩色墙面' },
+  { id: '6', src: 'https://picsum.photos/seed/p6/600/800', thumb: 'https://picsum.photos/seed/p6/150/200', caption: '老爷爷的柠檬摊' },
+  { id: '7', src: 'https://picsum.photos/seed/p7/800/600', thumb: 'https://picsum.photos/seed/p7/200/150', caption: '海边的晚餐' },
+  { id: '8', src: 'https://picsum.photos/seed/p8/800/600', thumb: 'https://picsum.photos/seed/p8/200/150', caption: '日落时分的灯塔' },
+  { id: '9', src: 'https://picsum.photos/seed/p9/600/800', thumb: 'https://picsum.photos/seed/p9/150/200', caption: '手工艺术品' },
+];
+
+// 相关相册
+const relatedAlbums = [
+  { id: '2', title: '城市角落', cover: 'https://picsum.photos/seed/album2/300/200' },
+  { id: '5', title: '海边日落', cover: 'https://picsum.photos/seed/album5/300/200' },
+];
+---
+
+<BookLayout title={album.title}>
+  <!-- 返回按钮 -->
+  <div class="mb-6">
+    <a href="/album" class="inline-flex items-center gap-2 text-sm font-hand text-[#8b7355] hover:text-[#8b3a3a] transition-colors">
+      <i class="ph ph-arrow-left"></i>
+      返回相册列表
+    </a>
+  </div>
+
+  <!-- 相册头部 -->
+  <header class="mb-8">
+    <div class="relative -mx-8 -mt-6 mb-6 overflow-hidden rounded-lg">
+      <img 
+        src={album.cover} 
+        alt={album.title}
+        class="w-full h-64 md:h-80 object-cover"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+      <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+        <h1 class="text-3xl font-bold font-serif mb-2">{album.title}</h1>
+        <div class="flex flex-wrap gap-4 text-sm font-hand opacity-90">
+          <span><i class="ph ph-map-pin mr-1"></i>{album.location}</span>
+          <span><i class="ph ph-calendar mr-1"></i>{album.date}</span>
+          <span><i class="ph ph-camera mr-1"></i>{album.camera}</span>
+        </div>
+      </div>
+    </div>
+    
+    <p class="font-hand text-[#5d5d5d] text-base leading-relaxed mb-4">
+      {album.description}
+    </p>
+    
+    <div class="flex items-center gap-3">
+      <span class="tag tag-blue">{album.category}</span>
+      <span class="text-sm font-hand text-[#8b7355]">
+        <i class="ph ph-images mr-1"></i>
+        {photos.length} 张照片
+      </span>
+    </div>
+  </header>
+
+  <!-- 照片网格 -->
+  <section class="mb-10">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {photos.map((photo, index) => (
+        <div 
+          class="photo-item group cursor-pointer" 
+          data-index={index}
+          onclick="openLightbox(this)"
+        >
+          <img 
+            src={photo.thumb} 
+            alt={photo.caption}
+            class="w-full aspect-square object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+          {photo.caption && (
+            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-end p-3">
+              <span class="text-white text-sm font-hand">{photo.caption}</span>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- 相关相册 -->
+  <section>
+    <h3 class="text-xl font-serif font-bold text-[#2c2c2c] mb-6 flex items-center gap-2">
+      <i class="ph ph-images text-[#8b3a3a]"></i>
+      其他相册
+    </h3>
+    
+    <div class="grid md:grid-cols-2 gap-4">
+      {relatedAlbums.map((ra) => (
+        <a href={`/album/${ra.id}`} class="stat-card flex gap-4 hover:shadow-md transition-shadow group">
+          <img 
+            src={ra.cover} 
+            alt={ra.title}
+            class="w-24 h-16 object-cover rounded"
+          />
+          <div class="flex-1">
+            <h4 class="font-serif font-bold group-hover:text-[#8b3a3a] transition-colors">
+              {ra.title}
+            </h4>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- 底部 -->
+  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
+    <p class="text-sm font-hand text-[#8b7355]">
+      朝花夕拾 · 岁月静好
+    </p>
+  </footer>
+</BookLayout>
+
+<!-- 灯箱 -->
+<div id="lightbox" class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center">
+  <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-3xl hover:text-[#8b3a3a] transition-colors">
+    <i class="ph ph-x"></i>
+  </button>
+  <button onclick="prevPhoto()" class="absolute left-4 text-white text-3xl hover:text-[#8b3a3a] transition-colors">
+    <i class="ph ph-caret-left"></i>
+  </button>
+  <button onclick="nextPhoto()" class="absolute right-4 text-white text-3xl hover:text-[#8b3a3a] transition-colors">
+    <i class="ph ph-caret-right"></i>
+  </button>
+  <div class="max-w-4xl max-h-[90vh] px-4">
+    <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[80vh] object-contain" />
+    <p id="lightbox-caption" class="text-white text-center mt-4 font-hand"></p>
+  </div>
+</div>
+
+<script>
+  // 灯箱功能
+  let currentIndex = 0;
+  const photos = [
+    { src: 'https://picsum.photos/seed/p1/800/600', caption: '彩色房子依山而建' },
+    { src: 'https://picsum.photos/seed/p2/800/600', caption: '地中海的蓝' },
+    { src: 'https://picsum.photos/seed/p3/600/800', caption: '穿行在小镇巷弄间' },
+    { src: 'https://picsum.photos/seed/p4/800/600', caption: '傍晚的钟声' },
+    { src: 'https://picsum.photos/seed/p5/800/800', caption: '阳光下的彩色墙面' },
+    { src: 'https://picsum.photos/seed/p6/600/800', caption: '老爷爷的柠檬摊' },
+    { src: 'https://picsum.photos/seed/p7/800/600', caption: '海边的晚餐' },
+    { src: 'https://picsum.photos/seed/p8/800/600', caption: '日落时分的灯塔' },
+    { src: 'https://picsum.photos/seed/p9/600/800', caption: '手工艺术品' },
+  ];
+
+  function openLightbox(el: HTMLElement) {
+    currentIndex = parseInt(el.dataset.index || '0');
+    updateLightbox();
+    const lightbox = document.getElementById('lightbox');
+    lightbox?.classList.remove('hidden');
+    lightbox?.classList.add('flex');
+  }
+
+  function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    lightbox?.classList.add('hidden');
+    lightbox?.classList.remove('flex');
+  }
+
+  function updateLightbox() {
+    const img = document.getElementById('lightbox-img') as HTMLImageElement;
+    const caption = document.getElementById('lightbox-caption');
+    if (img) img.src = photos[currentIndex].src;
+    if (caption) caption.textContent = photos[currentIndex].caption;
+  }
+
+  function prevPhoto() {
+    currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+    updateLightbox();
+  }
+
+  function nextPhoto() {
+    currentIndex = (currentIndex + 1) % photos.length;
+    updateLightbox();
+  }
+
+  // ESC 关闭灯箱
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') prevPhoto();
+    if (e.key === 'ArrowRight') nextPhoto();
+  });
+</script>
+
+<style>
+  .photo-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+</style>

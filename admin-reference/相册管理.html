@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相册管理 · 后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont@1.1.0/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="../assets/css/shared.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <style>
+        .mobile-header-fix { display: flex !important; }
+        @media (min-width: 768px) { .mobile-header-fix { display: none !important; } }
+        .path-badge { background: rgba(74,107,101,0.08); color: #4a6b65; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-family: var(--font-hand); }
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.5rem; }
+        .photo-item { aspect-ratio: 1; background: #eee; border-radius: 4px; overflow: hidden; border: 1px solid #dcd3b2; cursor: pointer; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-item:hover img { filter: brightness(0.9); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: #f7f1e3; padding: 24px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .file-browser { border: 1px solid var(--line-color); background: white; border-radius: 4px; max-height: 200px; overflow-y: auto; }
+        .fb-item { padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #f0ebe0; }
+        .fb-item:hover { background: rgba(139,58,58,0.03); }
+        .fb-item.selected { background: rgba(139,58,58,0.08); }
+
+        /* 相册卡片网格 */
+        .album-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+        .album-card-item {
+            background: #fff;
+            border: 1px solid var(--line-color);
+            border-radius: 6px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            display: flex;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .album-card-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border-color: #bfa57d;
+        }
+        .album-card-cover {
+            width: 110px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            background: #f5f5f0;
+        }
+        .album-card-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .album-card-cover.private-cover img {
+            filter: invert(1) hue-rotate(180deg) brightness(0.7) opacity(0.6);
+        }
+        .album-card-cover .cover-checkbox {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            z-index: 3;
+            accent-color: #8b3a3a;
+        }
+        .album-card-body {
+            flex: 1;
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+        }
+        .album-card-name {
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 1rem;
+            color: #2c2c2c;
+            margin: 0 0 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .album-card-desc {
+            font-family: var(--font-hand);
+            font-size: 0.75rem;
+            color: #999;
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 20px;
+        }
+        .album-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            font-family: var(--font-serif);
+            color: #999;
+            margin-bottom: 10px;
+        }
+        .album-card-meta .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .album-card-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .album-card-actions .btn {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+        }
+        @media (max-width: 768px) {
+            .album-card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 分类卡片网格 */
+        .category-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        .category-card {
+            background: #fff;
+            border: 1px solid var(--line-color);
+            border-radius: 6px;
+            padding: 1.25rem;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            border-color: #bfa57d;
+        }
+        .category-card .cat-checkbox {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            accent-color: #8b3a3a;
+            z-index: 2;
+        }
+        .category-card .cat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .category-card .cat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            background: rgba(139,58,58,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .category-card .cat-icon i {
+            font-size: 1.3rem;
+            color: #8b3a3a;
+        }
+        .category-card .cat-title {
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #2c2c2c;
+            margin: 0;
+        }
+        .category-card .cat-slug {
+            font-family: var(--font-hand);
+            font-size: 0.7rem;
+            color: #999;
+            margin: 1px 0 0 0;
+        }
+        .category-card .cat-path {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .category-card .cat-path .path-text {
+            font-family: "SF Mono","Consolas",monospace;
+            font-size: 0.78rem;
+            color: #4a6b65;
+            background: rgba(74,107,101,0.06);
+            padding: 3px 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .category-card .cat-stats {
+            display: flex;
+            gap: 16px;
+        }
+        .category-card .cat-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .category-card .cat-stat .stat-num {
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #2c2c2c;
+            line-height: 1;
+        }
+        .category-card .cat-stat .stat-label {
+            font-family: var(--font-hand);
+            font-size: 0.65rem;
+            color: #999;
+            margin: 0;
+        }
+        .category-card .cat-actions {
+            display: flex;
+            gap: 6px;
+            border-top: 1px solid #f0ebe0;
+            padding-top: 0.75rem;
+        }
+        .category-card .cat-actions .btn {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+        }
+        @media (max-width: 768px) {
+            .category-card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="is-admin">
+    <div class="reading-progress"></div>
+    <button id="back-to-top" class="back-to-top"><i class="ph ph-arrow-up"></i></button>
+    <div class="book-container book-shadow">
+        
+        <header class="mobile-header-fix md:hidden flex items-center justify-between p-4 bg-[#2c2a29] text-[#dcd3b2] shadow-md relative z-30 shrink-0">
+            <button onclick="toggleMobileMenu()" class="p-1 focus:outline-none"><i class="ph ph-list text-2xl"></i></button>
+            <h1 class="font-calligraphy text-2xl tracking-widest absolute left-1/2 -translate-x-1/2 mt-1">后台管理</h1>
+            <button onclick="location.href='../pages/首页.html'" class="w-7 h-7 border border-[#bfa57d] text-[#bfa57d] bg-[#bfa57d]/10 flex items-center justify-center text-[10px] font-bold focus:outline-none transition-colors" title="返回前台">返</button>
+        </header>
+
+        <div id="mobile-backdrop" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"></div>
+
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-[240px] shrink-0 bg-[#2c2a29] text-gray-300 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+            <button class="md:hidden absolute top-5 right-5 text-gray-400 hover:text-white" onclick="toggleMobileMenu()">
+                <i class="ph ph-x text-2xl"></i>
+            </button>
+            <div class="sidebar-top">
+                <div class="flex items-center justify-center md:justify-between w-full mb-3">
+                    <h1 class="font-calligraphy text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest">后台管理</h1>
+                    <button onclick="location.href='../pages/首页.html'" class="seal-btn seal-btn-return hidden md:flex" title="返回前台">返</button>
+                </div>
+                <p class="mt-3 text-xs text-[#a8a8a8] tracking-[0.4em] font-hand opacity-90 hidden md:block">内容管理 · 系统配置</p>
+                <p class="mt-3 text-[10px] text-gray-500 tracking-[0.3em] uppercase font-serif opacity-50 w-full text-center border-t border-gray-700/30 pt-2 hidden md:block">Admin Panel</p>
+            </div>
+            <nav class="flex-1 py-6 px-5 overflow-y-auto">
+                <ul class="space-y-2">
+                    <li><a href="仪表盘.html" class="nav-link"><i class="ph ph-gauge"></i><span class="menu-item-text">管理仪表盘</span></a></li>
+                    <li><a href="文章管理.html" class="nav-link"><i class="ph ph-pen-nib"></i><span class="menu-item-text">文章管理</span></a></li>
+                    <li><a href="相册管理.html" class="nav-link active"><i class="ph ph-image"></i><span class="menu-item-text">相册管理</span></a></li>
+                    <li><a href="网盘管理.html" class="nav-link"><i class="ph ph-hard-drives"></i><span class="menu-item-text">网盘管理</span></a></li>
+                    <li><a href="导航管理.html" class="nav-link"><i class="ph ph-compass"></i><span class="menu-item-text">导航管理</span></a></li>
+                    <li><a href="留言管理.html" class="nav-link"><i class="ph ph-envelope-simple"></i><span class="menu-item-text">留言管理</span></a></li>
+                    <li><a href="设置.html" class="nav-link"><i class="ph ph-gear"></i><span class="menu-item-text">系统设置</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer"><p>&copy; 2024 - 2064</p><p class="mt-1 font-serif opacity-70">朝花夕拾 · 岁月静好</p></div>
+        </aside>
+        <div class="sidebar-overlay"></div>
+        <main class="content paper-texture">
+            <header class="flex justify-between items-end border-b border-[#dcd3b2] pb-4 mb-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-[#2c2c2c] mb-1 font-serif">相册管理</h2>
+                    <p class="text-[#8b3a3a] text-sm font-serif">EXIF/文字存 D1 · 照片存 OpenList</p>
+                </div>
+                <button class="btn btn-primary" onclick="openAlbumModal()"><i class="ph ph-plus"></i> 新建相册</button>
+            </header>
+
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab(this,'tab-category')"><i class="ph ph-folders mr-1"></i> 相册分类 <span class="tab-count">3</span></button>
+                <button class="tab-btn" onclick="switchTab(this,'tab-album')"><i class="ph ph-images mr-1"></i> 相册管理 <span class="tab-count">3</span></button>
+                <button class="tab-btn" onclick="switchTab(this,'tab-photo')"><i class="ph ph-image mr-1"></i> 照片管理 <span class="tab-count">181</span></button>
+            </div>
+
+            <!-- Tab 1: 相册分类 -->
+            <div class="tab-panel active" id="tab-category">
+                <div class="batch-bar">
+                    <input type="checkbox" style="accent-color:#8b3a3a" onchange="toggleAllCats(this)">
+                    <span>全选</span>
+                    <span class="batch-count ml-2" id="cat-count-text">共 3 个分类</span>
+                    <button class="btn btn-danger btn-sm ml-auto" onclick="batchDeleteAlbumCategories()"><i class="ph ph-trash mr-1"></i> 批量删除</button>
+                </div>
+
+                <table class="admin-table" id="category-table">
+                    <thead>
+                        <tr>
+                            <th style="width:30px"></th>
+                            <th>分类名称</th>
+                            <th>英文标识</th>
+                            <th>存储路径</th>
+                            <th style="width:60px">排序</th>
+                            <th style="width:60px">相册</th>
+                            <th style="width:60px">照片</th>
+                            <th style="width:130px">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="category-tbody"></tbody>
+                </table>
+
+                <div class="stat-card mt-6">
+                    <h4 class="font-serif font-bold text-sm mb-3 flex items-center gap-2">
+                        <i class="ph ph-plus-circle text-[#8b3a3a]"></i> 新增分类
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div class="form-group">
+                            <label>分类名称 <span class="text-[#a93226]">*</span></label>
+                            <input type="text" class="form-input" id="new-cat-name" placeholder="如：胶片摄影">
+                        </div>
+                        <div class="form-group">
+                            <label>英文标识 <span class="text-[#a93226]">*</span></label>
+                            <input type="text" class="form-input" id="new-cat-slug" placeholder="如：film">
+                        </div>
+                        <div class="form-group">
+                            <label>排序</label>
+                            <input type="number" class="form-input" id="new-cat-order" placeholder="数字" value="5" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>存储路径 <span class="text-[#a93226]">*</span></label>
+                            <div class="flex gap-2">
+                                <input type="text" class="form-input" id="new-cat-path" placeholder="/albums/film/" value="/albums/film/" oninput="updateNewCatPathPreview()">
+                                <button class="btn btn-outline" onclick="openPathBrowser('category')" title="浏览目录"><i class="ph ph-folder-open"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 p-3 rounded flex items-center gap-3" style="background:rgba(74,107,101,0.05);border:1px solid rgba(74,107,101,0.12)">
+                        <i class="ph ph-folder text-[#4a6b65] text-lg flex-shrink-0"></i>
+                        <div class="text-xs font-hand">
+                            <span class="text-[#4a6b65] font-bold">存储路径：</span>
+                            <span class="path-badge" id="new-cat-path-preview">/albums/film/</span>
+                            <span class="text-[#999] ml-1">(OpenList 主力存储)</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-4" onclick="addCategory()"><i class="ph ph-plus"></i> 添加分类</button>
+                </div>
+            </div>
+
+            <!-- Tab 2: 相册列表 -->
+            <div class="tab-panel" id="tab-album">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-dashed border-[#dcd3b2] text-sm">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-[#999] font-serif">状态</span>
+                            <span class="index-link active" data-album-filter="all" onclick="filterAlbumList(this,'all')">全部</span>
+                            <span class="filter-separator">/</span>
+                            <span class="index-link" data-album-filter="public" onclick="filterAlbumList(this,'public')">公开</span>
+                            <span class="filter-separator">/</span>
+                            <span class="index-link" data-album-filter="encrypted" onclick="filterAlbumList(this,'encrypted')">加密</span>
+                            <span class="filter-separator">/</span>
+                            <span class="index-link" data-album-filter="private" onclick="filterAlbumList(this,'private')">私有</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-[#999] font-serif">分类</span>
+                            <select class="form-input" style="min-width:130px" onchange="renderAlbumCards()">
+                                <option value="all">所有分类</option>
+                                <option value="日常随拍">日常随拍</option>
+                                <option value="旅行记录">旅行记录</option>
+                                <option value="私藏相册">私藏相册</option>
+                            </select>
+                        </div>
+                    </div>
+                    <a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="openAlbumModal()"><i class="ph ph-plus"></i> 新建相册</a>
+                </div>
+
+                <div class="batch-bar mb-4">
+                    <span class="text-xs text-[#999] font-hand mr-2" id="album-count-text">共 3 个相册</span>
+                    <button class="btn btn-danger btn-sm ml-auto" onclick="batchDeleteAlbums()"><i class="ph ph-trash mr-1"></i> 批量删除</button>
+                </div>
+
+                <div class="album-card-grid" id="album-card-grid"></div>
+
+                <div class="pagination">
+                    <span class="pagination-link disabled">上一页</span>
+                    <span class="pagination-link active">【 壹 】</span>
+                    <span class="pagination-link">下一页</span>
+                </div>
+            </div>
+
+            <!-- Tab 3: 照片管理 -->
+            <div class="tab-panel" id="tab-photo">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-dashed border-[#dcd3b2] text-sm">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-[#999] font-serif">分类</span>
+                            <select class="form-input" style="min-width:130px" id="photo-filter-cat" onchange="renderPhotoGrid()">
+                                <option value="all">所有分类</option>
+                                <option value="daily">日常随拍</option>
+                                <option value="travel">旅行记录</option>
+                                <option value="private">私藏相册</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2" id="photo-filter-album-wrap">
+                            <span class="text-xs text-[#999] font-serif">相册</span>
+                            <select class="form-input" style="min-width:150px" id="photo-filter-album" onchange="renderPhotoGrid()">
+                                <option value="all">所有相册</option>
+                                <option value="morning">晨光熹微</option>
+                                <option value="family">【私藏】家庭聚会</option>
+                                <option value="cinque">五渔村的夏天</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openUploadModal()"><i class="ph ph-plus"></i> 上传照片</button>
+                </div>
+
+                <div class="batch-bar">
+                    <input type="checkbox" style="accent-color:#8b3a3a" onchange="togglePhotoSelectAll(this)">
+                    <span>全选</span>
+                    <span class="batch-count ml-2" id="photo-count-text">6 张照片</span>
+                    <button class="btn btn-outline btn-sm ml-auto" onclick="batchMovePhotos()">批量移动</button>
+                    <button class="btn btn-danger btn-sm" onclick="batchDeletePhotos()">批量删除</button>
+                </div>
+
+                <!-- 无照片空状态 -->
+                <div class="empty-state" id="photo-empty-state" style="display:none">
+                    <div class="empty-icon"><i class="ph ph-image text-5xl text-[#dcd3b2]"></i></div>
+                    <div class="empty-text">暂无照片</div>
+                    <div class="empty-hint">点击右上角「上传照片」开始添加</div>
+                </div>
+
+                <div class="photo-grid mt-4" id="photo-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新建/编辑相册弹窗 -->
+    <div class="modal-overlay" id="album-modal">
+        <div class="modal-content" style="max-width:680px">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-[#dcd3b2]">
+                <div>
+                    <h3 class="font-serif text-xl font-bold text-[#2c2c2c]" id="album-modal-title">新建相册</h3>
+                    <p class="text-xs text-[#999] font-hand mt-0.5">EXIF/文字存 D1 · 照片存 OpenList</p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="closeAlbumModal()"><i class="ph ph-x"></i></button>
+            </div>
+
+            <!-- 区块1: 基本信息 -->
+            <div class="stat-card mb-4" style="padding:1rem 1.25rem">
+                <h4 class="font-serif font-bold text-sm text-[#2c2c2c] mb-3 flex items-center gap-2">
+                    <i class="ph ph-info text-[#8b3a3a]"></i> 基本信息
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label>相册名称 <span class="text-[#a93226]">*</span></label>
+                        <input type="text" class="form-input" id="album-name" placeholder="如：春日记忆">
+                    </div>
+                    <div class="form-group">
+                        <label>英文标识</label>
+                        <input type="text" class="form-input" id="album-slug" placeholder="如：spring-memory">
+                        <p class="text-[10px] text-[#999] font-hand mt-1">用于 URL 拼接，建议使用小写字母和连字符</p>
+                    </div>
+                    <div class="form-group">
+                        <label>所属分类</label>
+                        <select class="form-input" id="album-category" onchange="updateAlbumPath()">
+                            <option>日常随拍</option>
+                            <option>旅行记录</option>
+                            <option>私藏相册</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="month" class="form-input" id="album-date" value="2024-05">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 区块2: 存储与权限 -->
+            <div class="stat-card mb-4" style="padding:1rem 1.25rem">
+                <h4 class="font-serif font-bold text-sm text-[#2c2c2c] mb-3 flex items-center gap-2">
+                    <i class="ph ph-folder-open text-[#8b3a3a]"></i> 存储与权限
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label>相册子目录</label>
+                        <div class="flex gap-2">
+                            <input type="text" class="form-input" id="album-subpath" placeholder="/spring/" value="/spring/" oninput="updateAlbumPath()">
+                            <button class="btn btn-outline" onclick="openPathBrowser('album')" title="浏览目录"><i class="ph ph-folder-open"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>权限</label>
+                        <select class="form-input" id="album-permission" onchange="toggleAlbumPassword()">
+                            <option value="public">🌐 公开 — 所有人可见</option>
+                            <option value="encrypted">🔐 加密 — 密码访问</option>
+                            <option value="private">🔒 私有 — 仅自己可见</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group mt-3" id="album-password-group" style="display:none">
+                    <label>加密密码 <span class="text-[#a93226]">*</span></label>
+                    <div class="flex gap-2">
+                        <input type="text" class="form-input" id="album-password" placeholder="请输入相册密码">
+                        <button class="btn btn-outline btn-sm" onclick="generatePassword()" title="随机生成"><i class="ph ph-shuffle"></i></button>
+                    </div>
+                    <p class="text-[10px] text-[#999] font-hand mt-1">访客需输入此密码才能查看相册内容</p>
+                </div>
+                <div class="mt-3 p-3 rounded flex items-center gap-3" style="background:rgba(74,107,101,0.05);border:1px solid rgba(74,107,101,0.12)">
+                    <i class="ph ph-folder text-[#4a6b65] text-lg flex-shrink-0"></i>
+                    <div class="text-xs font-hand">
+                        <span class="text-[#4a6b65] font-bold">存储路径：</span>
+                        <span class="path-badge" id="album-fullpath">/albums/daily/spring/</span>
+                        <span class="text-[#999] ml-1">(OpenList 主力存储)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 区块3: 封面与描述 -->
+            <div class="stat-card mb-4" style="padding:1rem 1.25rem">
+                <h4 class="font-serif font-bold text-sm text-[#2c2c2c] mb-3 flex items-center gap-2">
+                    <i class="ph ph-image text-[#8b3a3a]"></i> 封面与描述
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                    <div class="md:col-span-1 flex flex-col items-center">
+                        <div class="w-28 h-28 rounded overflow-hidden bg-gray-100 border border-[#dcd3b2] shadow-sm mb-2">
+                            <img src="https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=160&h=160&fit=crop" class="w-full h-full object-cover" id="album-cover-img">
+                        </div>
+                        <button class="btn btn-outline btn-sm w-full" onclick="openCoverPicker()"><i class="ph ph-image mr-1"></i> 选择封面</button>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="form-group">
+                            <label>封面图片 URL</label>
+                            <input type="text" class="form-input text-xs" id="album-cover-url" placeholder="或直接粘贴图片URL..." value="https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=160&h=160&fit=crop" onchange="document.getElementById('album-cover-img').src=this.value">
+                        </div>
+                        <div class="form-group mt-3">
+                            <label>拍摄地点</label>
+                            <input type="text" class="form-input" id="album-location" placeholder="如：意大利 · 五渔村">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>相册描述</label>
+                    <textarea class="form-input" id="album-desc" rows="3" placeholder="简单描述一下这个相册，将展示在相册详情页顶部..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button class="btn btn-outline" onclick="closeAlbumModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveAlbum()"><i class="ph ph-check"></i> 保存相册</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传照片弹窗 -->
+    <div class="modal-overlay" id="upload-modal">
+        <div class="modal-content" style="max-width:620px">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-[#dcd3b2]">
+                <div>
+                    <h3 class="font-serif text-xl font-bold text-[#2c2c2c]">上传照片</h3>
+                    <p class="text-xs text-[#999] font-hand mt-0.5">自动读取 EXIF · 照片存 OpenList</p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="closeUploadModal()"><i class="ph ph-x"></i></button>
+            </div>
+
+            <!-- 区块1: 目标位置 -->
+            <div class="stat-card mb-4" style="padding:1rem 1.25rem">
+                <h4 class="font-serif font-bold text-sm text-[#2c2c2c] mb-3 flex items-center gap-2">
+                    <i class="ph ph-folder-open text-[#8b3a3a]"></i> 目标位置
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label>选择分类</label>
+                        <select class="form-input" id="upload-cat" onchange="updateUploadPath()">
+                            <option value="daily">日常随拍</option>
+                            <option value="travel">旅行记录</option>
+                            <option value="private">私藏相册</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>选择相册</label>
+                        <select class="form-input" id="upload-album" onchange="updateUploadPath()">
+                            <option value="morning">晨光熹微</option>
+                            <option value="family">【私藏】家庭聚会</option>
+                            <option value="cinque">五渔村的夏天</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3 p-3 rounded flex items-center gap-3" style="background:rgba(74,107,101,0.05);border:1px solid rgba(74,107,101,0.12)">
+                    <i class="ph ph-folder text-[#4a6b65] text-lg flex-shrink-0"></i>
+                    <div class="text-xs font-hand">
+                        <span class="text-[#4a6b65] font-bold">存储路径：</span>
+                        <span class="path-badge" id="upload-path-display">/albums/daily/spring/</span>
+                        <span class="text-[#999] ml-1">(OpenList 主力存储)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 区块2: 照片信息 -->
+            <div class="stat-card mb-4" style="padding:1rem 1.25rem">
+                <h4 class="font-serif font-bold text-sm text-[#2c2c2c] mb-3 flex items-center gap-2">
+                    <i class="ph ph-image text-[#8b3a3a]"></i> 照片信息
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div class="form-group">
+                        <label>照片标题</label>
+                        <input type="text" class="form-input" id="upload-photo-title" placeholder="如：悬崖上的彩色房子">
+                    </div>
+                    <div class="form-group">
+                        <label>照片描述</label>
+                        <input type="text" class="form-input" id="upload-photo-desc" placeholder="如：黄昏时分的光线最温柔">
+                    </div>
+                </div>
+                <div class="text-[10px] text-[#999] font-hand">
+                    <i class="ph ph-info text-[#4a6b65] mr-1"></i> 相机/镜头/光圈/快门/ISO/焦距等 EXIF 信息由系统自动提取
+                </div>
+            </div>
+
+            <!-- 区块3: 文件选择 -->
+            <div class="stat-card mb-4" style="padding:1rem 1.25rem">
+                <h4 class="font-serif font-bold text-sm text-[#2c2c2c] mb-3 flex items-center gap-2">
+                    <i class="ph ph-cloud-arrow-up text-[#8b3a3a]"></i> 选择文件
+                </h4>
+                <div class="upload-zone border-2 border-dashed border-[#dcd3b2] rounded-lg p-10 text-center cursor-pointer transition-all duration-200 hover:border-[#8b3a3a] hover:bg-[rgba(139,58,58,0.03)]" onclick="showToast('浏览器文件选择框（对接后实现真实上传）')">
+                    <div class="upload-icon mb-3"><i class="ph ph-cloud-arrow-up text-4xl text-[#bfa57d]"></i></div>
+                    <div class="upload-text text-sm font-hand text-[#5d5d5d]">点击或拖拽照片到此区域</div>
+                    <div class="text-[11px] text-[#999] font-serif mt-1">支持 JPG / PNG / WebP · 单张最大 50MB · 自动读取 EXIF</div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button class="btn btn-outline" onclick="closeUploadModal()">取消</button>
+                <button class="btn btn-primary" onclick="doUploadPhoto()"><i class="ph ph-upload"></i> 上传</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑照片弹窗 -->
+    <div class="modal-overlay" id="edit-photo-modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-serif text-xl font-bold">编辑照片信息</h3>
+                <button class="btn btn-outline btn-sm" onclick="closeEditPhotoModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="flex gap-4 mb-4">
+                <div class="w-32 h-32 rounded overflow-hidden bg-gray-100 border border-[#dcd3b2] flex-shrink-0">
+                    <img src="" class="w-full h-full object-cover" id="edit-photo-thumb">
+                </div>
+                <div class="flex-1 space-y-3">
+                    <div class="form-group">
+                        <label>照片标题</label>
+                        <input type="text" class="form-input" id="edit-photo-title" placeholder="请输入照片标题">
+                    </div>
+                    <div class="form-group">
+                        <label>照片描述</label>
+                        <textarea class="form-input" id="edit-photo-desc" rows="2" placeholder="请输入照片描述"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="text-xs text-[#999] font-hand mb-3">
+                <i class="ph ph-info text-[#4a6b65] mr-1"></i> EXIF信息（相机/镜头/光圈/快门/ISO/焦距）由系统自动提取，无需手动编辑
+            </div>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-outline" onclick="closeEditPhotoModal()">取消</button>
+                <button class="btn btn-primary" onclick="savePhotoEdit()"><i class="ph ph-check"></i> 保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑相册分类弹窗 -->
+    <div class="modal-overlay" id="edit-category-modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-serif text-xl font-bold">编辑相册分类</h3>
+                <button class="btn btn-outline btn-sm" onclick="closeEditCategoryModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="form-group mb-4">
+                <label>分类名称</label>
+                <input type="text" class="form-input" id="edit-category-name" placeholder="请输入分类名称">
+            </div>
+            <div class="form-group mb-4">
+                <label>英文标识</label>
+                <input type="text" class="form-input" id="edit-category-slug" placeholder="请输入英文标识">
+            </div>
+            <div class="form-group mb-4">
+                <label>排序</label>
+                <input type="number" class="form-input" id="edit-category-order" placeholder="数字">
+            </div>
+            <div class="form-group mb-4">
+                <label>存储路径</label>
+                <div class="flex gap-2">
+                    <input type="text" class="form-input" id="edit-category-path" placeholder="相对路径">
+                    <button class="btn btn-outline" onclick="openPathBrowser('edit-category')"><i class="ph ph-folder-open"></i> 浏览</button>
+                </div>
+            </div>
+            <div class="text-xs text-[#999] font-hand mb-4">
+                <i class="ph ph-info text-[#4a6b65] mr-1"></i>
+                完整路径：<span class="path-badge" id="edit-category-fullpath">/albums/daily/</span>
+                <span class="ml-2">(OpenList: 主力存储)</span>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-outline" onclick="closeEditCategoryModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveCategoryEdit()"><i class="ph ph-check"></i> 保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 路径浏览器弹窗 -->
+    <div class="modal-overlay" id="path-browser-modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-serif text-xl font-bold">浏览路径</h3>
+                <button class="btn btn-outline btn-sm" onclick="closePathBrowser()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="mb-3">
+                <div class="text-sm text-[#999] font-hand mb-2">
+                    <i class="ph ph-folder-open text-[#bfa57d]"></i> 当前：<span class="path-badge" id="browser-current-path">/albums/</span>
+                </div>
+                <div class="file-browser">
+                    <div class="fb-item" onclick="navigateTo('/albums/daily/')"><i class="ph ph-folder text-[#bfa57d]"></i>daily/</div>
+                    <div class="fb-item" onclick="navigateTo('/albums/travel/')"><i class="ph ph-folder text-[#bfa57d]"></i>travel/</div>
+                    <div class="fb-item" onclick="navigateTo('/albums/private/')"><i class="ph ph-folder text-[#bfa57d]"></i>private/</div>
+                </div>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <input type="text" class="form-input" placeholder="新文件夹名称">
+                <button class="btn btn-primary" onclick="showToast('创建文件夹...')"><i class="ph ph-folder-plus"></i> 新建</button>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button class="btn btn-outline" onclick="closePathBrowser()">取消</button>
+                <button class="btn btn-primary" onclick="selectPath()"><i class="ph ph-check"></i> 选择此目录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 封面选择器弹窗 -->
+    <div class="modal-overlay" id="cover-picker-modal">
+        <div class="modal-content" style="max-width:700px">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-serif text-xl font-bold">选择相册封面</h3>
+                <button class="btn btn-outline btn-sm" onclick="closeCoverPicker()"><i class="ph ph-x"></i></button>
+            </div>
+            <p class="text-xs text-[#999] font-hand mb-4">点击下方照片将其设为相册封面</p>
+            <div class="cover-picker-grid" id="cover-picker-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;max-height:400px;overflow-y:auto">
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button class="btn btn-outline" onclick="closeCoverPicker()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/shared.js"></script>
+    <script>
+    const sidebar=document.getElementById('sidebar');const backdrop=document.getElementById('mobile-backdrop');
+    function toggleMobileMenu(){const isClosed=sidebar.classList.contains('-translate-x-full');if(isClosed){backdrop.classList.remove('hidden');setTimeout(()=>backdrop.classList.remove('opacity-0'),10);sidebar.classList.remove('-translate-x-full')}else{backdrop.classList.add('opacity-0');sidebar.classList.add('-translate-x-full');setTimeout(()=>backdrop.classList.add('hidden'),300)}}
+    function openAlbumModal() {
+            currentEditAlbumId = null;
+            document.getElementById('album-modal-title').textContent = '新建相册';
+            document.getElementById('album-name').value = '';
+            document.getElementById('album-slug').value = '';
+            document.getElementById('album-category').value = '日常随拍';
+            document.getElementById('album-subpath').value = '/spring/';
+            document.getElementById('album-date').value = '2024-05';
+            document.getElementById('album-permission').value = 'public';
+            document.getElementById('album-password').value = '';
+            document.getElementById('album-cover-url').value = 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=160&h=160&fit=crop';
+            document.getElementById('album-cover-img').src = 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=160&h=160&fit=crop';
+            document.getElementById('album-location').value = '';
+            document.getElementById('album-desc').value = '';
+            document.getElementById('album-password-group').style.display = 'none';
+            updateAlbumPath();
+            document.getElementById('album-modal').classList.add('active');
+        }
+        function closeAlbumModal() {
+            document.getElementById('album-modal').classList.remove('active');
+            document.getElementById('album-password-group').style.display = 'none';
+        }
+        function toggleAlbumPassword() {
+            var sel = document.getElementById('album-permission');
+            document.getElementById('album-password-group').style.display = sel.value === 'encrypted' ? 'block' : 'none';
+        }
+        function openUploadModal() { document.getElementById('upload-modal').classList.add('active'); }
+        function closeUploadModal() { document.getElementById('upload-modal').classList.remove('active'); }
+        function openPathBrowser(type) { currentPathBrowserTarget = type; document.getElementById('path-browser-modal').classList.add('active'); }
+        function closePathBrowser() { document.getElementById('path-browser-modal').classList.remove('active'); }
+        function navigateTo(path) { showToast('已进入 ' + path); browserCurrentPath = path; document.getElementById('browser-current-path').textContent = path; }
+        function selectPath() {
+            if (currentPathBrowserTarget === 'edit-category') {
+                document.getElementById('edit-category-path').value = browserCurrentPath;
+                document.getElementById('edit-category-fullpath').textContent = browserCurrentPath;
+            } else {
+                document.getElementById('new-cat-path').value = browserCurrentPath;
+            }
+            closePathBrowser();
+        }
+
+        var browserCurrentPath = '/albums/';
+        var currentPathBrowserTarget = 'category';
+
+        var albumCategoryData = {
+            1: { name: '日常随拍', slug: 'daily', order: 1, path: '/albums/daily/' },
+            2: { name: '旅行记录', slug: 'travel', order: 2, path: '/albums/travel/' },
+            3: { name: '私藏相册', slug: 'private', order: 3, path: '/albums/private/' }
+        };
+
+        var currentEditCategoryId = null;
+
+        function editCategory(id) {
+            currentEditCategoryId = id;
+            var category = albumCategoryData[id];
+            if (category) {
+                document.getElementById('edit-category-name').value = category.name;
+                document.getElementById('edit-category-slug').value = category.slug;
+                document.getElementById('edit-category-order').value = category.order;
+                document.getElementById('edit-category-path').value = category.path;
+                document.getElementById('edit-category-fullpath').textContent = category.path;
+            }
+            document.getElementById('edit-category-modal').classList.add('active');
+        }
+
+        function closeEditCategoryModal() {
+            document.getElementById('edit-category-modal').classList.remove('active');
+            currentEditCategoryId = null;
+        }
+
+        function saveCategoryEdit() {
+            if (!currentEditCategoryId) return;
+            var name = document.getElementById('edit-category-name').value;
+            var slug = document.getElementById('edit-category-slug').value;
+            var order = document.getElementById('edit-category-order').value;
+            var path = document.getElementById('edit-category-path').value;
+            if (!name || !slug || !path) { showToast('请填写完整的分类信息'); return; }
+            albumCategoryData[currentEditCategoryId] = { name: name, slug: slug, order: parseInt(order) || 0, path: path };
+            showToast('分类已更新');
+            closeEditCategoryModal();
+            renderCategoryTable();
+        }
+
+        function deleteCategory(id) { if(confirm('确定要删除此分类吗？分类下的相册不会被删除。')) showToast('分类已从 D1 删除'); }
+        function addCategory() {
+            var name = document.getElementById('new-cat-name').value;
+            var slug = document.getElementById('new-cat-slug').value;
+            var order = document.getElementById('new-cat-order').value;
+            var path = document.getElementById('new-cat-path').value;
+            if (!name) { showToast('请输入分类名称'); return; }
+            if (!slug) { showToast('请输入英文标识'); return; }
+            if (!path) { showToast('请输入存储路径'); return; }
+            var newId = Date.now();
+            albumCategoryData[newId] = { name: name, slug: slug, order: parseInt(order) || 99, path: path };
+            document.getElementById('new-cat-name').value = '';
+            document.getElementById('new-cat-slug').value = '';
+            document.getElementById('new-cat-order').value = '5';
+            document.getElementById('new-cat-path').value = '/albums/film/';
+            updateNewCatPathPreview();
+            showToast('分类「' + name + '」已添加到 D1');
+            renderCategoryTable();
+        }
+
+        function renderCategoryTable() {
+            var tbody = document.getElementById('category-tbody');
+            var countEl = document.getElementById('cat-count-text');
+            if (!tbody) return;
+
+            var cats = [];
+            for (var k in albumCategoryData) { cats.push({ id: k, data: albumCategoryData[k] }); }
+            cats.sort(function(a, b) { return (a.data.order || 99) - (b.data.order || 99); });
+
+            if (countEl) countEl.textContent = '共 ' + cats.length + ' 个分类';
+
+            var albumCounts = { 1: 3, 2: 2, 3: 1 };
+            var photoCounts = { 1: 87, 2: 65, 3: 29 };
+
+            var html = '';
+            cats.forEach(function(item) {
+                var c = item.data;
+                var id = item.id;
+                html += '<tr>' +
+                    '<td><input type="checkbox" class="cat-row-checkbox" style="accent-color:#8b3a3a" data-cat-id="' + id + '"></td>' +
+                    '<td><span class="font-serif font-bold text-[#2c2c2c]">' + c.name + '</span></td>' +
+                    '<td><span class="tag tag-red">' + c.slug + '</span></td>' +
+                    '<td><span class="path-badge">' + c.path + '</span></td>' +
+                    '<td>' + (c.order || '-') + '</td>' +
+                    '<td>' + (albumCounts[id] || 0) + '</td>' +
+                    '<td>' + (photoCounts[id] || 0) + '</td>' +
+                    '<td class="flex gap-1">' +
+                    '<button class="btn btn-outline btn-sm" onclick="editCategory(' + id + ')"><i class="ph ph-pencil"></i> 编辑</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="deleteCategoryRow(' + id + ')"><i class="ph ph-trash"></i></button>' +
+                    '</td>' +
+                    '</tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        function toggleAllCats(cb) {
+            document.querySelectorAll('.cat-row-checkbox').forEach(function(c) { c.checked = cb.checked; });
+        }
+
+        function deleteCategoryRow(id) {
+            if (!confirm('确定要删除分类「' + (albumCategoryData[id] ? albumCategoryData[id].name : '') + '」吗？')) return;
+            delete albumCategoryData[id];
+            showToast('分类已从 D1 删除');
+            renderCategoryTable();
+        }
+
+        function batchDeleteAlbumCategories() {
+            var checked = document.querySelectorAll('.cat-row-checkbox:checked');
+            if (checked.length === 0) { showToast('请先勾选分类'); return; }
+            if (!confirm('确定删除选中的 ' + checked.length + ' 个分类吗？')) return;
+            checked.forEach(function(cb) {
+                delete albumCategoryData[cb.getAttribute('data-cat-id')];
+            });
+            showToast('已批量删除分类');
+            renderCategoryTable();
+        }
+
+        function updateNewCatPathPreview() {
+            var val = document.getElementById('new-cat-path').value;
+            document.getElementById('new-cat-path-preview').textContent = val || '/albums/';
+        }
+
+        var currentAlbumFilter = 'all';
+
+        function renderAlbumCards() {
+            var grid = document.getElementById('album-card-grid');
+            var countEl = document.getElementById('album-count-text');
+            if (!grid) return;
+
+            var catSelect = document.querySelector('#tab-album select');
+            var catVal = catSelect ? catSelect.value : 'all';
+
+            var filtered = [];
+            for (var k in albumData) {
+                var a = albumData[k];
+                if (catVal !== 'all' && a.category !== catVal) continue;
+                if (currentAlbumFilter !== 'all' && a.permission !== currentAlbumFilter) continue;
+                filtered.push({ id: k, data: a });
+            }
+
+            if (countEl) countEl.textContent = '共 ' + filtered.length + ' 个相册';
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon"><i class="ph ph-images text-5xl text-[#dcd3b2]"></i></div><div class="empty-text">暂无匹配相册</div><div class="empty-hint">尝试调整筛选条件或新建相册</div></div>';
+                return;
+            }
+
+            var permissionMap = {
+                public:  '<span class="perm-badge perm-public"><i class="ph ph-globe"></i> 公开</span>',
+                private: '<span class="perm-badge perm-private"><i class="ph ph-lock"></i> 私有</span>',
+                encrypted: '<span class="perm-badge perm-encrypted"><i class="ph ph-lock-key"></i> 加密</span>'
+            };
+            var photoCounts = { 1: 24, 2: 56, 3: 48 };
+
+            var html = '';
+            filtered.forEach(function(item) {
+                var a = item.data;
+                var id = item.id;
+                var permTag = permissionMap[a.permission] || permissionMap.public;
+                var isPrivate = a.permission === 'private';
+                var coverClass = isPrivate ? ' album-card-cover private-cover' : ' album-card-cover';
+                html += '<div class="album-card-item">' +
+                    '<div class="' + coverClass + '">' +
+                    '<input type="checkbox" class="cover-checkbox" data-album-id="' + id + '" onclick="event.stopPropagation()">' +
+                    '<img src="' + (a.cover || '') + '" alt="' + a.name + '">' +
+                    '</div>' +
+                    '<div class="album-card-body">' +
+                    '<div>' +
+                    '<h4 class="album-card-name">' + a.name + '</h4>' +
+                    '<p class="album-card-desc">' + (a.desc || '暂无描述') + '</p>' +
+                    '<div class="album-card-meta">' +
+                    '<span class="tag tag-red">' + a.category + '</span>' +
+                    permTag +
+                    '<span class="meta-item"><i class="ph ph-calendar-blank"></i>' + a.date + '</span>' +
+                    '<span class="meta-item"><i class="ph ph-image"></i>' + (photoCounts[id] || 0) + ' 张</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="album-card-actions">' +
+                    '<button class="btn btn-outline btn-sm" onclick="editAlbum(' + id + ')"><i class="ph ph-pencil mr-1"></i>编辑</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="deleteAlbumCard(' + id + ')"><i class="ph ph-trash"></i></button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+            grid.innerHTML = html;
+        }
+
+        function filterAlbumList(link, type) {
+            var bar = link.parentElement;
+            bar.querySelectorAll('.index-link').forEach(function(l) { l.classList.remove('active'); });
+            link.classList.add('active');
+            currentAlbumFilter = type;
+            renderAlbumCards();
+        }
+
+        function deleteAlbumCard(id) {
+            if (!confirm('确定要删除相册「' + (albumData[id] ? albumData[id].name : '') + '」吗？\n注意：仅删除数据库记录，OpenList 中的照片文件不会被删除。')) return;
+            delete albumData[id];
+            showToast('相册已删除');
+            renderAlbumCards();
+        }
+
+        function batchDeleteAlbums() {
+            var checked = document.querySelectorAll('.cover-checkbox:checked');
+            if (checked.length === 0) { showToast('请先勾选相册封面上的复选框'); return; }
+            if (!confirm('确定删除选中的 ' + checked.length + ' 个相册吗？\n注意：仅删除数据库记录，OpenList 中的照片文件不会被删除。')) return;
+            checked.forEach(function(cb) {
+                var id = cb.getAttribute('data-album-id');
+                delete albumData[id];
+            });
+            showToast('已批量删除相册');
+            renderAlbumCards();
+        }
+        function editAlbum(id) {
+            currentEditAlbumId = id;
+            var album = albumData[id];
+            if (album) {
+                document.getElementById('album-modal-title').textContent = '编辑相册';
+                document.getElementById('album-name').value = album.name || '';
+                document.getElementById('album-slug').value = album.slug || '';
+                document.getElementById('album-category').value = album.category || '日常随拍';
+                document.getElementById('album-subpath').value = album.subpath || '';
+                document.getElementById('album-date').value = album.date || '';
+                document.getElementById('album-permission').value = album.permission || 'public';
+                document.getElementById('album-password').value = album.password || '';
+                document.getElementById('album-cover-url').value = album.cover || '';
+                document.getElementById('album-cover-img').src = album.cover || '';
+                document.getElementById('album-location').value = album.location || '';
+                document.getElementById('album-desc').value = album.desc || '';
+                updateAlbumPath();
+                toggleAlbumPassword();
+            }
+            document.getElementById('album-modal').classList.add('active');
+        }
+        function deleteAlbum(id) { if(confirm('确定要删除此相册吗？\n注意：仅删除数据库记录，OpenList 中的照片文件不会被删除。')) showToast('相册已删除'); }
+        function saveAlbum() {
+            var name = document.getElementById('album-name').value;
+            if (!name) { showToast('请输入相册名称'); return; }
+            if (currentEditAlbumId) {
+                var album = albumData[currentEditAlbumId];
+                if (album) {
+                    album.name = name;
+                    album.slug = document.getElementById('album-slug').value;
+                    album.category = document.getElementById('album-category').value;
+                    album.subpath = document.getElementById('album-subpath').value;
+                    album.date = document.getElementById('album-date').value;
+                    album.permission = document.getElementById('album-permission').value;
+                    album.password = document.getElementById('album-password').value;
+                    album.cover = document.getElementById('album-cover-url').value;
+                    album.location = document.getElementById('album-location').value;
+                    album.desc = document.getElementById('album-desc').value;
+                }
+                showToast('相册已更新');
+            } else {
+                showToast('相册已保存到 D1');
+            }
+            closeAlbumModal();
+        }
+
+        // 相册数据
+        var currentEditAlbumId = null;
+        var albumData = {
+            1: { name: '晨光熹微', slug: 'morning-light', category: '日常随拍', subpath: '/spring/', date: '2024-05', permission: 'public', password: '', cover: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=160&h=160&fit=crop', location: '', desc: '清晨的第一缕阳光' },
+            2: { name: '【私藏】家庭聚会', slug: 'family-gathering', category: '私藏相册', subpath: '/family/', date: '2024-02', permission: 'private', password: '', cover: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=160&h=160&fit=crop', location: '', desc: '难得的全家福' },
+            3: { name: '五渔村的夏天', slug: 'cinque-terre-summer', category: '旅行记录', subpath: '/vernazza/', date: '2023-08', permission: 'public', password: '', cover: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=160&h=160&fit=crop', location: '意大利 · 五渔村', desc: '那年夏天，沿着利古里亚海岸线的记忆' }
+        };
+
+        // 照片数据示例
+        var photoData = [
+            { id: 1, src: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=300&h=300&fit=crop', title: '晨光熹微', desc: '清晨的第一缕阳光洒在窗台', album: 'morning', cat: 'daily' },
+            { id: 2, src: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=300&h=300&fit=crop', title: '家庭聚会', desc: '难得的全家福', album: 'family', cat: 'private' },
+            { id: 3, src: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=300&h=300&fit=crop', title: '五渔村的夏天', desc: '意大利海岸线的记忆', album: 'cinque', cat: 'travel' },
+            { id: 4, src: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=300&h=300&fit=crop', title: '山间小屋', desc: '周末徒步所见', album: 'morning', cat: 'daily' },
+            { id: 5, src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&h=300&fit=crop', title: '金色田野', desc: '秋天的麦田', album: 'cinque', cat: 'travel' },
+            { id: 6, src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=300&h=300&fit=crop', title: '公路旅行', desc: '穿越无人区', album: 'morning', cat: 'daily' }
+        ];
+        var nextPhotoId = 7;
+
+        var currentEditPhotoId = null;
+
+        function renderPhotoGrid() {
+            var grid = document.getElementById('photo-grid');
+            var empty = document.getElementById('photo-empty-state');
+            var countEl = document.getElementById('photo-count-text');
+            if (!grid) return;
+
+            var catFilter = document.getElementById('photo-filter-cat');
+            var albumFilter = document.getElementById('photo-filter-album');
+            var catVal = catFilter ? catFilter.value : 'all';
+            var albumVal = albumFilter ? albumFilter.value : 'all';
+
+            var filtered = photoData.filter(function(p) {
+                if (catVal !== 'all' && p.cat !== catVal) return false;
+                if (albumVal !== 'all' && p.album !== albumVal) return false;
+                return true;
+            });
+
+            if (empty) empty.style.display = filtered.length === 0 ? 'flex' : 'none';
+            if (countEl) countEl.textContent = filtered.length + ' 张照片';
+
+            var html = '';
+            filtered.forEach(function(p) {
+                html += '<div class="photo-item" style="position:relative;border-radius:6px">' +
+                    '<input type="checkbox" class="photo-checkbox" style="position:absolute;top:6px;left:6px;z-index:5;accent-color:#8b3a3a" data-photo-id="' + p.id + '" onclick="event.stopPropagation()">' +
+                    '<img src="' + p.src + '" onclick="openEditPhotoModal(' + p.id + ')" title="点击编辑标题和描述" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;border-radius:6px 6px 0 0">' +
+                    '<div style="background:rgba(255,255,255,0.95);padding:8px 10px;border-radius:0 0 6px 6px;border-top:1px solid #f0ebe0">' +
+                    '<p style="color:#2c2c2c;font-size:12px;font-family:var(--font-serif);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0">' + (p.title || '未命名') + '</p>' +
+                    '<p style="color:#999;font-size:10px;font-family:var(--font-hand);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 0 0 0">' + (p.desc || '暂无描述') + '</p>' +
+                    '</div></div>';
+            });
+            grid.innerHTML = html;
+        }
+
+        function openEditPhotoModal(id) {
+            currentEditPhotoId = id;
+            var photo = photoData.find(function(p) { return p.id === id; });
+            if (photo) {
+                document.getElementById('edit-photo-thumb').src = photo.src;
+                document.getElementById('edit-photo-title').value = photo.title || '';
+                document.getElementById('edit-photo-desc').value = photo.desc || '';
+            }
+            document.getElementById('edit-photo-modal').classList.add('active');
+        }
+
+        function closeEditPhotoModal() {
+            document.getElementById('edit-photo-modal').classList.remove('active');
+            currentEditPhotoId = null;
+        }
+
+        function savePhotoEdit() {
+            if (!currentEditPhotoId) return;
+            var photo = photoData.find(function(p) { return p.id === currentEditPhotoId; });
+            if (photo) {
+                photo.title = document.getElementById('edit-photo-title').value;
+                photo.desc = document.getElementById('edit-photo-desc').value;
+            }
+            showToast('照片信息已保存到 D1');
+            closeEditPhotoModal();
+            renderPhotoGrid();
+        }
+
+        function updateAlbumPath() {
+            var catName = document.getElementById('album-category').value;
+            var sub = document.getElementById('album-subpath').value;
+            var fp = '/albums/';
+            for (var k in albumCategoryData) {
+                if (albumCategoryData[k].name === catName) { fp = albumCategoryData[k].path; break; }
+            }
+            fp = fp + (sub || '');
+            fp = fp.replace(/\/+/g, '/');
+            document.getElementById('album-fullpath').textContent = fp;
+        }
+
+        function openCoverPicker() {
+            var grid = document.getElementById('cover-picker-grid');
+            if (!grid) return;
+            var html = '';
+            var allPhotos = photoData.concat([
+                { id: 7, src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300' },
+                { id: 8, src: 'https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?w=300' },
+                { id: 9, src: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=300' },
+                { id: 10, src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=300' }
+            ]);
+            allPhotos.forEach(function(p) {
+                html += '<div style="aspect-ratio:1;overflow:hidden;border-radius:4px;border:2px solid #dcd3b2;cursor:pointer;transition:all 0.2s" onclick="selectAlbumCover(\'' + p.src + '\')" onmouseover="this.style.borderColor=\'#8b3a3a\'" onmouseout="this.style.borderColor=\'#dcd3b2\'">' +
+                    '<img src="' + p.src + '" style="width:100%;height:100%;object-fit:cover">' +
+                    '</div>';
+            });
+            grid.innerHTML = html;
+            document.getElementById('cover-picker-modal').classList.add('active');
+        }
+
+        function closeCoverPicker() {
+            document.getElementById('cover-picker-modal').classList.remove('active');
+        }
+
+        function selectAlbumCover(src) {
+            document.getElementById('album-cover-url').value = src;
+            document.getElementById('album-cover-img').src = src;
+            closeCoverPicker();
+            showToast('封面已选择');
+        }
+
+        function toggleAllCheckboxes(cb, containerId) {
+            var container = document.querySelector(containerId);
+            if (!container) return;
+            container.querySelectorAll('tbody input[type="checkbox"]').forEach(function(c) { c.checked = cb.checked; });
+        }
+
+        function togglePhotoSelectAll(cb) {
+            document.querySelectorAll('.photo-checkbox').forEach(function(c) { c.checked = cb.checked; });
+        }
+
+        function batchDeletePhotos() {
+            var checked = document.querySelectorAll('.photo-checkbox:checked');
+            if (checked.length === 0) { showToast('请先选择照片'); return; }
+            if (!confirm('确定删除选中的 ' + checked.length + ' 张照片吗？\n注意：仅删除数据库记录，OpenList 文件不会被删除。')) return;
+            checked.forEach(function(cb) {
+                var id = parseInt(cb.getAttribute('data-photo-id'));
+                photoData = photoData.filter(function(p) { return p.id !== id; });
+            });
+            showToast('已删除选中的照片');
+            renderPhotoGrid();
+        }
+
+        function batchMovePhotos() {
+            var checked = document.querySelectorAll('.photo-checkbox:checked');
+            if (checked.length === 0) { showToast('请先选择照片'); return; }
+            showToast('已批量移动照片（需配合 D1 实现）');
+        }
+
+        function updateUploadPath() {
+            var albumPaths = {
+                morning: '/albums/daily/spring/',
+                family: '/albums/private/family/',
+                cinque: '/albums/travel/vernazza/'
+            };
+            var albumVal = document.getElementById('upload-album').value;
+            var path = albumPaths[albumVal] || '/albums/';
+            document.getElementById('upload-path-display').textContent = path;
+        }
+
+        function doUploadPhoto() {
+            var title = document.getElementById('upload-photo-title').value;
+            var desc = document.getElementById('upload-photo-desc').value;
+            var albumVal = document.getElementById('upload-album').value;
+            var catVal = document.getElementById('upload-cat').value;
+            var sampleSrcs = [
+                'https://images.unsplash.com/photo-1534445867742-43195f401b6c?w=300&h=300&fit=crop',
+                'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=300&fit=crop',
+                'https://images.unsplash.com/photo-1598300042247-d088f8c3a922?w=300&h=300&fit=crop',
+                'https://images.unsplash.com/photo-1555881400-74d7acaacd9b?w=300&h=300&fit=crop'
+            ];
+            var src = sampleSrcs[Math.floor(Math.random() * sampleSrcs.length)];
+            photoData.push({
+                id: nextPhotoId++,
+                src: src,
+                title: title || '未命名',
+                desc: desc || '',
+                album: albumVal,
+                cat: catVal
+            });
+            document.getElementById('upload-photo-title').value = '';
+            document.getElementById('upload-photo-desc').value = '';
+            showToast('照片已上传成功 ✓');
+            closeUploadModal();
+            renderPhotoGrid();
+            var catFilter = document.getElementById('photo-filter-cat');
+            var albumFilter = document.getElementById('photo-filter-album');
+            if (catFilter) catFilter.value = 'all';
+            if (albumFilter) albumFilter.value = 'all';
+            renderPhotoGrid();
+        }
+
+        renderPhotoGrid();
+        renderAlbumCards();
+        renderCategoryTable();
+
+        function generatePassword() {
+            var chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+            var pwd = '';
+            for (var i = 0; i < 8; i++) { pwd += chars.charAt(Math.floor(Math.random() * chars.length)); }
+            document.getElementById('album-password').value = pwd;
+            showToast('已生成随机密码: ' + pwd);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+---
+import BookLayout from '../../layouts/BookLayout.astro';
+
+// 获取路由参数
+const { id } = Astro.params;
+
+// 模拟文章数据
+const post = {
+  id: id,
+  title: '三十岁的第一个清晨',
+  content: `窗外的第一缕阳光透过窗帘的缝隙，在墙上投下一道金色的光痕。
+
+我躺在床上，听着远处隐约的鸟鸣，感受着这个与往常不同的早晨。今天，是我三十岁的第一天。
+
+三十而立。这个词在脑海中回荡了很久。小时候觉得三十岁是很遥远的年纪，仿佛到了那个时候，一切都会尘埃落定。可真正到了这一天，才发现世界依然在转，而所谓的"立"，不过是内心多了一份笃定。
+
+## 早晨的仪式
+
+我没有睡懒觉。六点准时醒来，像往常一样。但今天的早餐，我想做得认真一些。
+
+煎蛋、吐司、牛奶，还有从菜市场买来的新鲜番茄。切开的时候，红色的汁水在案板上蔓延开来，带着一股清新的酸甜气息。这大概就是生活的味道吧——看似平淡，却有滋有味。
+
+## 关于"立"
+
+什么是"立"？我想了很久。
+
+也许是经济上的独立，不必再为柴米油盐发愁。也许是思想上的成熟，能够分辨是非、抵御诱惑。又或许只是简单地知道自己想要什么、适合什么。
+
+但我觉得，"立"更是一种内心的状态。不再急于向世界证明什么，而是默默做好手头的每一件事。不再焦虑于未来的不确定，而是专注于当下的每一个选择。
+
+> "三十而立，不是成就，而是一种内心的笃定。"
+
+这句话是在一本书里读到的，今天格外有感触。
+
+## 写给十年后的自己
+
+如果有机会，我想对十年后的自己说：希望你还能保持现在的这份热忱，对生活、对世界、对身边的一切。
+
+希望你依然会为一部好电影感动落泪，依然会为一首好歌反复聆听，依然会在深夜写下一行行文字，记录那些转瞬即逝的想法。
+
+希望你还记得今天早晨的阳光，记得切开番茄时的那股香气，记得三十岁生日蛋糕上跳动的烛光。
+
+---
+
+这就是三十岁的第一个清晨。
+
+没有惊天动地的改变，没有想象中的激动人心。只是普通的一天，因为赋予了特殊的意义，而变得与众不同。
+
+也许人生就是这样，每一个平凡的日子，串联起来，就成了独一无二的故事。
+
+继续走吧，路还很长。`,
+  excerpt: '窗外的第一缕阳光透过窗帘的缝隙，在墙上投下一道金色的光痕。我躺在床上，听着远处隐约的鸟鸣，感受着这个与往常不同的早晨...',
+  category: '随笔',
+  categoryId: '1',
+  date: '2024-05-20',
+  time: '08:30',
+  permission: 'public',
+  isPinned: true,
+  weather: '晴',
+  mood: '平静',
+  tags: ['生活', '三十岁', '感悟'],
+  viewCount: 128,
+  coverImage: 'https://picsum.photos/seed/1/1200/400',
+};
+
+// 相关评论
+const comments = [
+  {
+    id: '1',
+    userName: '海边旅人',
+    content: '写得太好了。"立"不是成就，而是一种内心的笃定——深有同感。祝三十岁快乐！',
+    date: '2024-05-21',
+    isReplied: true,
+    reply: '感谢来访。安静是这个时代最奢侈的东西，希望这里能给你片刻的宁静。',
+  },
+  {
+    id: '2',
+    userName: '云中漫步',
+    content: '我也是快到三十岁的人了，看完这篇文章很有感触。',
+    date: '2024-05-22',
+    isReplied: false,
+    reply: '',
+  },
+];
+
+// 上一篇/下一篇
+const prevPost = null;
+const nextPost = { id: '2', title: '胶片里的老街' };
+
+// 相关文章
+const relatedPosts = [
+  { id: '4', title: '读《瓦尔登湖》', date: '2024-05-10' },
+  { id: '8', title: '童年记忆', date: '2024-04-28' },
+  { id: '14', title: '父亲的背影', date: '2024-03-28' },
+];
+---
+
+<BookLayout title={post.title}>
+  <!-- 返回按钮 -->
+  <div class="mb-6">
+    <a href="/log" class="inline-flex items-center gap-2 text-sm font-hand text-[#8b7355] hover:text-[#8b3a3a] transition-colors">
+      <i class="ph ph-arrow-left"></i>
+      返回日志列表
+    </a>
+  </div>
+
+  <!-- 文章头部 -->
+  <header class="mb-8">
+    <!-- 封面图 -->
+    {post.coverImage && (
+      <div class="relative -mx-8 -mt-6 mb-6 overflow-hidden rounded-lg">
+        <img 
+          src={post.coverImage} 
+          alt={post.title}
+          class="w-full h-64 md:h-80 object-cover"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+      </div>
+    )}
+    
+    <!-- 标题 -->
+    <h1 class="text-3xl md:text-4xl font-bold font-serif text-[#2c2c2c] mb-4">
+      {post.isPinned && (
+        <span class="inline-block mr-2 text-[#8b3a3a]">
+          <i class="ph ph-push-pin"></i>
+        </span>
+      )}
+      {post.title}
+    </h1>
+    
+    <!-- 元信息 -->
+    <div class="flex flex-wrap items-center gap-4 text-sm font-hand text-[#8b7355]">
+      <span>
+        <i class="ph ph-calendar-blank mr-1"></i>
+        {post.date}
+      </span>
+      <span>
+        <i class="ph ph-clock mr-1"></i>
+        {post.time}
+      </span>
+      <span>
+        <i class="ph ph-eye mr-1"></i>
+        {post.viewCount} 阅读
+      </span>
+      <span class="tag tag-red">{post.category}</span>
+      
+      {post.permission === 'encrypted' && (
+        <span class="tag tag-gray">
+          <i class="ph ph-lock-simple mr-1"></i>
+          加密
+        </span>
+      )}
+    </div>
+    
+    <!-- 标签 -->
+    {post.tags && post.tags.length > 0 && (
+      <div class="flex flex-wrap gap-2 mt-4">
+        {post.tags.map((tag) => (
+          <span class="tag tag-blue">#{tag}</span>
+        ))}
+      </div>
+    )}
+    
+    <!-- 天气心情 -->
+    {post.weather && post.mood && (
+      <div class="flex gap-4 mt-4 text-sm font-hand text-[#5d5d5d]">
+        <span>今日天气：{post.weather}</span>
+        <span>心情：{post.mood}</span>
+      </div>
+    )}
+  </header>
+
+  <!-- 文章内容 -->
+  <article class="article-content mb-10">
+    {post.content.split('\n\n').map((paragraph) => {
+      if (paragraph.startsWith('## ')) {
+        return <h2>{paragraph.replace('## ', '')}</h2>;
+      } else if (paragraph.startsWith('> ')) {
+        return <blockquote>{paragraph.replace('> ', '')}</blockquote>;
+      } else if (paragraph.startsWith('---')) {
+        return <hr class="my-8 border-[#dcd3b2]" />;
+      } else {
+        return <p class="article-drop-cap">{paragraph}</p>;
+      }
+    })}
+  </article>
+
+  <!-- 上下篇导航 -->
+  <nav class="flex justify-between items-center py-6 border-t border-b border-[#dcd3b2] mb-10">
+    {prevPost ? (
+      <a href={`/log/${prevPost.id}`} class="text-sm font-hand text-[#8b7355] hover:text-[#8b3a3a]">
+        <i class="ph ph-arrow-left mr-1"></i>
+        {prevPost.title}
+      </a>
+    ) : (
+      <span></span>
+    )}
+    {nextPost && (
+      <a href={`/log/${nextPost.id}`} class="text-sm font-hand text-[#8b7355] hover:text-[#8b3a3a]">
+        {nextPost.title}
+        <i class="ph ph-arrow-right ml-1"></i>
+      </a>
+    )}
+  </nav>
+
+  <!-- 评论区 -->
+  <section class="mb-10">
+    <h3 class="text-xl font-serif font-bold text-[#2c2c2c] mb-6 flex items-center gap-2">
+      <i class="ph ph-chat-circle-text text-[#8b3a3a]"></i>
+      评论区
+      <span class="text-sm font-hand text-[#8b7355] font-normal">({comments.length})</span>
+    </h3>
+
+    <!-- 发表评论 -->
+    <div class="stat-card mb-6">
+      <h4 class="font-serif font-bold text-sm mb-3">发表评论</h4>
+      <form id="comment-form" class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="form-group">
+            <input type="text" class="form-input" placeholder="昵称 *" required />
+          </div>
+          <div class="form-group">
+            <input type="email" class="form-input" placeholder="邮箱（选填）" />
+          </div>
+        </div>
+        <div class="form-group">
+          <textarea class="form-input" rows="4" placeholder="说点什么..." required></textarea>
+        </div>
+        <div class="flex justify-between items-center">
+          <label class="flex items-center gap-2 text-sm font-hand text-[#5d5d5d]">
+            <input type="checkbox" class="accent-[#8b3a3a]" />
+            悄悄话（仅博主可见）
+          </label>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="ph ph-paper-plane-right mr-1"></i>
+            发布评论
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 评论列表 -->
+    <div class="space-y-4">
+      {comments.map((comment) => (
+        <div class="stat-card">
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-3">
+              <span class="font-serif font-bold">{comment.userName}</span>
+              <span class="text-xs text-[#999] font-hand">{comment.date}</span>
+            </div>
+            {comment.isReplied && (
+              <span class="tag tag-green text-xs">已回复</span>
+            )}
+          </div>
+          <p class="font-hand text-[#444] text-sm leading-relaxed mb-3">
+            {comment.content}
+          </p>
+          
+          {comment.isReplied && comment.reply && (
+            <div class="card-comment">
+              <span class="text-xs text-[#8b3a3a] font-calligraphy">博主回复</span>
+              <p class="text-sm font-hand text-[#5d5d5d] mt-1">
+                {comment.reply}
+              </p>
+            </div>
+          )}
+          
+          <button class="text-xs font-hand text-[#8b7355] hover:text-[#8b3a3a] mt-2">
+            <i class="ph ph-arrow-bend-up-left mr-1"></i>
+            回复
+          </button>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- 相关推荐 -->
+  <section>
+    <h3 class="text-xl font-serif font-bold text-[#2c2c2c] mb-6 flex items-center gap-2">
+      <i class="ph ph-books text-[#8b3a3a]"></i>
+      相关推荐
+    </h3>
+    
+    <div class="grid md:grid-cols-3 gap-4">
+      {relatedPosts.map((rp) => (
+        <a href={`/log/${rp.id}`} class="stat-card hover:shadow-md transition-shadow group">
+          <h4 class="font-serif text-sm font-bold group-hover:text-[#8b3a3a] transition-colors line-clamp-2">
+            {rp.title}
+          </h4>
+          <p class="text-xs text-[#8b7355] font-hand mt-1">{rp.date}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- 底部 -->
+  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
+    <p class="text-sm font-hand text-[#8b7355]">
+      朝花夕拾 · 岁月静好
+    </p>
+  </footer>
+</BookLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

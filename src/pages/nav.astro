@@ -1,0 +1,112 @@
+---
+import BookLayout from '../layouts/BookLayout.astro';
+
+// 模拟数据
+const categories = [
+  {
+    name: '技术博客',
+    icon: 'ph-code',
+    sites: [
+      { name: 'GitHub', url: 'https://github.com', desc: '代码托管平台', favicon: 'https://github.githubassets.com/favicons/favicon.svg' },
+      { name: 'Stack Overflow', url: 'https://stackoverflow.com', desc: '技术问答社区', favicon: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico' },
+      { name: 'MDN Web Docs', url: 'https://developer.mozilla.org', desc: 'Web 开发文档', favicon: 'https://developer.mozilla.org/favicon-48x48.png' },
+      { name: 'Vercel', url: 'https://vercel.com', desc: '前端部署平台', favicon: 'https://assets.vercel.com/favicon.ico' },
+    ]
+  },
+  {
+    name: '设计资源',
+    icon: 'ph-palette',
+    sites: [
+      { name: 'Unsplash', url: 'https://unsplash.com', desc: '免费高清图片', favicon: 'https://unsplash.com/favicon.ico' },
+      { name: 'Pexels', url: 'https://pexels.com', desc: '免费图片素材', favicon: 'https://www.pexels.com/favicon.ico' },
+      { name: 'Iconify', url: 'https://icon-sets.iconify.design', desc: '图标库集合', favicon: 'https://icon-sets.iconify.design/favicon.ico' },
+      { name: 'Google Fonts', url: 'https://fonts.google.com', desc: '免费字体', favicon: 'https://fonts.gstatic.com/s/images/favicon.ico' },
+    ]
+  },
+  {
+    name: '效率工具',
+    icon: 'ph-tools',
+    sites: [
+      { name: 'Notion', url: 'https://notion.so', desc: '笔记与知识管理', favicon: 'https://www.notion.so/images/favicon.ico' },
+      { name: 'Obsidian', url: 'https://obsidian.md', desc: 'Markdown 笔记', favicon: 'https://obsidian.md/favicon.svg' },
+      { name: 'Raycast', url: 'https://raycast.com', desc: '效率启动器', favicon: 'https://www.raycast.com/favicon.ico' },
+    ]
+  },
+  {
+    name: '学习园地',
+    icon: 'ph-graduation-cap',
+    sites: [
+      { name: 'Bilibili', url: 'https://bilibili.com', desc: '视频学习网站', favicon: 'https://www.bilibili.com/favicon.ico' },
+      { name: '网易公开课', url: 'https://open.163.com', desc: '名校公开课', favicon: 'https://shared.ydstatic.com/fanyi/ubox/pc/images/favicon.ico' },
+      { name: 'Coursera', url: 'https://coursera.org', desc: '在线课程平台', favicon: 'https://www.coursera.org/favicon.ico' },
+    ]
+  },
+  {
+    name: '生活娱乐',
+    icon: 'ph-coffee',
+    sites: [
+      { name: '豆瓣', url: 'https://douban.com', desc: '读书影音', favicon: 'https://www.douban.com/favicon.ico' },
+      { name: '知乎', url: 'https://zhihu.com', desc: '问答社区', favicon: 'https://static.zhihu.com/heifetz/favicon.ico' },
+      { name: '即刻', url: 'https://jike.city', desc: '兴趣社区', favicon: 'https://s3.jike.city/jike/favicon.ico' },
+    ]
+  },
+];
+---
+
+<BookLayout title="常用导航">
+  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
+    <div>
+      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">常用导航</h2>
+      <p class="text-sm font-hand text-[#8b3a3a]">收藏夹 · 数字生活</p>
+    </div>
+  </div>
+
+  <!-- 站点分类 -->
+  <div class="space-y-8">
+    {categories.map((category) => (
+      <section>
+        <h3 class="text-xl font-serif font-bold text-[#8b3a3a] mb-4 flex items-center gap-2">
+          <i class={`${category.icon} text-[#8b3a3a]`}></i>
+          {category.name}
+        </h3>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {category.sites.map((site) => (
+            <a 
+              href={site.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="stat-card group hover:shadow-lg transition-all duration-300"
+            >
+              <div class="flex items-start gap-3 mb-2">
+                <img 
+                  src={site.favicon}
+                  alt={site.name}
+                  class="w-8 h-8 rounded object-contain bg-white p-1 shadow-sm"
+                  onerror="this.style.display='none'"
+                />
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-serif font-bold text-[#2c2c2c] group-hover:text-[#8b3a3a] transition-colors truncate">
+                    {site.name}
+                  </h4>
+                  <p class="text-xs text-[#8b7355] font-hand truncate">{site.desc}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 text-xs text-[#bbb]">
+                <span class="truncate">{site.url}</span>
+                <i class="ph ph-arrow-square-out flex-shrink-0"></i>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <!-- 底部 -->
+  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
+    <p class="text-sm font-hand text-[#8b7355]">
+      朝花夕拾 · 岁月静好
+    </p>
+  </footer>
+</BookLayout>

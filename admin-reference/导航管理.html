@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>导航管理 · 后台</title>
+<script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont@1.1.0/style.css"><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet"><script src="https://unpkg.com/@phosphor-icons/web"></script><link rel="stylesheet" href="../assets/css/shared.css"><link rel="stylesheet" href="../assets/css/admin.css">
+<style>
+.mobile-header-fix { display: flex !important; }
+@media (min-width: 768px) { .mobile-header-fix { display: none !important; } }
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.active{display:flex}
+.modal-content{background:#f7f1e3;padding:24px;border-radius:8px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto}
+</style>
+</head>
+<body class="is-admin">
+<div class="reading-progress"></div><button id="back-to-top" class="back-to-top"><i class="ph ph-arrow-up"></i></button><div class="book-container book-shadow">
+
+<header class="mobile-header-fix md:hidden flex items-center justify-between p-4 bg-[#2c2a29] text-[#dcd3b2] shadow-md relative z-30 shrink-0">
+<button onclick="toggleMobileMenu()" class="p-1 focus:outline-none"><i class="ph ph-list text-2xl"></i></button>
+<h1 class="font-calligraphy text-2xl tracking-widest absolute left-1/2 -translate-x-1/2 mt-1">后台管理</h1>
+<button onclick="location.href='../pages/首页.html'" class="w-7 h-7 border border-[#bfa57d] text-[#bfa57d] bg-[#bfa57d]/10 flex items-center justify-center text-[10px] font-bold focus:outline-none transition-colors" title="返回前台">返</button>
+</header>
+<div id="mobile-backdrop" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"></div>
+<aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-[240px] shrink-0 bg-[#2c2a29] text-gray-300 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+<button class="md:hidden absolute top-5 right-5 text-gray-400 hover:text-white" onclick="toggleMobileMenu()"><i class="ph ph-x text-2xl"></i></button>
+<div class="sidebar-top"><div class="flex items-center justify-center md:justify-between w-full mb-3"><h1 class="font-calligraphy text-3xl text-[#e8e8e8] opacity-90 drop-shadow-md tracking-widest">后台管理</h1><button onclick="location.href='../pages/首页.html'" class="seal-btn seal-btn-return hidden md:flex" title="返回前台">返</button></div><p class="mt-3 text-xs text-[#a8a8a8] tracking-[0.4em] font-hand opacity-90 hidden md:block">内容管理 · 系统配置</p><p class="mt-3 text-[10px] text-gray-500 tracking-[0.3em] uppercase font-serif opacity-50 w-full text-center border-t border-gray-700/30 pt-2 hidden md:block">Admin Panel</p></div>
+<nav class="flex-1 py-6 px-5 overflow-y-auto">
+<ul class="space-y-2"><li><a href="仪表盘.html" class="nav-link"><i class="ph ph-gauge"></i><span class="menu-item-text">管理仪表盘</span></a></li><li><a href="文章管理.html" class="nav-link"><i class="ph ph-pen-nib"></i><span class="menu-item-text">文章管理</span></a></li><li><a href="相册管理.html" class="nav-link"><i class="ph ph-image"></i><span class="menu-item-text">相册管理</span></a></li><li><a href="网盘管理.html" class="nav-link"><i class="ph ph-hard-drives"></i><span class="menu-item-text">网盘管理</span></a></li><li><a href="导航管理.html" class="nav-link active"><i class="ph ph-compass"></i><span class="menu-item-text">导航管理</span></a></li><li><a href="留言管理.html" class="nav-link"><i class="ph ph-envelope-simple"></i><span class="menu-item-text">留言管理</span></a></li><li><a href="设置.html" class="nav-link"><i class="ph ph-gear"></i><span class="menu-item-text">系统设置</span></a></li></ul></nav>
+<div class="p-5 text-[10px] text-gray-500 text-center border-t border-gray-700/20 shrink-0"><p>&copy; 2024 - 2064</p><p class="mt-1 font-serif opacity-70">朝花夕拾 · 岁月静好</p></div></aside><div class="sidebar-overlay"></div>
+<main class="content paper-texture">
+<header class="flex justify-between items-end border-b border-[#dcd3b2] pb-4 mb-4">
+<div><h2 class="text-3xl font-bold text-[#2c2c2c] mb-1 font-serif">导航管理</h2><p class="text-[#8b3a3a] text-sm font-serif">存于 D1 · 站点收藏与分类管理</p></div>
+<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="openSiteModal()"><i class="ph ph-plus"></i> 添加站点</a>
+</header>
+
+<div class="tab-bar">
+<button class="tab-btn active" onclick="switchTab(this,'tab-cat')"><i class="ph ph-folders mr-1"></i> 导航分类 <span class="tab-count" id="nav-cat-count-tab">3</span></button>
+<button class="tab-btn" onclick="switchTab(this,'tab-site')"><i class="ph ph-globe-simple mr-1"></i> 站点管理 <span class="tab-count" id="nav-site-count-tab">9</span></button>
+</div>
+
+<!-- ===== Tab 1: 导航分类 ===== -->
+<div class="tab-panel active" id="tab-cat">
+<div class="batch-bar">
+<input type="checkbox" style="accent-color:#8b3a3a" onchange="toggleAllNavCats(this)">
+<span>全选</span>
+<span class="batch-count ml-2" id="nav-cat-count">共 3 个分类</span>
+<button class="btn btn-danger btn-sm ml-auto" onclick="batchDeleteNavCats()"><i class="ph ph-trash mr-1"></i> 批量删除</button>
+</div>
+
+<table class="admin-table">
+<thead><tr>
+<th style="width:32px"></th>
+<th>分类名称</th>
+<th style="width:70px">排序</th>
+<th style="width:70px">站点</th>
+<th style="width:80px">权限</th>
+<th style="width:120px">操作</th>
+</tr></thead>
+<tbody id="nav-cat-tbody"></tbody>
+</table>
+
+<div class="stat-card mt-6">
+<h4 class="font-serif font-bold text-sm mb-3 flex items-center gap-2">
+<i class="ph ph-plus-circle text-[#8b3a3a]"></i> 新增分类
+</h4>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+<div class="form-group"><label>分类名称 <span class="text-[#a93226]">*</span></label><input type="text" class="form-input" id="new-nav-cat-name" placeholder="如：设计灵感"></div>
+<div class="form-group"><label>排序</label><input type="number" class="form-input" id="new-nav-cat-order" placeholder="数字" value="5" min="1"></div>
+<div class="form-group"><label>权限</label><select class="form-input" id="new-nav-cat-perm"><option value="public">🌐 公开</option><option value="private">🔒 私有</option></select></div>
+<div class="form-group" style="flex:0 0 auto"><label>&nbsp;</label><button class="btn btn-primary" onclick="addNavCategory()"><i class="ph ph-plus"></i> 添加</button></div>
+</div>
+</div>
+</div>
+
+<!-- ===== Tab 2: 站点管理 ===== -->
+<div class="tab-panel" id="tab-site">
+<div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-dashed border-[#dcd3b2] text-sm">
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-2">
+<span class="text-xs text-[#999] font-serif">分类</span>
+<span class="index-link active" onclick="filterNavSites(this,'all')">全部</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterNavSites(this,'创作工具')">创作工具</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterNavSites(this,'阅读角落')">阅读角落</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterNavSites(this,'机要暗格')">机要暗格</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs text-[#999] font-serif">权限</span>
+<span class="index-link active" onclick="filterNavSitesPerm(this,'all')">全部</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterNavSitesPerm(this,'public')">公开</span>
+<span class="filter-separator">/</span>
+<span class="index-link" onclick="filterNavSitesPerm(this,'private')">私密</span>
+</div>
+</div>
+<div class="relative">
+<i class="ph ph-magnifying-glass absolute left-0 top-1/2 -translate-y-1/2 text-[#a8a8a8]"></i>
+<input type="text" placeholder="搜索站点..." class="vintage-search pl-6" id="nav-site-search" oninput="renderNavSiteTable()">
+</div>
+</div>
+
+<div class="batch-bar">
+<input type="checkbox" style="accent-color:#8b3a3a" onchange="toggleAllNavSites(this)">
+<span>全选</span>
+<span class="batch-count ml-2" id="nav-site-count">共 9 个站点</span>
+<button class="btn btn-outline btn-sm ml-auto" onclick="batchMoveNavSites()"><i class="ph ph-swap mr-1"></i> 批量移动</button>
+<button class="btn btn-danger btn-sm" onclick="batchDeleteNavSites()"><i class="ph ph-trash mr-1"></i> 批量删除</button>
+</div>
+
+<table class="admin-table">
+<thead><tr>
+<th style="width:32px"></th>
+<th style="width:60px">排序</th>
+<th>站点名称</th>
+<th style="width:100px">分类</th>
+<th>URL</th>
+<th>描述</th>
+<th style="width:70px">权限</th>
+<th style="width:120px">操作</th>
+</tr></thead>
+<tbody id="nav-site-tbody"></tbody>
+</table>
+
+<div class="pagination">
+<span class="pagination-link disabled">上一页</span>
+<span class="pagination-link active">【 壹 】</span>
+<span class="pagination-link">下一页</span>
+</div>
+</div>
+</main></div>
+
+<!-- 编辑分类弹窗 -->
+<div class="modal-overlay" id="edit-nav-cat-modal">
+<div class="modal-content">
+<div class="flex justify-between items-center mb-5 pb-3 border-b border-[#dcd3b2]">
+<h3 class="font-serif text-xl font-bold text-[#2c2c2c]">编辑分类</h3>
+<button class="btn btn-outline btn-sm" onclick="closeEditNavCatModal()"><i class="ph ph-x"></i></button>
+</div>
+<div class="form-group mb-4"><label>分类名称 <span class="text-[#a93226]">*</span></label><input type="text" class="form-input" id="edit-nav-cat-name"></div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div class="form-group"><label>排序</label><input type="number" class="form-input" id="edit-nav-cat-order" min="1"></div>
+<div class="form-group"><label>权限</label><select class="form-input" id="edit-nav-cat-perm"><option value="public">🌐 公开</option><option value="private">🔒 私有</option></select></div>
+</div>
+<div class="flex justify-end gap-3">
+<button class="btn btn-outline" onclick="closeEditNavCatModal()">取消</button>
+<button class="btn btn-primary" onclick="saveNavCatEdit()"><i class="ph ph-check"></i> 保存</button>
+</div>
+</div>
+</div>
+
+<!-- 编辑/新建站点弹窗 -->
+<div class="modal-overlay" id="site-modal">
+<div class="modal-content" style="max-width:560px">
+<div class="flex justify-between items-center mb-5 pb-3 border-b border-[#dcd3b2]">
+<h3 class="font-serif text-xl font-bold text-[#2c2c2c]" id="site-modal-title">添加站点</h3>
+<button class="btn btn-outline btn-sm" onclick="closeSiteModal()"><i class="ph ph-x"></i></button>
+</div>
+<div class="stat-card mb-4" style="padding:1rem 1.25rem">
+<h4 class="font-serif font-bold text-sm text-[#2c2c2c] mb-3 flex items-center gap-2"><i class="ph ph-info text-[#8b3a3a]"></i> 基本信息</h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="form-group"><label>站点名称 <span class="text-[#a93226]">*</span></label><input type="text" class="form-input" id="site-name" placeholder="如：Unsplash"></div>
+<div class="form-group"><label>URL <span class="text-[#a93226]">*</span></label><input type="text" class="form-input" id="site-url" placeholder="https://..."></div>
+<div class="form-group"><label>所属分类</label><select class="form-input" id="site-cat"><option>创作工具</option><option>阅读角落</option><option>机要暗格</option></select></div>
+<div class="form-group"><label>排序</label><input type="number" class="form-input" id="site-order" placeholder="数字" value="1" min="1"></div>
+</div>
+</div>
+<div class="stat-card mb-4" style="padding:1rem 1.25rem">
+<h4 class="font-serif font-bold text-sm text-[#2c2c2c] mb-3 flex items-center gap-2"><i class="ph ph-lock text-[#8b3a3a]"></i> 权限与描述</h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="form-group"><label>权限</label><select class="form-input" id="site-perm"><option value="public">🌐 公开</option><option value="private">🔒 私有</option></select></div>
+<div class="form-group"><label>描述</label><input type="text" class="form-input" id="site-desc" placeholder="简短描述..."></div>
+</div>
+<div class="text-[10px] text-[#999] font-hand mt-2"><i class="ph ph-info text-[#4a6b65] mr-1"></i> 站点图标由系统自动从网址获取，以 Base64 方式存入 D1</div>
+</div>
+<div class="flex justify-end gap-3">
+<button class="btn btn-outline" onclick="closeSiteModal()">取消</button>
+<button class="btn btn-primary" onclick="saveSite()"><i class="ph ph-check"></i> 保存</button>
+</div>
+</div>
+</div>
+
+<script src="../assets/js/shared.js"></script>
+<script>
+const sidebar=document.getElementById('sidebar');const backdrop=document.getElementById('mobile-backdrop');
+function toggleMobileMenu(){const isClosed=sidebar.classList.contains('-translate-x-full');if(isClosed){backdrop.classList.remove('hidden');setTimeout(()=>backdrop.classList.remove('opacity-0'),10);sidebar.classList.remove('-translate-x-full')}else{backdrop.classList.add('opacity-0');sidebar.classList.add('-translate-x-full');setTimeout(()=>backdrop.classList.add('hidden'),300)}}
+// ===== 数据 =====
+var navCatData = {
+    1: { name: '创作工具', order: 1, permission: 'public' },
+    2: { name: '阅读角落', order: 2, permission: 'public' },
+    3: { name: '机要暗格', order: 3, permission: 'private' }
+};
+
+var navSiteData = [
+    { id: 1, name: 'Unsplash', cat: '创作工具', url: 'unsplash.com', desc: '免费高清摄影素材库', order: 1, permission: 'public' },
+    { id: 2, name: 'Color Hunt', cat: '创作工具', url: 'colorhunt.co', desc: '配色方案灵感收集', order: 2, permission: 'public' },
+    { id: 3, name: 'Google Fonts', cat: '创作工具', url: 'fonts.google.com', desc: '开源字体资源库', order: 3, permission: 'public' },
+    { id: 4, name: 'Excalidraw', cat: '创作工具', url: 'excalidraw.com', desc: '手绘风格白板工具', order: 4, permission: 'public' },
+    { id: 5, name: 'Hacker News', cat: '阅读角落', url: 'news.ycombinator.com', desc: '科技圈每日必读', order: 1, permission: 'public' },
+    { id: 6, name: 'ReadHub', cat: '阅读角落', url: 'readhub.cn', desc: '中文科技资讯聚合', order: 2, permission: 'public' },
+    { id: 7, name: '小众软件', cat: '阅读角落', url: 'appinn.com', desc: '发现有趣实用软件', order: 3, permission: 'public' },
+    { id: 8, name: 'NAS管理后台', cat: '机要暗格', url: '192.168.1.100', desc: '家庭服务器控制面板', order: 1, permission: 'private' },
+    { id: 9, name: '密码管理器', cat: '机要暗格', url: 'bitwarden.local', desc: '自建 Bitwarden 实例', order: 2, permission: 'private' }
+];
+
+var navSiteFilter = 'all';
+var navSitePermFilter = 'all';
+
+// ===== 分类 Tab =====
+function renderNavCatTable() {
+    var tbody = document.getElementById('nav-cat-tbody');
+    var countEl = document.getElementById('nav-cat-count');
+    var tabCount = document.getElementById('nav-cat-count-tab');
+    if (!tbody) return;
+
+    var cats = [];
+    for (var k in navCatData) { cats.push({ id: k, data: navCatData[k] }); }
+    cats.sort(function(a, b) { return (a.data.order || 99) - (b.data.order || 99); });
+
+    if (countEl) countEl.textContent = '共 ' + cats.length + ' 个分类';
+    if (tabCount) tabCount.textContent = cats.length;
+
+    var siteCountMap = {};
+    navSiteData.forEach(function(s) { siteCountMap[s.cat] = (siteCountMap[s.cat] || 0) + 1; });
+
+    var html = '';
+    cats.forEach(function(item) {
+        var c = item.data;
+        var id = item.id;
+        var permCell = c.permission === 'private'
+            ? '<span class="perm-badge perm-private"><i class="ph ph-lock"></i> 私有</span>'
+            : '<span class="tag tag-green">公开</span>';
+        html += '<tr>' +
+            '<td><input type="checkbox" class="nav-cat-checkbox" style="accent-color:#8b3a3a" data-cat-id="' + id + '"></td>' +
+            '<td><span class="font-serif font-bold text-[#2c2c2c]">' + c.name + '</span></td>' +
+            '<td>' + (c.order || '-') + '</td>' +
+            '<td>' + (siteCountMap[c.name] || 0) + '</td>' +
+            '<td>' + permCell + '</td>' +
+            '<td class="flex gap-1">' +
+            '<button class="btn btn-outline btn-sm" onclick="editNavCat(' + id + ')"><i class="ph ph-pencil"></i> 编辑</button>' +
+            '<button class="btn btn-danger btn-sm" onclick="deleteNavCat(' + id + ')"><i class="ph ph-trash"></i></button>' +
+            '</td>' +
+            '</tr>';
+    });
+    tbody.innerHTML = html;
+}
+
+function toggleAllNavCats(cb) {
+    document.querySelectorAll('.nav-cat-checkbox').forEach(function(c) { c.checked = cb.checked; });
+}
+
+function deleteNavCat(id) {
+    if (!confirm('确定要删除分类「' + (navCatData[id] ? navCatData[id].name : '') + '」吗？')) return;
+    delete navCatData[id];
+    showToast('分类已从 D1 删除');
+    renderNavCatTable();
+}
+
+function batchDeleteNavCats() {
+    var checked = document.querySelectorAll('.nav-cat-checkbox:checked');
+    if (checked.length === 0) { showToast('请先勾选分类'); return; }
+    if (!confirm('确定删除选中的 ' + checked.length + ' 个分类吗？')) return;
+    checked.forEach(function(cb) { delete navCatData[cb.getAttribute('data-cat-id')]; });
+    showToast('已批量删除分类');
+    renderNavCatTable();
+}
+
+function addNavCategory() {
+    var name = document.getElementById('new-nav-cat-name').value;
+    var order = document.getElementById('new-nav-cat-order').value;
+    var perm = document.getElementById('new-nav-cat-perm').value;
+    if (!name) { showToast('请输入分类名称'); return; }
+    var newId = Date.now();
+    navCatData[newId] = { name: name, order: parseInt(order) || 99, permission: perm };
+    document.getElementById('new-nav-cat-name').value = '';
+    document.getElementById('new-nav-cat-order').value = '5';
+    showToast('分类「' + name + '」已添加到 D1');
+    renderNavCatTable();
+}
+
+var currentEditNavCatId = null;
+function editNavCat(id) {
+    currentEditNavCatId = id;
+    var c = navCatData[id];
+    if (c) {
+        document.getElementById('edit-nav-cat-name').value = c.name;
+        document.getElementById('edit-nav-cat-order').value = c.order;
+        document.getElementById('edit-nav-cat-perm').value = c.permission || 'public';
+    }
+    document.getElementById('edit-nav-cat-modal').classList.add('active');
+}
+function closeEditNavCatModal() { document.getElementById('edit-nav-cat-modal').classList.remove('active'); currentEditNavCatId = null; }
+function saveNavCatEdit() {
+    if (!currentEditNavCatId) return;
+    var name = document.getElementById('edit-nav-cat-name').value;
+    if (!name) { showToast('请输入分类名称'); return; }
+    navCatData[currentEditNavCatId] = {
+        name: name,
+        order: parseInt(document.getElementById('edit-nav-cat-order').value) || 0,
+        permission: document.getElementById('edit-nav-cat-perm').value
+    };
+    showToast('分类已更新');
+    closeEditNavCatModal();
+    renderNavCatTable();
+}
+
+// ===== 站点 Tab =====
+function renderNavSiteTable() {
+    var tbody = document.getElementById('nav-site-tbody');
+    var countEl = document.getElementById('nav-site-count');
+    var tabCount = document.getElementById('nav-site-count-tab');
+    if (!tbody) return;
+
+    var searchVal = (document.getElementById('nav-site-search') || {}).value || '';
+
+    var filtered = navSiteData.filter(function(s) {
+        if (navSiteFilter !== 'all' && s.cat !== navSiteFilter) return false;
+        if (navSitePermFilter !== 'all' && s.permission !== navSitePermFilter) return false;
+        if (searchVal && s.name.toLowerCase().indexOf(searchVal.toLowerCase()) === -1 && s.desc.toLowerCase().indexOf(searchVal.toLowerCase()) === -1) return false;
+        return true;
+    });
+
+    if (countEl) countEl.textContent = '共 ' + filtered.length + ' 个站点';
+    if (tabCount) tabCount.textContent = navSiteData.length;
+
+    var html = '';
+    filtered.forEach(function(s) {
+        var permCell = s.permission === 'private'
+            ? '<span class="perm-badge perm-private"><i class="ph ph-lock"></i> 私有</span>'
+            : '<span class="tag tag-green">公开</span>';
+        html += '<tr>' +
+            '<td><input type="checkbox" class="nav-site-checkbox" style="accent-color:#8b3a3a" data-site-id="' + s.id + '"></td>' +
+            '<td><input type="number" class="form-input" value="' + s.order + '" style="width:50px;text-align:center;padding:3px 4px;font-size:0.8rem" min="1" onchange="updateSiteOrder(' + s.id + ',this.value)"></td>' +
+            '<td><span class="font-serif font-bold text-[#2c2c2c]">' + s.name + '</span></td>' +
+            '<td><span class="tag tag-red">' + s.cat + '</span></td>' +
+            '<td><span class="text-xs font-serif text-[#4a6b65]">' + s.url + '</span></td>' +
+            '<td><span class="text-xs text-[#5d5d5d] font-hand">' + (s.desc || '—') + '</span></td>' +
+            '<td>' + permCell + '</td>' +
+            '<td class="flex gap-1">' +
+            '<button class="btn btn-outline btn-sm" onclick="editNavSite(' + s.id + ')"><i class="ph ph-pencil"></i> 编辑</button>' +
+            '<button class="btn btn-danger btn-sm" onclick="deleteNavSite(' + s.id + ')"><i class="ph ph-trash"></i></button>' +
+            '</td>' +
+            '</tr>';
+    });
+    tbody.innerHTML = html;
+}
+
+function filterNavSites(link, type) {
+    var bar = link.parentElement;
+    bar.querySelectorAll('.index-link').forEach(function(l) { l.classList.remove('active'); });
+    link.classList.add('active');
+    navSiteFilter = type;
+    renderNavSiteTable();
+}
+
+function filterNavSitesPerm(link, type) {
+    var bar = link.parentElement;
+    bar.querySelectorAll('.index-link').forEach(function(l) { l.classList.remove('active'); });
+    link.classList.add('active');
+    navSitePermFilter = type;
+    renderNavSiteTable();
+}
+
+function updateSiteOrder(id, val) {
+    var site = navSiteData.find(function(s) { return s.id === id; });
+    if (site) { site.order = parseInt(val) || 1; }
+    showToast('排序已更新');
+    renderNavSiteTable();
+    renderNavCatTable();
+}
+
+function toggleAllNavSites(cb) {
+    document.querySelectorAll('.nav-site-checkbox').forEach(function(c) { c.checked = cb.checked; });
+}
+
+function deleteNavSite(id) {
+    if (!confirm('确定要删除此站点吗？')) return;
+    navSiteData = navSiteData.filter(function(s) { return s.id !== id; });
+    showToast('站点已从 D1 删除');
+    renderNavSiteTable();
+    renderNavCatTable();
+}
+
+function batchDeleteNavSites() {
+    var checked = document.querySelectorAll('.nav-site-checkbox:checked');
+    if (checked.length === 0) { showToast('请先勾选站点'); return; }
+    if (!confirm('确定删除选中的 ' + checked.length + ' 个站点吗？')) return;
+    var ids = [];
+    checked.forEach(function(cb) { ids.push(parseInt(cb.getAttribute('data-site-id'))); });
+    navSiteData = navSiteData.filter(function(s) { return ids.indexOf(s.id) === -1; });
+    showToast('已批量删除 ' + ids.length + ' 个站点');
+    renderNavSiteTable();
+    renderNavCatTable();
+}
+
+function batchMoveNavSites() {
+    var checked = document.querySelectorAll('.nav-site-checkbox:checked');
+    if (checked.length === 0) { showToast('请先勾选站点'); return; }
+    showToast('已批量移动站点（需配合 D1 实现）');
+}
+
+// ===== 站点弹窗 =====
+var currentEditSiteId = null;
+function openSiteModal() {
+    currentEditSiteId = null;
+    document.getElementById('site-modal-title').textContent = '添加站点';
+    document.getElementById('site-name').value = '';
+    document.getElementById('site-url').value = '';
+    document.getElementById('site-cat').value = '创作工具';
+    document.getElementById('site-order').value = '1';
+    document.getElementById('site-perm').value = 'public';
+    document.getElementById('site-desc').value = '';
+    document.getElementById('site-modal').classList.add('active');
+}
+function closeSiteModal() { document.getElementById('site-modal').classList.remove('active'); currentEditSiteId = null; }
+function editNavSite(id) {
+    currentEditSiteId = id;
+    var site = navSiteData.find(function(s) { return s.id === id; });
+    if (site) {
+        document.getElementById('site-modal-title').textContent = '编辑站点';
+        document.getElementById('site-name').value = site.name;
+        document.getElementById('site-url').value = site.url;
+        document.getElementById('site-cat').value = site.cat;
+        document.getElementById('site-order').value = site.order;
+        document.getElementById('site-perm').value = site.permission;
+        document.getElementById('site-desc').value = site.desc || '';
+    }
+    document.getElementById('site-modal').classList.add('active');
+}
+function saveSite() {
+    var name = document.getElementById('site-name').value;
+    var url = document.getElementById('site-url').value;
+    if (!name) { showToast('请输入站点名称'); return; }
+    if (!url) { showToast('请输入 URL'); return; }
+    if (currentEditSiteId) {
+        var site = navSiteData.find(function(s) { return s.id === currentEditSiteId; });
+        if (site) {
+            site.name = name;
+            site.url = url;
+            site.cat = document.getElementById('site-cat').value;
+            site.order = parseInt(document.getElementById('site-order').value) || 1;
+            site.permission = document.getElementById('site-perm').value;
+            site.desc = document.getElementById('site-desc').value;
+        }
+        showToast('站点已更新');
+    } else {
+        navSiteData.push({
+            id: Date.now(),
+            name: name,
+            url: url,
+            cat: document.getElementById('site-cat').value,
+            order: parseInt(document.getElementById('site-order').value) || 1,
+            permission: document.getElementById('site-perm').value,
+            desc: document.getElementById('site-desc').value
+        });
+        showToast('站点已添加到 D1');
+    }
+    closeSiteModal();
+    renderNavSiteTable();
+    renderNavCatTable();
+}
+
+// init
+renderNavCatTable();
+renderNavSiteTable();
+</script>
+</body>
+</html>

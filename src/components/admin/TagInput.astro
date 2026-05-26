@@ -1,0 +1,90 @@
+---
+interface Props {
+  name: string;
+  label?: string;
+  tags: string[];
+  placeholder?: string;
+}
+
+const { name, label, tags = [], placeholder = '输入后按回车添加' } = Astro.props;
+---
+
+<div class="space-y-2">
+  {label && (
+    <label class="block text-sm font-medium text-[#2c2c2c]">{label}</label>
+  )}
+  
+  <div class="border border-[#dcd3b2] rounded-md p-2 bg-white focus-within:border-[#8b3a3a] focus-within:ring-1 focus-within:ring-[#8b3a3a]">
+    <div id={`${name}-tags`} class="flex flex-wrap gap-2">
+      {tags.map((tag, index) => (
+        <span class="inline-flex items-center gap-1 px-2 py-1 bg-[#8b3a3a]/10 text-[#8b3a3a] text-sm rounded">
+          {tag}
+          <button type="button" class="hover:text-red-500" data-tag-index={index} data-tag-name={name}>
+            <i class="ph ph-x text-xs"></i>
+          </button>
+        </span>
+      ))}
+    </div>
+    
+    <input 
+      type="text"
+      id={name}
+      placeholder={placeholder}
+      class="mt-2 w-full border-none outline-none bg-transparent text-sm"
+    >
+  </div>
+  
+  <!-- 隐藏的 input 存储实际值 -->
+  <input type="hidden" name={name} value={JSON.stringify(tags)}>
+</div>
+
+<script define:vars={{ name, initialTags: tags }}>
+  const container = document.getElementById(`${name}-tags`);
+  const input = document.getElementById(name);
+  const hiddenInput = document.querySelector(`input[name="${name}"]`);
+  let currentTags = [...initialTags];
+  
+  function renderTags() {
+    if (!container) return;
+    container.innerHTML = currentTags.map((tag, index) => `
+      <span class="inline-flex items-center gap-1 px-2 py-1 bg-[#8b3a3a]/10 text-[#8b3a3a] text-sm rounded">
+        ${tag}
+        <button type="button" class="hover:text-red-500 remove-tag" data-index="${index}">
+          <i class="ph ph-x text-xs"></i>
+        </button>
+      </span>
+    `).join('');
+    
+    // 绑定删除事件
+    container.querySelectorAll('.remove-tag').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const index = parseInt(btn.dataset.index);
+        currentTags.splice(index, 1);
+        renderTags();
+        updateHiddenInput();
+      });
+    });
+    
+    updateHiddenInput();
+  }
+  
+  function updateHiddenInput() {
+    if (hiddenInput) {
+      hiddenInput.value = JSON.stringify(currentTags);
+    }
+  }
+  
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && input.value.trim()) {
+      e.preventDefault();
+      const tag = input.value.trim();
+      if (!currentTags.includes(tag)) {
+        currentTags.push(tag);
+        renderTags();
+      }
+      input.value = '';
+    }
+  });
+  
+  renderTags();
+</script>

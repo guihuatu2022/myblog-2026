@@ -1,0 +1,166 @@
+---
+import BookLayout from '../layouts/BookLayout.astro';
+import Pagination from '../components/Pagination.astro';
+
+// 模拟数据 - 按年份归档
+const archiveData = [
+  {
+    year: 2024,
+    months: [
+      {
+        month: 5,
+        posts: [
+          { id: '1', title: '三十岁的第一个清晨', date: '2024-05-20', category: '随笔' },
+          { id: '2', title: '胶片里的老街', date: '2024-05-18', category: '摄影' },
+          { id: '3', title: '搭建博客的一些心得', date: '2024-05-15', category: '技术' },
+          { id: '4', title: '读《瓦尔登湖》', date: '2024-05-10', category: '读书' },
+        ]
+      },
+      {
+        month: 4,
+        posts: [
+          { id: '5', title: '夏日午后的咖啡馆', date: '2024-04-28', category: '随笔' },
+          { id: '6', title: '城市的黄昏', date: '2024-04-25', category: '摄影' },
+        ]
+      },
+      {
+        month: 3,
+        posts: [
+          { id: '7', title: '关于 TypeScript 的思考', date: '2024-03-20', category: '技术' },
+        ]
+      },
+    ]
+  },
+  {
+    year: 2023,
+    months: [
+      {
+        month: 12,
+        posts: [
+          { id: '8', title: '年终总结', date: '2023-12-31', category: '随笔' },
+          { id: '9', title: '冬日暖阳', date: '2023-12-20', category: '摄影' },
+        ]
+      },
+      {
+        month: 11,
+        posts: [
+          { id: '10', title: '秋天的童话', date: '2023-11-15', category: '随笔' },
+        ]
+      },
+    ]
+  },
+];
+
+// 数字转汉字
+function toChineseNum(num: number): string {
+  const chars = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  if (num <= 10) return chars[num];
+  if (num < 20) return '十' + chars[num - 10];
+  if (num < 100) return chars[Math.floor(num / 10)] + '十' + (num % 10 ? chars[num % 10] : '');
+  return num.toString();
+}
+
+// 获取月份名称
+function getMonthName(month: number): string {
+  return toChineseNum(month) + '月';
+}
+
+// 统计总文章数
+const totalPosts = archiveData.reduce((sum, year) => {
+  return sum + year.months.reduce((msum, m) => msum + m.posts.length, 0);
+}, 0);
+---
+
+<BookLayout title="文章归档">
+  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
+    <div>
+      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">文章归档</h2>
+      <p class="text-sm font-hand text-[#8b3a3a]">时间线 · 岁月留痕</p>
+    </div>
+    <div class="text-sm font-hand text-[#8b7355]">
+      共 {totalPosts} 篇文章
+    </div>
+  </div>
+
+  <!-- 时间线 -->
+  <div class="relative">
+    <!-- 中轴线 -->
+    <div class="absolute left-1/2 top-0 bottom-0 w-px bg-[#dcd3b2] -translate-x-1/2 hidden md:block"></div>
+    
+    <div class="space-y-8">
+      {archiveData.map((yearData, yearIndex) => (
+        <section class="relative">
+          <!-- 年份标题 -->
+          <div class="text-center mb-6">
+            <div class="inline-block bg-[#8b3a3a] text-white px-6 py-2 rounded-full font-serif font-bold text-lg shadow-md">
+              {yearData.year} 年
+            </div>
+          </div>
+          
+          <!-- 月份列表 -->
+          <div class="space-y-6">
+            {yearData.months.map((monthData, monthIndex) => {
+              const isLeft = (yearIndex + monthIndex) % 2 === 0;
+              return (
+                <div class={`flex items-start gap-6 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                  <!-- 节点 -->
+                  <div class="hidden md:flex flex-col items-center flex-shrink-0 w-8">
+                    <div class="w-4 h-4 bg-[#8b3a3a] rounded-full border-4 border-[#f7f1e3] shadow-md z-10"></div>
+                    <div class="w-px h-full bg-[#dcd3b2]"></div>
+                  </div>
+                  
+                  <!-- 内容卡片 -->
+                  <div class={`flex-1 stat-card ${isLeft ? '' : 'md:text-right'}`}>
+                    <div class={`flex items-center gap-2 mb-3 ${isLeft ? '' : 'md:flex-row-reverse'}`}>
+                      <h3 class="font-serif font-bold text-[#8b3a3a]">
+                        {getMonthName(monthData.month)}
+                      </h3>
+                      <span class="text-xs text-[#8b7355] font-hand">
+                        ({monthData.posts.length} 篇)
+                      </span>
+                    </div>
+                    
+                    <div class="space-y-2">
+                      {monthData.posts.map((post) => (
+                        <a 
+                          href={`/log/${post.id}`}
+                          class={`block group ${isLeft ? '' : 'md:text-right'}`}
+                        >
+                          <span class="font-hand text-xs text-[#8b7355] mr-2">{post.date}</span>
+                          <span class="font-serif font-bold group-hover:text-[#8b3a3a] transition-colors">
+                            {post.title}
+                          </span>
+                          <span class="tag tag-red text-xs ml-2">{post.category}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination mt-10">
+    <span class="pagination-link disabled">
+      <i class="ph ph-caret-left mr-1"></i>
+      上一页
+    </span>
+    <span class="pagination-link active">【壹】</span>
+    <span class="pagination-link disabled">
+      下一页
+      <i class="ph ph-caret-right ml-1"></i>
+    </span>
+  </div>
+
+  <!-- 底部 -->
+  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
+    <p class="text-sm font-hand text-[#8b7355]">
+      朝花夕拾 · 岁月静好
+    </p>
+  </footer>
+</BookLayout>

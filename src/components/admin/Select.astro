@@ -1,0 +1,58 @@
+---
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  name: string;
+  label?: string;
+  options: Option[];
+  value?: string;
+  required?: boolean;
+  placeholder?: string;
+  error?: string;
+}
+
+const { 
+  name, 
+  label, 
+  options,
+  value = '',
+  required = false,
+  placeholder = '请选择',
+  error
+} = Astro.props;
+---
+
+<div class="space-y-1">
+  {label && (
+    <label for={name} class="block text-sm font-medium text-[#2c2c2c]">
+      {label}
+      {required && <span class="text-red-500 ml-1">*</span>}
+    </label>
+  )}
+  
+  <select 
+    id={name}
+    name={name}
+    required={required}
+    class={`w-full px-3 py-2 border rounded-md transition-colors outline-none appearance-none bg-white ${
+      error 
+        ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+        : 'border-[#dcd3b2] focus:border-[#8b3a3a] focus:ring-1 focus:ring-[#8b3a3a]'
+    } text-[#2c2c2c]`}
+    style="background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%23555%22%20d%3D%22M6%208.5L1.5%204l1-1L6%206.5l3.5-3.5 1%201z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 12px center;"
+  >
+    <option value="">{placeholder}</option>
+    {options.map((opt) => (
+      <option value={opt.value} selected={opt.value === value}>
+        {opt.label}
+      </option>
+    ))}
+  </select>
+  
+  {error && (
+    <p class="text-sm text-red-500">{error}</p>
+  )}
+</div>

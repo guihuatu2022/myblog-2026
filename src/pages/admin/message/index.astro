@@ -1,0 +1,243 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+// 留言数据
+const messages = [
+  { id: '1', userName: '海边旅人', email: 'hai@email.com', content: '偶然路过，被这个复古的博客风格吸引。写得真好，文章读起来很有年代感，却不失温度。祝博主创作愉快！', date: '2024-05-21 14:32', isPrivate: false, isReplied: true, reply: '感谢来访。安静是这个时代最奢侈的东西，希望这里能给你片刻的宁静。' },
+  { id: '2', userName: '云中漫步', email: '', content: '三十岁的文章看完了，深有同感。', date: '2024-05-22 09:15', isPrivate: false, isReplied: false, reply: '' },
+  { id: '3', userName: '故园东望', email: 'guyuan@email.com', content: '博主用的是 Astro 框架吗？看起来加载很快。', date: '2024-05-20 20:45', isPrivate: false, isReplied: true, reply: '是的，Astro 配合 Cloudflare Pages，速度确实不错。' },
+  { id: '4', userName: '静水流深', email: '', content: '这里有一股淡淡的书卷气，很喜欢。', date: '2024-05-18 16:20', isPrivate: false, isReplied: false, reply: '' },
+  { id: '5', userName: '悄悄话', email: '', content: '博主你好，我是你的忠实读者...', date: '2024-05-15 11:30', isPrivate: true, isReplied: false, reply: '' },
+];
+
+// 主人寄语
+const hostMessage = {
+  content: '来者皆是客，不必拘礼。\n留下一言半语，便是缘分。',
+  signature: '—— 主人敬上',
+};
+---
+
+<AdminLayout title="留言管理" activeMenu="message">
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <h1 class="page-title">留言管理</h1>
+    <div class="flex gap-2">
+      <span class="text-sm text-[#999] py-2">共 {messages.length} 条留言</span>
+    </div>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div class="admin-card">
+    <div class="flex gap-2 mb-6">
+      <button class="tab-btn active" data-tab="messages">
+        <i class="ph ph-chat-circle-dots mr-1"></i>
+        留言列表
+      </button>
+      <button class="tab-btn" data-tab="host">
+        <i class="ph ph-user mr-1"></i>
+        主人寄语
+      </button>
+    </div>
+
+    <!-- 留言列表 Tab -->
+    <div id="tab-messages" class="tab-content">
+      <!-- 筛选 -->
+      <div class="flex items-center gap-4 mb-6 pb-4 border-b border-[#e8e8e8]">
+        <span class="text-sm text-[#999]">筛选</span>
+        <div class="flex gap-2">
+          <button class="tab-btn-sm active">全部</button>
+          <button class="tab-btn-sm">已回复</button>
+          <button class="tab-btn-sm">未回复</button>
+          <button class="tab-btn-sm">悄悄话</button>
+        </div>
+      </div>
+
+      <!-- 留言列表 -->
+      <div class="space-y-4">
+        {messages.map((msg) => (
+          <div class={`message-item p-4 border border-[#e8e8e8] rounded-lg ${msg.isPrivate ? 'bg-[#fffbe6] border-[#ffe58f]' : ''}`}>
+            <div class="flex justify-between items-start mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#f0f2f5] flex items-center justify-center text-[#8b3a3a]">
+                  <i class="ph ph-user"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium">{msg.userName}</span>
+                    {msg.isPrivate && (
+                      <span class="tag tag-yellow text-xs">
+                        <i class="ph ph-eye-slash mr-1"></i>
+                        悄悄话
+                      </span>
+                    )}
+                    {msg.isReplied && (
+                      <span class="tag tag-green text-xs">
+                        <i class="ph ph-check mr-1"></i>
+                        已回复
+                      </span>
+                    )}
+                  </div>
+                  <div class="text-xs text-[#999]">
+                    {msg.email && <span>{msg.email}</span>}
+                    <span class="ml-2">{msg.date}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button class="text-[#999] hover:text-[#8b3a3a] reply-btn" data-id={msg.id} title="回复">
+                  <i class="ph ph-chat-circle"></i>
+                </button>
+                <button class="text-[#999] hover:text-red-500 delete-msg" data-id={msg.id} title="删除">
+                  <i class="ph ph-trash"></i>
+                </button>
+              </div>
+            </div>
+            
+            <p class="text-[#666] mb-3 whitespace-pre-line">{msg.content}</p>
+            
+            {msg.isReplied && msg.reply && (
+              <div class="bg-[#fafafa] border-l-4 border-[#8b3a3a] pl-4 py-3 rounded-r-md">
+                <div class="flex items-center gap-2 mb-2">
+                  <i class="ph ph-arrow-return text-[#8b3a3a]"></i>
+                  <span class="text-xs font-medium text-[#8b3a3a]">我的回复</span>
+                </div>
+                <p class="text-sm text-[#666]">{msg.reply}</p>
+              </div>
+            )}
+            
+            {!msg.isReplied && (
+              <div class="reply-form mt-3 hidden" id={`reply-form-${msg.id}`}>
+                <textarea class="form-input" rows="3" placeholder="输入回复内容..."></textarea>
+                <div class="flex justify-end gap-2 mt-2">
+                  <button class="btn btn-default btn-sm cancel-reply">取消</button>
+                  <button class="btn btn-primary btn-sm">发送回复</button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- 主人寄语 Tab -->
+    <div id="tab-host" class="tab-content hidden">
+      <div class="max-w-xl">
+        <div class="form-group mb-4">
+          <label class="form-label">寄语内容</label>
+          <textarea class="form-input" rows="6" id="host-content">{hostMessage.content}</textarea>
+          <p class="text-xs text-[#999] mt-1">支持多行，每行会用换行符分隔</p>
+        </div>
+        
+        <div class="form-group mb-6">
+          <label class="form-label">落款</label>
+          <input type="text" class="form-input" value={hostMessage.signature} id="host-signature" />
+        </div>
+        
+        <div class="flex justify-end">
+          <button class="btn btn-primary" id="save-host">
+            <i class="ph ph-floppy-disk mr-1"></i>
+            保存寄语
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .tab-btn {
+    padding: 8px 16px;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn:hover {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn.active {
+    background: #8b3a3a;
+    border-color: #8b3a3a;
+    color: #fff;
+  }
+  
+  .tab-btn-sm {
+    padding: 6px 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn-sm:hover,
+  .tab-btn-sm.active {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn-sm.active {
+    background: #fff2f0;
+  }
+  
+  .message-item {
+    transition: all 0.3s;
+  }
+  
+  .message-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+</style>
+
+<script>
+  // Tab 切换
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = (btn as HTMLElement).dataset.tab;
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById(`tab-${tab}`)?.classList.remove('hidden');
+    });
+  });
+  
+  // 回复按钮
+  document.querySelectorAll('.reply-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = (btn as HTMLElement).dataset.id;
+      const form = document.getElementById(`reply-form-${id}`);
+      form?.classList.toggle('hidden');
+    });
+  });
+  
+  // 取消回复
+  document.querySelectorAll('.cancel-reply').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const form = btn.closest('.reply-form');
+      form?.classList.add('hidden');
+    });
+  });
+  
+  // 删除留言
+  document.querySelectorAll('.delete-msg').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (confirm('确定要删除这条留言吗？')) {
+        console.log('删除留言:', (btn as HTMLElement).dataset.id);
+      }
+    });
+  });
+  
+  // 保存主人寄语
+  document.getElementById('save-host')?.addEventListener('click', () => {
+    const content = (document.getElementById('host-content') as HTMLTextAreaElement)?.value;
+    const signature = (document.getElementById('host-signature') as HTMLInputElement)?.value;
+    console.log('保存寄语:', { content, signature });
+    alert('寄语已保存！');
+  });
+</script>

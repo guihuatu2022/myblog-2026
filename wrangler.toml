@@ -1,0 +1,28 @@
+name = "blog"
+compatibility_date = "2024-05-14"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 数据库绑定
+[[d1_databases]]
+binding = "DB"
+database_name = "blog-db"
+database_id = "6fed9fe7-aec3-4cba-b1dc-7c92af13ec61"
+
+# R2 存储绑定（可选，用于缓存等）
+# [[r2_buckets]]
+# binding = "ASSETS"
+# bucket_name = "blog-assets"
+
+# KV 命名空间绑定（可选）
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"
+
+[vars]
+# 站点配置（可通过 Cloudflare Pages 设置覆盖）
+SITE_TITLE = "三十而立"
+SITE_SUBTITLE = "记录·沉淀·回忆"
+
+# OpenList 配置（通过环境变量设置，不在配置文件中明文）
+# OPENLIST_API_URL = ""
+# OPENLIST_TOKEN = ""

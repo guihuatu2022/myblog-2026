@@ -1,0 +1,209 @@
+---
+interface Props {
+  name: string;
+  label?: string;
+  value?: string;
+}
+
+const { name, label, value = '' } = Astro.props;
+---
+
+<div class="space-y-2">
+  {label && (
+    <label class="block text-sm font-medium text-[#2c2c2c]">{label}</label>
+  )}
+  
+  <div class="border border-[#dcd3b2] rounded-lg overflow-hidden">
+    <!-- 工具栏 -->
+    <div class="flex items-center gap-1 p-2 bg-gray-50 border-b border-[#dcd3b2] flex-wrap">
+      <button type="button" class="toolbar-btn" data-command="bold" title="加粗">
+        <i class="ph ph-text-b"></i>
+      </button>
+      <button type="button" class="toolbar-btn" data-command="italic" title="斜体">
+        <i class="ph ph-text-italic"></i>
+      </button>
+      <button type="button" class="toolbar-btn" data-command="underline" title="下划线">
+        <i class="ph ph-text-underline"></i>
+      </button>
+      
+      <span class="w-px h-6 bg-gray-300 mx-1"></span>
+      
+      <button type="button" class="toolbar-btn" data-command="formatBlock" data-value="H2" title="标题">
+        <i class="ph ph-text-h"></i>
+      </button>
+      <button type="button" class="toolbar-btn" data-command="formatBlock" data-value="BLOCKQUOTE" title="引用">
+        <i class="ph ph-quotes"></i>
+      </button>
+      <button type="button" class="toolbar-btn" data-command="insertUnorderedList" title="无序列表">
+        <i class="ph ph-list-bullets"></i>
+      </button>
+      <button type="button" class="toolbar-btn" data-command="insertOrderedList" title="有序列表">
+        <i class="ph ph-list-numbers"></i>
+      </button>
+      
+      <span class="w-px h-6 bg-gray-300 mx-1"></span>
+      
+      <button type="button" class="toolbar-btn" data-command="createLink" title="插入链接">
+        <i class="ph ph-link"></i>
+      </button>
+      <button type="button" class="toolbar-btn" id={`${name}-image-btn`} title="插入图片">
+        <i class="ph ph-image"></i>
+      </button>
+      <button type="button" class="toolbar-btn" data-command="formatBlock" data-value="PRE" title="代码">
+        <i class="ph ph-code"></i>
+      </button>
+      
+      <span class="w-px h-6 bg-gray-300 mx-1"></span>
+      
+      <button type="button" class="toolbar-btn" data-command="undo" title="撤销">
+        <i class="ph ph-arrow-counter-clockwise"></i>
+      </button>
+      <button type="button" class="toolbar-btn" data-command="redo" title="重做">
+        <i class="ph ph-arrow-clockwise"></i>
+      </button>
+    </div>
+    
+    <!-- 编辑区 -->
+    <div 
+      id={`${name}-editor`}
+      contenteditable="true"
+      class="min-h-[300px] p-4 outline-none prose prose-sm max-w-none focus:outline-none"
+      data-placeholder="开始写作..."
+    >{value}</div>
+    
+    <!-- 隐藏的 textarea 存储实际值 -->
+    <textarea 
+      name={name} 
+      id={`${name}-textarea`}
+      class="hidden"
+    >{value}</textarea>
+  </div>
+  
+  <!-- 图片上传隐藏 input -->
+  <input type="file" id={`${name}-image-input`} accept="image/*" class="hidden">
+</div>
+
+<style>
+  .toolbar-btn {
+    padding: 6px 8px;
+    border-radius: 4px;
+    color: #5d5d5d;
+    transition: all 0.2s;
+  }
+  
+  .toolbar-btn:hover {
+    background-color: #e5e5e5;
+    color: #8b3a3a;
+  }
+  
+  #editor:empty:before {
+    content: attr(data-placeholder);
+    color: #a0a0a0;
+    pointer-events: none;
+  }
+  
+  #editor h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 1em 0;
+  }
+  
+  #editor blockquote {
+    border-left: 3px solid #8b3a3a;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #5d5d5d;
+    font-family: var(--font-hand);
+  }
+  
+  #editor pre {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  
+  #editor a {
+    color: #8b3a3a;
+    text-decoration: underline;
+  }
+  
+  #editor img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+  }
+</style>
+
+<script define:vars={{ name }}>
+  const editor = document.getElementById(`${name}-editor`);
+  const textarea = document.getElementById(`${name}-textarea`);
+  const imageBtn = document.getElementById(`${name}-image-btn`);
+  const imageInput = document.getElementById(`${name}-image-input`);
+  
+  // 同步内容到 textarea
+  function syncContent() {
+    if (textarea && editor) {
+      textarea.value = editor.innerHTML;
+    }
+  }
+  
+  // 工具栏按钮点击
+  document.querySelectorAll('.toolbar-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const command = btn.dataset.command;
+      const value = btn.dataset.value || null;
+      
+      if (command === 'createLink') {
+        const url = prompt('请输入链接地址:');
+        if (url) {
+          document.execCommand('createLink', false, url);
+        }
+      } else {
+        document.execCommand(command, false, value);
+      }
+      
+      editor?.focus();
+      syncContent();
+    });
+  });
+  
+  // 图片上传
+  imageBtn?.addEventListener('click', () => {
+    imageInput?.click();
+  });
+  
+  imageInput?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // TODO: 上传到 OpenList
+    // const formData = new FormData();
+    // formData.append('file', file);
+    // const response = await fetch('/api/upload/image', { method: 'POST', body: formData });
+    // const data = await response.json();
+    // if (data.url) {
+    //   document.execCommand('insertImage', false, data.url);
+    // }
+    
+    // 临时本地预览
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.execCommand('insertImage', false, e.target.result);
+      syncContent();
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  // 内容变化时同步
+  editor?.addEventListener('input', syncContent);
+  
+  // 初始同步
+  syncContent();
+  
+  // 定期同步（防止丢失）
+  setInterval(syncContent, 5000);
+  
+  // 表单提交前同步
+  document.querySelector('form')?.addEventListener('submit', syncContent);
+</script>

@@ -1,0 +1,384 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+// 分类
+const categories = [
+  { id: '1', name: '全部', count: 127 },
+  { id: '2', name: '文档', count: 45 },
+  { id: '3', name: '软件', count: 32 },
+  { id: '4', name: '素材', count: 28 },
+  { id: '5', name: '其他', count: 22 },
+];
+
+// 文件数据
+const files = [
+  { id: '1', name: '博客搭建完整教程.pdf', type: 'pdf', size: '2.3 MB', category: '文档', date: '2024-05-15', downloads: 128, permission: 'public' },
+  { id: '2', name: 'Astro框架入门指南.pdf', type: 'pdf', size: '1.8 MB', category: '文档', date: '2024-05-10', downloads: 89, permission: 'public' },
+  { id: '3', name: '摄影作品集2024.zip', type: 'zip', size: '156 MB', category: '素材', date: '2024-05-08', downloads: 45, permission: 'public' },
+  { id: '4', name: '常用软件工具包.exe', type: 'exe', size: '89 MB', category: '软件', date: '2024-05-05', downloads: 234, permission: 'public' },
+  { id: '5', name: '手写字体素材包.ttf', type: 'ttf', size: '12 MB', category: '素材', date: '2024-04-28', downloads: 67, permission: 'public' },
+];
+
+// 获取文件图标
+function getFileIcon(type: string): string {
+  const icons: Record<string, string> = {
+    pdf: 'ph-file-pdf',
+    doc: 'ph-file-doc',
+    xls: 'ph-file-xls',
+    zip: 'ph-file-zip',
+    exe: 'ph-file-dll',
+    ttf: 'ph-text-aa',
+  };
+  return icons[type] || 'ph-file';
+}
+
+function getIconColor(type: string): string {
+  const colors: Record<string, string> = {
+    pdf: '#c4493c',
+    doc: '#4a6b65',
+    xls: '#4a6b65',
+    zip: '#8b6914',
+    exe: '#6b4a5b',
+    ttf: '#5b6b4a',
+  };
+  return colors[type] || '#8b8b8b';
+}
+---
+
+<AdminLayout title="网盘管理" activeMenu="drive">
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <h1 class="page-title">网盘管理</h1>
+    <div class="flex gap-2">
+      <button class="btn btn-default" id="new-folder-btn">
+        <i class="ph ph-folder-plus mr-1"></i>
+        新建文件夹
+      </button>
+      <button class="btn btn-primary" id="upload-btn">
+        <i class="ph ph-upload mr-1"></i>
+        上传文件
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div class="admin-card">
+    <div class="flex gap-2 mb-6">
+      <button class="tab-btn active" data-tab="files">
+        <i class="ph ph-file mr-1"></i>
+        文件列表
+      </button>
+      <button class="tab-btn" data-tab="categories">
+        <i class="ph ph-folder-simple mr-1"></i>
+        分类管理
+      </button>
+    </div>
+
+    <!-- 文件列表 Tab -->
+    <div id="tab-files" class="tab-content">
+      <!-- 分类筛选 -->
+      <div class="flex items-center gap-4 mb-6 pb-4 border-b border-[#e8e8e8]">
+        <span class="text-sm text-[#999]">分类</span>
+        <div class="flex gap-2 flex-wrap">
+          {categories.map((cat, i) => (
+            <button class={`tab-btn-sm ${i === 0 ? 'active' : ''}`}>
+              {cat.name}
+              <span class="ml-1 text-[10px]">({cat.count})</span>
+            </button>
+          ))}
+        </div>
+        <div class="flex-1"></div>
+        <div class="relative">
+          <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[#999]"></i>
+          <input type="text" placeholder="搜索文件..." class="form-input pl-9 w-48" />
+        </div>
+      </div>
+
+      <!-- 文件表格 -->
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;">
+              <input type="checkbox" class="w-4 h-4 accent-[#8b3a3a]" />
+            </th>
+            <th>文件名</th>
+            <th style="width: 100px;">分类</th>
+            <th style="width: 100px;">大小</th>
+            <th style="width: 80px;">下载</th>
+            <th style="width: 120px;">日期</th>
+            <th style="width: 100px;">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {files.map((file) => (
+            <tr>
+              <td>
+                <input type="checkbox" class="file-checkbox w-4 h-4 accent-[#8b3a3a]" />
+              </td>
+              <td>
+                <div class="flex items-center gap-3">
+                  <i class={`${getFileIcon(file.type)} text-xl`} style={`color: ${getIconColor(file.type)}`}></i>
+                  <div>
+                    <span class="font-medium hover:text-[#8b3a3a] cursor-pointer">{file.name}</span>
+                    {file.permission === 'encrypted' && (
+                      <span class="ml-2 text-[#999]">
+                        <i class="ph ph-lock-simple"></i>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </td>
+              <td><span class="tag tag-blue">{file.category}</span></td>
+              <td class="text-[#999]">{file.size}</td>
+              <td class="text-[#999]">{file.downloads}</td>
+              <td class="text-[#999]">{file.date}</td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="text-[#999] hover:text-[#8b3a3a]" title="编辑">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <a href="#" class="text-[#999] hover:text-[#8b3a3a]" title="下载">
+                    <i class="ph ph-download-simple"></i>
+                  </a>
+                  <button class="text-[#999] hover:text-red-500 delete-file" data-id={file.id} title="删除">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <!-- 分页 -->
+      <div class="pagination">
+        <button class="pagination-item disabled"><i class="ph ph-caret-left"></i></button>
+        <button class="pagination-item active">1</button>
+        <button class="pagination-item">2</button>
+        <button class="pagination-item">3</button>
+        <button class="pagination-item"><i class="ph ph-caret-right"></i></button>
+      </div>
+    </div>
+
+    <!-- 分类管理 Tab -->
+    <div id="tab-categories" class="tab-content hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-medium">分类列表</h3>
+        <button class="btn btn-primary btn-sm">
+          <i class="ph ph-plus mr-1"></i>
+          添加分类
+        </button>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>分类名称</th>
+            <th>英文标识</th>
+            <th>文件数量</th>
+            <th>存储路径</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {categories.slice(1).map((cat) => (
+            <tr>
+              <td class="font-medium">{cat.name}</td>
+              <td class="text-[#999]">{cat.name.toLowerCase()}</td>
+              <td>{cat.count}</td>
+              <td class="text-[#999]">/drive/{cat.name.toLowerCase()}/</td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="text-[#999] hover:text-[#8b3a3a]">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-[#999] hover:text-red-500">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 上传弹窗 -->
+  <div id="upload-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>上传文件</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">上传到分类</label>
+          <select class="form-input">
+            {categories.slice(1).map(cat => (
+              <option value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+        <div class="border-2 border-dashed border-[#dcd3b2] rounded-lg p-8 text-center cursor-pointer hover:border-[#8b3a3a] transition-colors">
+          <i class="ph ph-cloud-arrow-up text-4xl text-[#ccc] mb-2"></i>
+          <p class="text-[#666] mb-1">点击或拖拽文件到此处上传</p>
+          <p class="text-xs text-[#999]">支持任意格式文件，单文件不超过 500MB</p>
+        </div>
+        <div class="mt-4">
+          <div class="flex items-center justify-between p-3 bg-[#fafafa] rounded mb-2">
+            <div class="flex items-center gap-3">
+              <i class="ph ph-file text-xl text-[#8b3a3a]"></i>
+              <span>example.pdf</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-[#999] text-sm">2.3 MB</span>
+              <button class="text-[#999] hover:text-red-500">
+                <i class="ph ph-x"></i>
+              </button>
+            </div>
+          </div>
+          <div class="h-2 bg-[#f0f2f5] rounded-full overflow-hidden">
+            <div class="h-full bg-[#8b3a3a]" style="width: 65%"></div>
+          </div>
+          <p class="text-xs text-[#999] mt-1 text-right">65%</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default modal-cancel">取消</button>
+        <button class="btn btn-primary">开始上传</button>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<style>
+  .tab-btn {
+    padding: 8px 16px;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn:hover {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn.active {
+    background: #8b3a3a;
+    border-color: #8b3a3a;
+    color: #fff;
+  }
+  
+  .tab-btn-sm {
+    padding: 6px 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn-sm:hover,
+  .tab-btn-sm.active {
+    border-color: #8b3a3a;
+    color: #8b3a3a;
+  }
+  
+  .tab-btn-sm.active {
+    background: #fff2f0;
+  }
+  
+  /* 弹窗 */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #e8e8e8;
+  }
+</style>
+
+<script>
+  // Tab 切换
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = (btn as HTMLElement).dataset.tab;
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById(`tab-${tab}`)?.classList.remove('hidden');
+    });
+  });
+  
+  // 上传弹窗
+  const uploadModal = document.getElementById('upload-modal');
+  document.getElementById('upload-btn')?.addEventListener('click', () => {
+    uploadModal?.classList.remove('hidden');
+  });
+  
+  document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      uploadModal?.classList.add('hidden');
+    });
+  });
+  
+  // 删除文件
+  document.querySelectorAll('.delete-file').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (confirm('确定要删除这个文件吗？')) {
+        console.log('删除文件:', (btn as HTMLElement).dataset.id);
+      }
+    });
+  });
+</script>

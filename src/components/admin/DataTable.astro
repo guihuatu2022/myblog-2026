@@ -1,0 +1,120 @@
+---
+interface Props {
+  columns: Array<{
+    key: string;
+    label: string;
+    width?: string;
+    render?: (value: any, row: any) => string;
+  }>;
+  data: any[];
+  selectable?: boolean;
+  actions?: Array<{
+    label: string;
+    icon?: string;
+    variant?: 'primary' | 'danger' | 'default';
+    onClick?: string;
+  }>;
+  emptyText?: string;
+}
+
+const { 
+  columns, 
+  data, 
+  selectable = false, 
+  actions = [],
+  emptyText = '暂无数据'
+} = Astro.props;
+---
+
+<div class="bg-white rounded-lg border border-[#dcd3b2] overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-gray-50 border-b border-[#dcd3b2]">
+        <tr>
+          {selectable && (
+            <th class="w-12 px-4 py-3 text-left">
+              <input type="checkbox" id="select-all" class="w-4 h-4 rounded border-gray-300 text-[#8b3a3a] focus:ring-[#8b3a3a]">
+            </th>
+          )}
+          {columns.map((col) => (
+            <th 
+              class="px-4 py-3 text-left text-sm font-semibold text-[#2c2c2c]"
+              style={col.width ? `width: ${col.width}` : ''}
+            >
+              {col.label}
+            </th>
+          ))}
+          {actions.length > 0 && (
+            <th class="px-4 py-3 text-right text-sm font-semibold text-[#2c2c2c]">操作</th>
+          )}
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#dcd3b2]">
+        {data.length === 0 ? (
+          <tr>
+            <td colspan={columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)} class="px-4 py-12 text-center text-gray-500">
+              <i class="ph ph-inbox text-4xl mb-2 block opacity-50"></i>
+              <p>{emptyText}</p>
+            </td>
+          </tr>
+        ) : (
+          data.map((row, index) => (
+            <tr class="hover:bg-gray-50 transition-colors" data-id={row.id}>
+              {selectable && (
+                <td class="px-4 py-3">
+                  <input type="checkbox" class="row-checkbox w-4 h-4 rounded border-gray-300 text-[#8b3a3a] focus:ring-[#8b3a3a]" data-id={row.id}>
+                </td>
+              )}
+              {columns.map((col) => (
+                <td class="px-4 py-3 text-sm text-[#2c2c2c]">
+                  {col.render ? (
+                    <Fragment set:html={col.render(row[col.key], row)} />
+                  ) : (
+                    row[col.key]
+                  )}
+                </td>
+              ))}
+              {actions.length > 0 && (
+                <td class="px-4 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    {actions.map((action) => (
+                      <button
+                        type="button"
+                        class={`px-3 py-1 text-xs rounded transition-colors ${
+                          action.variant === 'danger' 
+                            ? 'text-red-600 hover:bg-red-50' 
+                            : action.variant === 'primary'
+                            ? 'bg-[#8b3a3a] text-white hover:bg-[#a94444]'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                        data-action={action.onClick}
+                        data-id={row.id}
+                      >
+                        {action.icon && <i class={`${action.icon} mr-1`}></i>}
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                </td>
+              )}
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // 全选功能
+  const selectAll = document.getElementById('select-all') as HTMLInputElement;
+  const checkboxes = document.querySelectorAll('.row-checkbox');
+  
+  if (selectAll) {
+    selectAll.addEventListener('change', () => {
+      checkboxes.forEach(cb => {
+        (cb as HTMLInputElement).checked = selectAll.checked;
+      });
+    });
+  }
+</script>

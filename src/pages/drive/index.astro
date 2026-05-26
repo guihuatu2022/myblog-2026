@@ -1,0 +1,178 @@
+---
+import BookLayout from '../../layouts/BookLayout.astro';
+import Pagination from '../../components/Pagination.astro';
+
+// 模拟数据
+const categories = [
+  { name: '全部', count: 127 },
+  { name: '文档', count: 45 },
+  { name: '软件', count: 32 },
+  { name: '素材', count: 28 },
+  { name: '其他', count: 22 },
+];
+
+const files = [
+  { id: '1', name: '博客搭建完整教程.pdf', category: '文档', size: '2.3 MB', date: '2024-05-15', downloads: 128, permission: 'public' },
+  { id: '2', name: 'Astro框架入门指南.pdf', category: '文档', size: '1.8 MB', date: '2024-05-10', downloads: 89, permission: 'public' },
+  { id: '3', name: '摄影作品集2024.zip', category: '素材', size: '156 MB', date: '2024-05-08', downloads: 45, permission: 'public' },
+  { id: '4', name: '常用软件工具包.exe', category: '软件', size: '89 MB', date: '2024-05-05', downloads: 234, permission: 'public' },
+  { id: '5', name: '手写字体素材包.ttf', category: '素材', size: '12 MB', date: '2024-04-28', downloads: 67, permission: 'public' },
+  { id: '6', name: '私密笔记备份.md', category: '文档', size: '0.5 MB', date: '2024-04-20', downloads: 12, permission: 'encrypted' },
+  { id: '7', name: '设计方案源文件.psd', category: '素材', size: '234 MB', date: '2024-04-15', downloads: 23, permission: 'public' },
+  { id: '8', name: '学习资料合集.pdf', category: '文档', size: '45 MB', date: '2024-04-10', downloads: 156, permission: 'public' },
+];
+
+// 获取文件图标
+function getFileIcon(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  const iconMap: Record<string, string> = {
+    pdf: 'ph-file-pdf',
+    doc: 'ph-file-doc',
+    docx: 'ph-file-doc',
+    xls: 'ph-file-xls',
+    xlsx: 'ph-file-xls',
+    ppt: 'ph-file-ppt',
+    pptx: 'ph-file-ppt',
+    zip: 'ph-file-zip',
+    rar: 'ph-file-zip',
+    '7z': 'ph-file-zip',
+    jpg: 'ph-file-image',
+    jpeg: 'ph-file-image',
+    png: 'ph-file-image',
+    gif: 'ph-file-image',
+    mp4: 'ph-file-video',
+    mp3: 'ph-file-music',
+    exe: 'ph-file-dll',
+    ttf: 'ph-text-aa',
+    otf: 'ph-text-aa',
+  };
+  return iconMap[ext] || 'ph-file';
+}
+
+function getIconColor(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  const colorMap: Record<string, string> = {
+    pdf: '#c4493c',
+    doc: '#4a6b65',
+    docx: '#4a6b65',
+    xls: '#4a6b65',
+    xlsx: '#4a6b65',
+    zip: '#8b6914',
+    rar: '#8b6914',
+    jpg: '#4a5b6b',
+    jpeg: '#4a5b6b',
+    png: '#4a5b6b',
+    mp4: '#6b4a5b',
+    mp3: '#6b4a5b',
+    ttf: '#5b6b4a',
+  };
+  return colorMap[ext] || '#8b8b8b';
+}
+---
+
+<BookLayout title="个人网盘">
+  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
+    <div>
+      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">个人网盘</h2>
+      <p class="text-sm font-hand text-[#8b3a3a]">存于 OpenList · 资料归档</p>
+    </div>
+    <div class="text-sm font-hand text-[#8b7355]">
+      共 {files.length} 个文件
+    </div>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="filter-bar">
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-[#999] font-serif">分类</span>
+      {categories.map((cat, i) => (
+        <span class={`index-link ${i === 0 ? 'active' : ''}`}>
+          {cat.name}
+          <span class="text-[10px] text-[#bbb] ml-1">({cat.count})</span>
+        </span>
+        {i < categories.length - 1 && <span class="filter-separator">/</span>}
+      ))}
+    </div>
+    
+    <div class="relative ml-auto">
+      <i class="ph ph-magnifying-glass absolute left-0 top-1/2 -translate-y-1/2 text-[#a8a8a8]"></i>
+      <input 
+        type="text" 
+        placeholder="搜索文件..." 
+        class="vintage-search"
+      />
+    </div>
+  </div>
+
+  <!-- 文件列表 -->
+  <div class="stat-card">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th style="width:50%">文件名</th>
+          <th style="width:15%">分类</th>
+          <th style="width:10%">大小</th>
+          <th style="width:10%">下载</th>
+          <th style="width:15%">日期</th>
+        </tr>
+      </thead>
+      <tbody>
+        {files.map((file) => (
+          <tr class="group">
+            <td>
+              <div class="flex items-center gap-3">
+                <i class={`${getFileIcon(file.name)} text-2xl`} style={`color: ${getIconColor(file.name)}`}></i>
+                <div>
+                  <a 
+                    href={`/api/download/${file.id}`}
+                    class="font-serif font-bold group-hover:text-[#8b3a3a] transition-colors"
+                  >
+                    {file.name}
+                  </a>
+                  {file.permission === 'encrypted' && (
+                    <span class="ml-2">
+                      <i class="ph ph-lock-simple text-[#8b7355] text-sm"></i>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="tag tag-blue text-xs">{file.category}</span>
+            </td>
+            <td class="font-hand text-sm text-[#5d5d5d]">
+              {file.size}
+            </td>
+            <td class="font-hand text-sm text-[#8b7355]">
+              <i class="ph ph-download-simple mr-1"></i>
+              {file.downloads}
+            </td>
+            <td class="font-hand text-sm text-[#8b7355]">
+              {file.date}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination">
+    <span class="pagination-link disabled">
+      <i class="ph ph-caret-left mr-1"></i>
+      上一页
+    </span>
+    <span class="pagination-link active">【壹】</span>
+    <span class="pagination-link disabled">
+      下一页
+      <i class="ph ph-caret-right ml-1"></i>
+    </span>
+  </div>
+
+  <!-- 底部 -->
+  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
+    <p class="text-sm font-hand text-[#8b7355]">
+      朝花夕拾 · 岁月静好
+    </p>
+  </footer>
+</BookLayout>

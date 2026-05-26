@@ -1,0 +1,244 @@
+---
+import BookLayout from '../layouts/BookLayout.astro';
+import Pagination from '../components/Pagination.astro';
+
+// 主人寄语
+const hostMessage = {
+  content: '来者皆是客，不必拘礼。\n留下一言半语，便是缘分。',
+  signature: '—— 主人敬上',
+};
+
+// 模拟留言数据
+const messages = [
+  {
+    id: '1',
+    userName: '海边旅人',
+    content: '偶然路过，被这个复古的博客风格吸引。写得真好，文章读起来很有年代感，却不失温度。祝博主创作愉快！',
+    date: '2024-05-21 14:32',
+    isPrivate: false,
+    isReplied: true,
+    reply: '感谢来访。安静是这个时代最奢侈的东西，希望这里能给你片刻的宁静。',
+  },
+  {
+    id: '2',
+    userName: '云中漫步',
+    content: '三十岁的文章看完了，深有同感。",
+    date: '2024-05-22 09:15',
+    isPrivate: false,
+    isReplied: false,
+    reply: '',
+  },
+  {
+    id: '3',
+    userName: '故园东望',
+    content: '博主用的是 Astro 框架吗？看起来加载很快。',
+    date: '2024-05-20 20:45',
+    isPrivate: false,
+    isReplied: true,
+    reply: '是的，Astro 配合 Cloudflare Pages，速度确实不错。',
+  },
+  {
+    id: '4',
+    userName: '静水流深',
+    content: '这里有一股淡淡的书卷气，很喜欢。',
+    date: '2024-05-18 16:20',
+    isPrivate: false,
+    isReplied: false,
+    reply: '',
+  },
+  {
+    id: '5',
+    userName: '晨曦微露',
+    content: '博主能不能出一个搭建博客的教程？想学习一下。',
+    date: '2024-05-15 11:08',
+    isPrivate: false,
+    isReplied: true,
+    reply: '教程已经在写了，等写完会发出来。',
+  },
+];
+---
+
+<BookLayout title="访客留言">
+  <div class="flex justify-between items-end mb-6 pb-4 border-b border-[#dcd3b2]">
+    <div>
+      <h2 class="text-3xl font-bold font-serif text-[#2c2c2c]">访客留言</h2>
+      <p class="text-sm font-hand text-[#8b3a3a]">说些什么吧 · 时光见证</p>
+    </div>
+    <div class="text-sm font-hand text-[#8b7355]">
+      共 {messages.length} 条留言
+    </div>
+  </div>
+
+  <!-- 主人寄语 -->
+  <div class="stat-card card-highlight mb-8">
+    <div class="flex gap-4">
+      <div class="text-4xl text-[#8b3a3a]/30 flex-shrink-0">
+        <i class="ph ph-quotes"></i>
+      </div>
+      <div class="flex-1">
+        <p class="font-hand text-[#5d5d5d] text-base leading-relaxed whitespace-pre-line">
+          {hostMessage.content}
+        </p>
+        <p class="text-right font-calligraphy text-[#8b3a3a] mt-3">
+          {hostMessage.signature}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 发表评论 -->
+  <div class="stat-card mb-8">
+    <h3 class="font-serif font-bold text-[#2c2c2c] mb-4 flex items-center gap-2">
+      <i class="ph ph-pencil-simple text-[#8b3a3a]"></i>
+      留下你的足迹
+    </h3>
+    
+    <form id="message-form" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group">
+          <label class="form-label">昵称 *</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            placeholder="贵姓大名？"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">邮箱（选填）</label>
+          <input 
+            type="email" 
+            class="form-input" 
+            placeholder="your@email.com"
+          />
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">留言内容 *</label>
+        <textarea 
+          class="form-input" 
+          rows="4" 
+          placeholder="说点什么..."
+          required
+        ></textarea>
+      </div>
+      
+      <div class="flex justify-between items-center">
+        <label class="flex items-center gap-2 text-sm font-hand text-[#5d5d5d] cursor-pointer">
+          <input 
+            type="checkbox" 
+            id="is-private"
+            class="accent-[#8b3a3a] w-4 h-4"
+          />
+          <i class="ph ph-eye-slash"></i>
+          悄悄话（仅博主可见）
+        </label>
+        
+        <button type="submit" class="btn btn-primary">
+          <i class="ph ph-paper-plane-right mr-1"></i>
+          发送留言
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 留言列表 -->
+  <div class="space-y-4">
+    {messages.map((msg) => (
+      <div class={`stat-card ${msg.isPrivate ? 'border-dashed border-[#dcd3b2]' : ''}`}>
+        <div class="flex justify-between items-start mb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-[#dcd3b2] flex items-center justify-center text-[#8b3a3a]">
+              <i class="ph ph-user text-lg"></i>
+            </div>
+            <div>
+              <span class="font-serif font-bold">{msg.userName}</span>
+              {msg.isPrivate && (
+                <span class="ml-2 text-xs text-[#8b7355]">
+                  <i class="ph ph-eye-slash mr-1"></i>
+                  悄悄话
+                </span>
+              )}
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            {msg.isReplied && (
+              <span class="tag tag-green text-xs">
+                <i class="ph ph-check mr-1"></i>
+                已回复
+              </span>
+            )}
+            <span class="text-xs text-[#999] font-hand">{msg.date}</span>
+          </div>
+        </div>
+        
+        <p class="font-hand text-[#444] leading-relaxed mb-3 whitespace-pre-line">
+          {msg.content}
+        </p>
+        
+        {msg.isReplied && msg.reply && (
+          <div class="bg-[#f7f1e3] border-l-4 border-[#8b3a3a] pl-4 py-3 rounded-r-md">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="ph ph-chat-circle-dots text-[#8b3a3a]"></i>
+              <span class="text-xs font-calligraphy text-[#8b3a3a]">博主回复</span>
+            </div>
+            <p class="text-sm font-hand text-[#5d5d5d] whitespace-pre-line">
+              {msg.reply}
+            </p>
+          </div>
+        )}
+        
+        <div class="flex gap-4 mt-3 pt-3 border-t border-[#dcd3b2]/50">
+          <button class="text-xs font-hand text-[#8b7355] hover:text-[#8b3a3a] transition-colors">
+            <i class="ph ph-arrow-bend-up-left mr-1"></i>
+            回复
+          </button>
+          <button class="text-xs font-hand text-[#8b7355] hover:text-[#8b3a3a] transition-colors">
+            <i class="ph ph-heart mr-1"></i>
+            喜欢
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination mt-8">
+    <span class="pagination-link disabled">
+      <i class="ph ph-caret-left mr-1"></i>
+      上一页
+    </span>
+    <span class="pagination-link active">【壹】</span>
+    <span class="pagination-link disabled">
+      下一页
+      <i class="ph ph-caret-right ml-1"></i>
+    </span>
+  </div>
+
+  <!-- 底部 -->
+  <footer class="mt-10 pt-6 border-t border-[#dcd3b2] text-center">
+    <p class="text-sm font-hand text-[#8b7355]">
+      朝花夕拾 · 岁月静好
+    </p>
+  </footer>
+</BookLayout>
+
+<script>
+  // 处理留言表单提交
+  const form = document.getElementById('message-form') as HTMLFormElement;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const data = {
+      userName: formData.get('userName'),
+      email: formData.get('email'),
+      content: formData.get('content'),
+      isPrivate: document.getElementById('is-private')?.checked,
+    };
+    console.log('提交留言:', data);
+    // TODO: 调用 API
+    alert('留言已提交，感谢您的留言！');
+    form.reset();
+  });
+</script>
