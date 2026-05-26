@@ -1,93 +1,86 @@
 import type { APIRoute } from 'astro';
-import { AiService, type AiConfig } from '../../lib/ai';
-
-const defaultConfig: AiConfig = {
-  provider: 'none',
-};
+import { AiService, getAiConfig } from '../../lib/ai';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const body = await request.json();
-    const { action, content, title, options } = body;
+    const config = getAiConfig();
+    const ai = new AiService(config);
 
-    if (!content && action !== 'suggest-tags') {
-      return new Response(JSON.stringify({ error: '内容不能为空' }), {
+    if (!ai.isConfigured()) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'AI 服务未配置，请联系管理员'
+      }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const aiService = new AiService(defaultConfig);
-    let result: any = { success: true };
+    const { action, content } = await request.json();
 
-    switch (action) {
-      case 'check-typo': {
-        const typoRules = [
-          { from: '渡过', to: '度过', desc: '"渡过"用于渡过难关/河流，"度过"用于时间' },
-        ];
-        const errors: any[] = [];
-        for (const rule of typoRules) {
-          if (content.includes(rule.from)) {
-            errors.push({
-              type: 'possible',
-              original: rule.from,
-              suggestion: rule.to,
-              description: rule.desc,
-            });
-          }
-        }
-        result.data = { errors };
-        break;
-      }
-
-      case 'suggest-title': {
-        const titles = [
-          { title: title || '无题', style: 'direct' },
-          { title: `关于${title || '某些事'}的思考`, style: 'poetic' },
-          { title: '我的看法', style: 'direct' },
-        ];
-        result.data = titles;
-        break;
-      }
-
-      case 'suggest-tags': {
-        result.data = [
-          { tag: '随笔', score: 0.9 },
-          { tag: '感悟', score: 0.8 },
-          { tag: '生活', score: 0.7 },
-        ];
-        break;
-      }
-
-      case 'summarize': {
-        const summary = content.slice(0, 200) + '...';
-        result.data = { summary, keyPoints: [] };
-        break;
-      }
-
-      case 'rewrite': {
-        result.data = { content: content + '\n\n（以上内容经 AI 润色）' };
-        break;
-      }
-
-      case 'continue': {
-        result.data = { content: content + '\n\n（AI 续写内容待添加）' };
-        break;
-      }
-
-      default:
-        result.error = '未知的操作';
-        result.success = false;
+    if (!content) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: '内容不能为空'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
-    return new Response(JSON.stringify(result), {
+    let result: unknown;
+
+    switch (action) {
+      case 'check-typo':
+        result = await ai.checkTypos(content);
+        break;
+
+      case 'suggest-title':
+        result = await ai.suggestTitles(content);
+        break;
+
+      case 'rewrite':
+        result = { text: await ai.rewrite(content) };
+        break;
+
+      case 'continue':
+        result = { text: await ai.continueWriting(content) };
+        break;
+
+      case 'suggest-tags':
+        result = await ai.suggestTags(content);
+        break;
+
+      case 'summarize':
+        result = await ai.summarize(content);
+        break;
+
+      default:
+        return new Response(JSON.stringify({
+          success: false,
+          error: '未知操作'
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      data: result
+    }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }
     });
+
   } catch (error) {
-    return new Response(JSON.stringify({ error: '服务器错误', success: false }), {
+    console.error('AI API Error:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'AI 服务出错，请稍后重试'
+    }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 };
